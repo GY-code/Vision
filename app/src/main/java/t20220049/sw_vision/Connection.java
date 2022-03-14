@@ -4,27 +4,39 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 
+import java.util.HashMap;
+
 
 public class Connection extends View {
-    public float currentX = 70;
-    public float currentY = 70;
+
     Bitmap clientBitmap;
     Bitmap serverBitmap;
     int clientWidth, clientHeight;
     int serverWidth, serverHeight;
     int deviceWidth, deviceHeight;
-    Paint p = new Paint();
+    HashMap<Integer, Device> deviceMap = new HashMap<>();
+    int nextId = 1;
+    int activateDevice = 0;
     private static final String TAG = "Connection";
+
+
+    private void initDevice() {
+        deviceMap.put(1, new Device(500, 100));
+        deviceMap.put(2, new Device(200, 100));
+        deviceMap.put(3, new Device(800, 100));
+        deviceMap.put(4, new Device(400, 200));
+
+    }
 
     private void initialize() {
         setLayerType(LAYER_TYPE_SOFTWARE, null);
@@ -38,6 +50,44 @@ public class Connection extends View {
 
         deviceWidth = wm.getDefaultDisplay().getWidth();
         deviceHeight = wm.getDefaultDisplay().getHeight();
+        initDevice();
+        setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                float currentX = (int) motionEvent.getX();
+                float currentY = (int) motionEvent.getY();
+                if (activateDevice == 0) {
+                    for (int key : deviceMap.keySet()) {
+                        Device device = deviceMap.get(key);
+                        float dx = device.currentX;
+                        float dy = device.currentY;
+                        float detax = currentX - dx;
+                        float detay = currentY - dy;
+                        Log.d(TAG, "deta" + detax + "," + detay);
+                        if (detax < clientWidth && detay < clientHeight && detax > 0 && detay > 0) {
+                            activateDevice = key;
+                            break;
+                        }
+                    }
+                } else {
+                    Device device = deviceMap.get(activateDevice);
+                    if (device != null) {
+                        device.currentX = currentX - (float) clientWidth / 2;
+                        device.currentY = currentY - (float) clientHeight / 2;
+                        invalidate();
+                    }
+                }
+//                Log.d(TAG, "activate:" + activateDevice);
+                return false;
+            }
+        });
+        setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Log.d(TAG, "onClick ");
+                activateDevice = 0;
+            }
+        });
 
     }
 
@@ -75,19 +125,14 @@ public class Connection extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         //绘制中心服务设备
-        canvas.drawBitmap(serverBitmap, (deviceWidth - serverWidth) / 2, (deviceHeight - serverHeight) / 2, null);
-        // 绘制当前触发设备
-        canvas.drawBitmap(clientBitmap, currentX - clientWidth / 2, currentY - clientHeight / 2, null);
+        canvas.drawBitmap(serverBitmap, (float) (deviceWidth - serverWidth) / 2, (float) (deviceHeight - serverHeight) / 2, null);
+        // 绘制客户设备
+        for (int key : deviceMap.keySet()) {
+            Device device = deviceMap.get(key);
+            canvas.drawBitmap(clientBitmap, device.currentX, device.currentY, null);
+        }
 
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        //修改当前的坐标
-        this.currentX = event.getX();
-        this.currentY = event.getY();
-        //重绘
-        this.invalidate();
-        return true;
-    }
+
 }
