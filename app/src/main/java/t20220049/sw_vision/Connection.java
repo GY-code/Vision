@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.AttributeSet;
@@ -31,10 +33,10 @@ public class Connection extends View {
 
 
     private void initDevice() {
-        deviceMap.put(1, new Device(500, 100));
-        deviceMap.put(2, new Device(200, 100));
-        deviceMap.put(3, new Device(800, 100));
-        deviceMap.put(4, new Device(400, 200));
+        deviceMap.put(1, new Device(500, 200));
+        deviceMap.put(2, new Device(200, 200));
+        deviceMap.put(3, new Device(800, 200));
+        deviceMap.put(4, new Device(400, 400));
 
     }
 
@@ -74,6 +76,17 @@ public class Connection extends View {
                     if (device != null) {
                         device.currentX = currentX - (float) clientWidth / 2;
                         device.currentY = currentY - (float) clientHeight / 2;
+                        int centerX = deviceWidth / 2;
+                        int centerY = deviceHeight / 2;
+                        int status = device.status;
+                        double distanceFromCenter = Math.sqrt((currentX - centerX) * (currentX - centerX) + (currentY - centerY) * (currentY - centerY));
+                        if (status == 0 && distanceFromCenter <= 300) {
+                            device.status = 1;
+                            tryConnect(device);
+                        }
+                        if (status != 0 && distanceFromCenter > 300) {
+                            device.status = 0;
+                        }
                         invalidate();
                     }
                 }
@@ -89,6 +102,11 @@ public class Connection extends View {
             }
         });
 
+    }
+
+    private int tryConnect(Device device) {
+        device.status = 2;
+        return device.status;
     }
 
     private static Bitmap getBitmap(Context context, int vectorDrawableId) {
@@ -121,17 +139,34 @@ public class Connection extends View {
         initialize();
     }
 
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        Paint devicePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        Paint statusPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        devicePaint.setColor(Color.BLACK);
+        devicePaint.setTextSize(30f);
+        statusPaint.setColor(Color.GREEN);
+        statusPaint.setTextSize(35f);
+
         //绘制中心服务设备
         canvas.drawBitmap(serverBitmap, (float) (deviceWidth - serverWidth) / 2, (float) (deviceHeight - serverHeight) / 2, null);
         // 绘制客户设备
         for (int key : deviceMap.keySet()) {
             Device device = deviceMap.get(key);
+            if (device == null)
+                continue;
             canvas.drawBitmap(clientBitmap, device.currentX, device.currentY, null);
-        }
+            String deviceText = device.deviceName + " (" + device.nickName + ")";
+            canvas.drawText(deviceText, device.currentX - 40, device.currentY - 30, devicePaint);
+            if (device.status == 1){
+                canvas.drawText("（连接中...）", device.currentX -5, device.currentY - 80, statusPaint);
+            }else if(device.status==2){
+                canvas.drawText("（已连接）", device.currentX - 5, device.currentY - 80, statusPaint);
+            }
 
+        }
     }
 
 
