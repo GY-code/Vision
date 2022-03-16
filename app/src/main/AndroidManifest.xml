@@ -18,6 +18,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".HomePage"
+            android:exported="true">
+        </activity>
+
+        <activity
+            android:name=".Video"
+            android:exported="true">
+        </activity>
     </application>
 
 </manifest>
