@@ -10,7 +10,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SWVision">
         <activity
-            android:name=".CollectMatch"
+            android:name=".ControlMatch"
             android:exported="true">
         </activity>
 
@@ -25,7 +25,7 @@
         </activity>
 
         <activity
-            android:name=".Video"
+            android:name=".ControlVideo"
             android:exported="true">
         </activity>
     </application>

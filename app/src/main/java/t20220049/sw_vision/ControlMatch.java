@@ -1,7 +1,5 @@
 package t20220049.sw_vision;
 
-import static androidx.core.content.ContextCompat.startActivity;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -9,7 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 
-public class CollectMatch extends AppCompatActivity {
+public class ControlMatch extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -20,7 +18,7 @@ public class CollectMatch extends AppCompatActivity {
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(CollectMatch.this, Video.class);
+                Intent intent = new Intent(ControlMatch.this, ControlVideo.class);
                 startActivity(intent);
             }
         });

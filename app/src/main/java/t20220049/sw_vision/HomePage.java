@@ -22,7 +22,8 @@ public class HomePage extends AppCompatActivity {
         controlButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(HomePage.this, ControlMatch.class);
+                startActivity(intent);
 
             }
         });
@@ -30,8 +31,7 @@ public class HomePage extends AppCompatActivity {
         collectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(HomePage.this, CollectMatch.class);
-                startActivity(intent);
+
             }
         });
     }
