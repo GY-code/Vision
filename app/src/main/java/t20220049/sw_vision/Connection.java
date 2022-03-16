@@ -1,6 +1,9 @@
 package t20220049.sw_vision;
 
+import static androidx.core.content.ContextCompat.startActivity;
+
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -13,6 +16,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.ImageView;
 
 import androidx.annotation.Nullable;
 
@@ -41,6 +45,7 @@ public class Connection extends View {
     }
 
     private void initialize() {
+
         setLayerType(LAYER_TYPE_SOFTWARE, null);
         clientBitmap = getBitmap(this.getContext(), R.drawable.ic_client);
         clientWidth = clientBitmap.getWidth();

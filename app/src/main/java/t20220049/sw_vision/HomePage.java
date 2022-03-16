@@ -1,5 +1,6 @@
 package t20220049.sw_vision;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
@@ -22,13 +23,15 @@ public class HomePage extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+
             }
         });
 
         collectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                Intent intent = new Intent(HomePage.this, CollectMatch.class);
+                startActivity(intent);
             }
         });
     }
