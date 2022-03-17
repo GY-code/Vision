@@ -1,45 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@mipmap/bg"
-    tools:context=".HomePage">
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_welcome"
+        android:layout_margin="30dp">
+    </ImageView>
+
+    <ImageView
+        android:layout_width="366dp"
+        android:layout_height="340dp"
+        android:layout_gravity="center_horizontal"
+        android:src="@mipmap/globe">
+    </ImageView>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="444dp"
-        android:orientation="horizontal"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="-16dp">
-
+        android:orientation="horizontal">
         <ImageView
             android:layout_weight="1"
             android:id="@+id/controlButton"
             android:layout_width="179dp"
             android:layout_height="182dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginStart="6dp"
-            android:layout_marginTop="5dp"
-            android:layout_marginBottom="5dp"
             android:src="@mipmap/control_button">
         </ImageView>
 
         <ImageView
             android:layout_weight="1"
             android:id="@+id/collectButton"
-            android:layout_width="169dp"
-            android:layout_height="177dp"
-            android:layout_gravity="center_vertical"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="5dp"
-            android:layout_marginBottom="5dp"
+            android:layout_width="179dp"
+            android:layout_height="182dp"
             android:src="@mipmap/collect_button">
-
         </ImageView>
     </LinearLayout>
 
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
