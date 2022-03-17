@@ -11,7 +11,7 @@
         android:layout_height="56dp"
         android:baselineAlignBottom="true"
         android:paddingLeft="8dp"
-        android:src="@mipmap/icon"/>
+        android:src="@drawable/ic_client"/>
 
     <!-- 定义一个竖直方向的LinearLayout,显示设备型号与名字 -->
     <LinearLayout

@@ -24,7 +24,7 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:src="@mipmap/refresh"
+            android:src="@drawable/ic_flip_camera"
             android:layout_marginLeft="5dp">
         </ImageView>
 
@@ -32,21 +32,21 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@mipmap/disconnect">
+            android:src="@drawable/ic_end_call">
         </ImageView>
 
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:src="@mipmap/record">
+            android:src="@drawable/ic_record_button">
         </ImageView>
 
         <ImageView
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:src="@mipmap/shoot"
+            android:src="@drawable/ic_shoot"
             android:layout_marginRight="5dp">
         </ImageView>
 
