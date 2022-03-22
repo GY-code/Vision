@@ -17,7 +17,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Video extends AppCompatActivity {
+public class ControlVideo extends AppCompatActivity {
     public class Device {
         String type;
         String name;
@@ -49,7 +49,7 @@ public class Video extends AppCompatActivity {
 
         deviceAdapter = new deviceAdapter();
         v1.setAdapter(deviceAdapter);
-        LinearLayoutManager layoutManager = new LinearLayoutManager(Video.this);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(ControlVideo.this);
         v1.setLayoutManager(layoutManager);
         behavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
@@ -91,7 +91,7 @@ public class Video extends AppCompatActivity {
         @NonNull
         @Override
         public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = View.inflate(Video.this, R.layout.device_list, null);
+            View view = View.inflate(ControlVideo.this, R.layout.device_list, null);
             MyViewHolder myViewHolder = new MyViewHolder(view);
             return myViewHolder;
         }
