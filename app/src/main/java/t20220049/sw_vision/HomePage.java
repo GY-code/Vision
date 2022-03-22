@@ -7,6 +7,8 @@ import android.widget.ImageView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import t20220049.sw_vision.nodejs.NodejsActivity;
+
 public class HomePage extends AppCompatActivity {
     ImageView controlButton;
     ImageView collectButton;
@@ -31,7 +33,8 @@ public class HomePage extends AppCompatActivity {
         collectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(HomePage.this, CollectMatch.class);
+//                Intent intent = new Intent(HomePage.this, CollectMatch.class);
+                Intent intent = new Intent(HomePage.this, NodejsActivity.class);
                 startActivity(intent);
             }
         });

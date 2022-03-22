@@ -18,6 +18,11 @@
         </ImageView>
     </RelativeLayout>
 
+    <FrameLayout
+        android:id="@+id/wr_video_view"
+        android:layout_width="match_parent"
+        android:layout_height="360dp" />
+
     <RelativeLayout
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
