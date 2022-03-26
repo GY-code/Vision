@@ -4,15 +4,20 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,9 +32,17 @@ import t20220049.sw_vision.wtc_meeting.WebRTCManager;
 import t20220049.sw_vision.utils.PermissionUtil;
 
 import org.webrtc.EglBase;
+import org.webrtc.EglRenderer;
 import org.webrtc.MediaStream;
 import org.webrtc.RendererCommon;
 import org.webrtc.SurfaceViewRenderer;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * 单聊界面
@@ -50,6 +63,8 @@ public class ChatSingleActivity extends AppCompatActivity {
     private EglBase rootEglBase;
 
     private ImageView switch_hang_up;
+    private TextView photoButton;
+    private TextView videoButton;
 
     public static void openActivity(Activity activity, boolean videoEnable) {
         Intent intent = new Intent(activity, ChatSingleActivity.class);
@@ -98,14 +113,18 @@ public class ChatSingleActivity extends AppCompatActivity {
             remote_view.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_BALANCED);
             remote_view.setMirror(true);
             remoteRender = new ProxyVideoSink();
-            setSwappedFeeds(true);
+//            setSwappedFeeds(true);
+            //后加
+            setSwappedFeeds(false);
 
-            local_view.setOnClickListener(v -> setSwappedFeeds(!isSwappedFeeds));
+//            local_view.setOnClickListener(v -> setSwappedFeeds(!isSwappedFeeds));
         }
 
         startCall();
 
         switch_hang_up = findViewById(R.id.switch_hang_up);
+        photoButton=findViewById(R.id.shoot);
+        videoButton=findViewById(R.id.video);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -152,11 +171,51 @@ public class ChatSingleActivity extends AppCompatActivity {
                 hangUp();
             }
         });
+        photoButton.setOnClickListener(v->{
+            havePhoto();
+        });
     }
+    protected void havePhoto(){
+        SurfaceViewRenderer mySurfaceViewRenderer=local_view;
+        if (mySurfaceViewRenderer!=null)
+            mySurfaceViewRenderer.addFrameListener(new EglRenderer.FrameListener() {
+                @Override
+                public void onFrame(Bitmap bitmap) {
+                    runOnUiThread(() -> {
+                        savePhoto(bitmap);
+                        mySurfaceViewRenderer.removeFrameListener(this);
+                    });
+                }
+            }, 1);
+    }
+
+    private void savePhoto(Bitmap bitmap){
+        long curTime =new Date().getTime();
+        SimpleDateFormat sdf =new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+//        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "record_photo "+sdf.format(curTime));
+        String fileName =  "record_photo "+sdf.format(curTime)+".png";
+        MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, fileName, fileName);
+        runOnUiThread(()->{
+            Toast.makeText(getApplicationContext(),"已保存图片到相册",Toast.LENGTH_SHORT).show();
+        });
+        File appDir = new File(getApplicationContext().getFilesDir()+"");
+        if (!appDir.exists()) appDir.mkdir();
+        File file = new File(appDir, fileName);
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void setSwappedFeeds(boolean isSwappedFeeds) {
         this.isSwappedFeeds = isSwappedFeeds;
         localRender.setTarget(isSwappedFeeds ? remote_view : local_view);
+//        localRender.setTarget(null);
         remoteRender.setTarget(isSwappedFeeds ? local_view : remote_view);
     }
 

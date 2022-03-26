@@ -4,7 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -16,6 +18,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -37,14 +40,21 @@ import t20220049.sw_vision.bean.MemberBean;
 import t20220049.sw_vision.utils.PermissionUtil;
 
 import org.webrtc.EglBase;
+import org.webrtc.EglRenderer;
 import org.webrtc.MediaStream;
 import org.webrtc.RendererCommon;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoTrack;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -62,11 +72,13 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
     private VideoTrack _localVideoTrack;
 
     private int mScreenWidth;
-
+    private String myId;
     private EglBase rootEglBase;
 
     ImageView switch_camera;
     ImageView switch_hang_up;
+    ImageView photoButton;
+    ImageView videoButton;
 
     // 上拉框显示
     RelativeLayout bottomSheet;
@@ -138,12 +150,51 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
 
     }
 
+    protected void havePhoto() {
+        SurfaceViewRenderer mySurfaceViewRenderer = _videoViews.get(myId);
+        if (mySurfaceViewRenderer != null)
+            mySurfaceViewRenderer.addFrameListener(new EglRenderer.FrameListener() {
+                @Override
+                public void onFrame(Bitmap bitmap) {
+                    runOnUiThread(() -> {
+                        savePhoto(bitmap);
+                        mySurfaceViewRenderer.removeFrameListener(this);
+                    });
+                }
+            }, 1);
+    }
+
+    private void savePhoto(Bitmap bitmap) {
+        long curTime = new Date().getTime();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+//        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "record_photo "+sdf.format(curTime));
+        String fileName = "record_photo " + sdf.format(curTime) + ".png";
+        MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, fileName, fileName);
+        runOnUiThread(() -> {
+            Toast.makeText(getApplicationContext(), "已保存图片到相册", Toast.LENGTH_SHORT).show();
+        });
+
+        File appDir = new File(getApplicationContext().getFilesDir() + "");
+        if (!appDir.exists()) appDir.mkdir();
+        File file = new File(appDir, fileName);
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     private void initView() {
         wr_video_view = findViewById(R.id.wr_video_view);
 
         switch_camera = findViewById(R.id.switch_camera);
         switch_hang_up = findViewById(R.id.switch_hang_up);
+        videoButton = findViewById(R.id.video_button);
+        photoButton = findViewById(R.id.photo_button);
 
         //底部抽屉栏展示地址
         bottomSheet = findViewById(R.id.bottom_sheet);
@@ -185,7 +236,7 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
 
     }
 
-    private void initListner(){
+    private void initListner() {
         // 转换摄像头
         switch_camera.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -201,6 +252,12 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
                 hangUp();
             }
         });
+
+        photoButton.setOnClickListener(v -> {
+            havePhoto();
+        });
+
+
     }
 
     private void startCall() {
@@ -219,6 +276,7 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         if (videoTracks.size() > 0) {
             _localVideoTrack = videoTracks.get(0);
         }
+        myId = userId;
         runOnUiThread(() -> {
             addView(userId, stream);
         });
@@ -258,7 +316,7 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         _sinks.put(id, sink);
         _infos.add(new MemberBean(id));
 //        wr_video_view.addView(renderer);  改动
-        wr_video_view.addView(renderer,0);
+        wr_video_view.addView(renderer, 0);
         int size = _infos.size();
         for (int i = 0; i < size; i++) {
             MemberBean memberBean = _infos.get(i);

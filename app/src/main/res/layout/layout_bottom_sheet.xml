@@ -38,6 +38,7 @@
         </ImageView>
 
         <ImageView
+            android:id="@+id/video_button"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -45,6 +46,7 @@
         </ImageView>
 
         <ImageView
+            android:id="@+id/photo_button"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -57,13 +59,14 @@
 
     <TextView
         android:id="@+id/tv_tishi"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="20dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="@color/white"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="15dp"
         android:text="添加设备···"
-        android:textSize="20sp"/>
+        android:textColor="@color/white"
+        android:layout_marginVertical="3dp"
+        android:textSize="20sp" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"

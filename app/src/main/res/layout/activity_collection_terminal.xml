@@ -15,8 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_left">
-        </ImageView>
+            android:src="@drawable/ic_left"></ImageView>
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -28,8 +27,7 @@
                 android:id="@+id/switch_hang_up"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_end_call">
-            </ImageView>
+                android:src="@drawable/ic_end_call"></ImageView>
 
             <Chronometer
                 android:id="@+id/chronometer"
@@ -38,8 +36,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_marginStart="7dp"
                 android:textColor="@color/white"
-                android:textSize="20sp">
-            </Chronometer>
+                android:textSize="20sp"></Chronometer>
 
         </LinearLayout>
 
@@ -51,15 +48,15 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/bottom"
         android:layout_below="@+id/top"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="-3dp"/>
+        android:layout_marginBottom="-3dp" />
 
     <org.webrtc.SurfaceViewRenderer
         android:id="@+id/remote_view_render"
         android:layout_width="120dp"
         android:layout_height="180dp"
         android:layout_below="@+id/top"
-        android:layout_alignParentEnd="true" />
+        android:layout_alignParentEnd="true"
+        android:visibility="invisible"/>
 
     <LinearLayout
         android:id="@+id/bottom"
@@ -85,25 +82,25 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="15dp">
+
             <TextView
                 android:id="@+id/shoot"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="拍照"
                 android:layout_marginEnd="15dp"
+                android:text="拍照"
                 android:textColor="@color/white"
-                android:textSize="20sp">
-            </TextView>
+                android:textSize="20sp"></TextView>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="录制"
-                android:layout_toRightOf="@+id/shoot"
                 android:layout_marginStart="15dp"
+                android:layout_toRightOf="@+id/shoot"
+                android:text="录制"
+                android:id="@+id/video"
                 android:textColor="@color/white"
-                android:textSize="20sp">
-            </TextView>
+                android:textSize="20sp"></TextView>
 
         </RelativeLayout>
 

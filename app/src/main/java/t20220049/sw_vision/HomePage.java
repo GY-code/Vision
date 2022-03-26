@@ -8,6 +8,7 @@ import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import t20220049.sw_vision.nodejs.NodejsActivity;
+import t20220049.sw_vision.nodejs.WebrtcUtil;
 
 public class HomePage extends AppCompatActivity {
     ImageView controlButton;
@@ -24,9 +25,7 @@ public class HomePage extends AppCompatActivity {
         controlButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(HomePage.this, ControlMatch.class);
-                startActivity(intent);
-
+                WebrtcUtil.call(HomePage.this, "ws://106.13.236.207:3000", "123456");
             }
         });
 
@@ -34,8 +33,10 @@ public class HomePage extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 //                Intent intent = new Intent(HomePage.this, CollectMatch.class);
-                Intent intent = new Intent(HomePage.this, NodejsActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(HomePage.this, NodejsActivity.class);
+//                startActivity(intent);
+                WebrtcUtil.callSingle(HomePage.this, "ws://106.13.236.207:3000",
+                        "123456", true);
             }
         });
     }
