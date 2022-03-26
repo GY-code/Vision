@@ -1,9 +1,12 @@
 package t20220049.sw_vision;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -14,10 +17,51 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.webrtc.EglBase;
+import org.webrtc.MediaStream;
+import org.webrtc.SurfaceViewRenderer;
+import org.webrtc.VideoTrack;
 
-public class ControlVideo extends AppCompatActivity {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import t20220049.sw_vision.bean.MemberBean;
+import t20220049.sw_vision.ui.ChatRoomActivity;
+import t20220049.sw_vision.wtc_meeting.IViewCallback;
+import t20220049.sw_vision.wtc_meeting.ProxyVideoSink;
+import t20220049.sw_vision.wtc_meeting.WebRTCManager;
+
+public class ControlVideo extends AppCompatActivity implements IViewCallback {
+
+    private FrameLayout wr_video_view;
+
+    private WebRTCManager manager;
+    private Map<String, SurfaceViewRenderer> _videoViews = new HashMap<>();
+    private Map<String, ProxyVideoSink> _sinks = new HashMap<>();
+    private List<MemberBean> _infos = new ArrayList<>();
+    private VideoTrack _localVideoTrack;
+
+    private int mScreenWidth;
+
+    private EglBase rootEglBase;
+
+    @Override
+    public void onSetLocalStream(MediaStream stream, String socketId) {
+
+    }
+
+    @Override
+    public void onAddRemoteStream(MediaStream stream, String socketId) {
+
+    }
+
+    @Override
+    public void onCloseWithId(String socketId) {
+
+    }
+
     public class Device {
         String type;
         String name;
@@ -28,6 +72,12 @@ public class ControlVideo extends AppCompatActivity {
     RecyclerView v1;
     deviceAdapter deviceAdapter;
     List<Device> mDevicesList = new ArrayList<>();
+
+    public static void openActivity(Activity activity) {
+        Intent intent = new Intent(activity, ControlVideo.class);
+        activity.startActivity(intent);
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

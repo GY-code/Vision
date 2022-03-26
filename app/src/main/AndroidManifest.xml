@@ -53,6 +53,13 @@
             android:launchMode="singleInstance"
             android:screenOrientation="fullUser"
             android:theme="@style/Theme.Design.NoActionBar" />
+
+        <activity
+            android:name=".ui.ChatSingleActivity"
+            android:configChanges="orientation|smallestScreenSize|screenSize|screenLayout"
+            android:launchMode="singleInstance"
+            android:screenOrientation="fullUser"
+            android:theme="@style/Theme.Design.NoActionBar" />
     </application>
 
 </manifest>

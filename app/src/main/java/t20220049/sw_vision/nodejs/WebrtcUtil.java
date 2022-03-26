@@ -3,10 +3,12 @@ package t20220049.sw_vision.nodejs;
 import android.app.Activity;
 import android.text.TextUtils;
 
+import t20220049.sw_vision.ui.ChatSingleActivity;
 import t20220049.sw_vision.wtc_meeting.WebRTCManager;
 import t20220049.sw_vision.bean.MediaType;
 import t20220049.sw_vision.bean.MyIceServer;
 import t20220049.sw_vision.ui.ChatRoomActivity;
+import t20220049.sw_vision.ControlVideo;
 import t20220049.sw_vision.ws.IConnectEvent;
 
 
@@ -43,7 +45,7 @@ public class WebrtcUtil {
         WebRTCManager.getInstance().init(wss, iceServers, new IConnectEvent() {
             @Override
             public void onSuccess() {
-//                ChatSingleActivity.openActivity(activity, videoEnable);
+                ChatSingleActivity.openActivity(activity, videoEnable);
             }
 
             @Override
@@ -63,6 +65,7 @@ public class WebrtcUtil {
             @Override
             public void onSuccess() {
                 ChatRoomActivity.openActivity(activity);
+//                ControlVideo.openActivity(activity);
             }
 
             @Override

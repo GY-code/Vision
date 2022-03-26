@@ -1,22 +1,33 @@
 package t20220049.sw_vision.ui;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
+
+import t20220049.sw_vision.ControlVideo;
 import t20220049.sw_vision.wtc_meeting.IViewCallback;
 import t20220049.sw_vision.wtc_meeting.PeerConnectionHelper;
 import t20220049.sw_vision.wtc_meeting.ProxyVideoSink;
@@ -54,9 +65,57 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
 
     private EglBase rootEglBase;
 
+    ImageView switch_camera;
+    ImageView switch_hang_up;
+
+    // 上拉框显示
+    RelativeLayout bottomSheet;
+    BottomSheetBehavior behavior;
+    RecyclerView v1;
+    deviceAdapter deviceAdapter;
+    List<Device> mDevicesList = new ArrayList<>();
+
+    public class Device {
+        String type;
+        String name;
+    }
+
     public static void openActivity(Activity activity) {
         Intent intent = new Intent(activity, ChatRoomActivity.class);
         activity.startActivity(intent);
+    }
+
+    class deviceAdapter extends RecyclerView.Adapter<MyViewHolder> {
+        @NonNull
+        @Override
+        public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            View view = View.inflate(ChatRoomActivity.this, R.layout.device_list, null);
+            MyViewHolder myViewHolder = new MyViewHolder(view);
+            return myViewHolder;
+        }
+
+        @Override
+        public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
+            Device device = mDevicesList.get(position);
+            holder.mType.setText(device.type);
+            holder.mName.setText(device.name);
+        }
+
+        @Override
+        public int getItemCount() {
+            return mDevicesList.size();
+        }
+    }
+
+    class MyViewHolder extends RecyclerView.ViewHolder {
+        TextView mType;
+        TextView mName;
+
+        public MyViewHolder(@NonNull View itemView) {
+            super(itemView);
+            mType = itemView.findViewById(R.id.txt_mType);
+            mName = itemView.findViewById(R.id.txt_mName);
+        }
     }
 
     @Override
@@ -69,12 +128,12 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.wr_activity_chat_room);
         setContentView(R.layout.acticity_video);
+
         initView();
         initVar();
-        ChatRoomFragment chatRoomFragment = new ChatRoomFragment();
-        replaceFragment(chatRoomFragment);
-
-
+        initListner();
+//        ChatRoomFragment chatRoomFragment = new ChatRoomFragment();
+//        replaceFragment(chatRoomFragment);
         startCall();
 
     }
@@ -82,6 +141,37 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
 
     private void initView() {
         wr_video_view = findViewById(R.id.wr_video_view);
+
+        switch_camera = findViewById(R.id.switch_camera);
+        switch_hang_up = findViewById(R.id.switch_hang_up);
+
+        //底部抽屉栏展示地址
+        bottomSheet = findViewById(R.id.bottom_sheet);
+        behavior = BottomSheetBehavior.from(bottomSheet);
+        v1 = findViewById(R.id.recyclerview);
+
+        for (int i = 0; i < 20; i++) {
+            Device device = new Device();
+            device.type = "标题" + i;
+            device.name = "内容" + i;
+            mDevicesList.add(device);
+        }
+
+        deviceAdapter = new deviceAdapter();
+        v1.setAdapter(deviceAdapter);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(ChatRoomActivity.this);
+        v1.setLayoutManager(layoutManager);
+        behavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, @BottomSheetBehavior.State int newState) {
+                behavior.setState(newState);
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                Log.d("BottomSheetDemo", "slideOffset:" + slideOffset);
+            }
+        });
     }
 
     private void initVar() {
@@ -93,6 +183,24 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         wr_video_view.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, mScreenWidth));
         rootEglBase = EglBase.create();
 
+    }
+
+    private void initListner(){
+        // 转换摄像头
+        switch_camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                switchCamera();
+            }
+        });
+
+        // 挂断
+        switch_hang_up.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                hangUp();
+            }
+        });
     }
 
     private void startCall() {
@@ -149,8 +257,8 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         _videoViews.put(id, renderer);
         _sinks.put(id, sink);
         _infos.add(new MemberBean(id));
-        wr_video_view.addView(renderer);
-
+//        wr_video_view.addView(renderer);  改动
+        wr_video_view.addView(renderer,0);
         int size = _infos.size();
         for (int i = 0; i < size; i++) {
             MemberBean memberBean = _infos.get(i);

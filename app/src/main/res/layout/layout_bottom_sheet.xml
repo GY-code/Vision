@@ -21,14 +21,16 @@
         android:orientation="horizontal">
 
         <ImageView
+            android:id="@+id/switch_camera"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:src="@drawable/ic_flip_camera"
-            android:layout_marginLeft="5dp">
+            android:layout_marginStart="5dp">
         </ImageView>
 
         <ImageView
+            android:id="@+id/switch_hang_up"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

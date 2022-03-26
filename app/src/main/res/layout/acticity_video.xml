@@ -5,28 +5,42 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     >
-
     <RelativeLayout
+        android:id="@+id/setting"
         android:layout_width="match_parent"
         android:layout_height="78dp">
 
         <ImageView
+            android:id="@+id/pattern"
             android:layout_width="116dp"
             android:layout_height="match_parent"
-            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
             android:src="@mipmap/pattern">
         </ImageView>
+
     </RelativeLayout>
 
-    <FrameLayout
-        android:id="@+id/wr_video_view"
+    <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="360dp" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <FrameLayout
+                android:id="@+id/wr_video_view"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"/>
+        </RelativeLayout>
+
+    </RelativeLayout>
+
 
     <RelativeLayout
         android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:stateListAnimator="@null"
         android:layout_alignParentBottom="true"
         app:behavior_hideable="false"
         app:behavior_peekHeight="140dp"
