@@ -3,8 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cl_chouti"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
+
     <RelativeLayout
         android:id="@+id/setting"
         android:layout_width="match_parent"
@@ -17,7 +17,6 @@
             android:layout_alignParentEnd="true"
             android:src="@mipmap/pattern">
         </ImageView>
-
     </RelativeLayout>
 
     <RelativeLayout
