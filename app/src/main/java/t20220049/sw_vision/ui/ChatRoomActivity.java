@@ -37,6 +37,7 @@ import io.microshow.rxffmpeg.RxFFmpegInvoke;
 import okio.BufferedSource;
 import okio.Okio;
 import okio.Sink;
+import t20220049.sw_vision.utils.Utils;
 import t20220049.sw_vision.wtc_meeting.IViewCallback;
 import t20220049.sw_vision.wtc_meeting.PeerConnectionHelper;
 import t20220049.sw_vision.wtc_meeting.ProxyVideoSink;
@@ -79,8 +80,8 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
     private Map<String, SurfaceViewRenderer> _videoViews = new HashMap<>();
     private Map<String, ProxyVideoSink> _sinks = new HashMap<>();
     private Map<String, VideoFileRenderer> _vfrs = new HashMap<>();
-    private Map<String, Long> _initTimes = new HashMap<>();
-    private Map<String, Long> _activateTimes = new HashMap<>();
+    private Map<String, String> startVideoTimes = new HashMap<>();
+    private Map<String, String> endVideoTimes = new HashMap<>();
     private List<MemberBean> _infos = new ArrayList<>();
     private VideoTrack _localVideoTrack;
 
@@ -161,6 +162,7 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
 //        replaceFragment(chatRoomFragment);
         startCall();
         RxFFmpegInvoke.getInstance().setDebug(true);
+        srcPath = getApplicationContext().getFilesDir().getAbsolutePath() + "/";
 
     }
 
@@ -274,7 +276,7 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         });
         videoButton.setOnClickListener(v -> {
             if (!activateVideo) {
-                startTime = new Date().getTime();
+                setVideoStart();
                 activateVideo = true;
                 runOnUiThread(() -> {
                     Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
@@ -284,6 +286,31 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
                 activateVideo = false;
             }
         });
+    }
+
+    String srcPath;
+
+    private void setVideoStart() {
+        for (MemberBean mb :
+                _infos) {
+            String userId = mb.getId();
+            String raw_info = RxFFmpegInvoke.getInstance().getMediaInfo(srcPath + userId + ".y4m");
+            String[] raw_list = raw_info.split(";");
+            int dur = Integer.parseInt(raw_list[4].split("=|ms| |\\.")[1]);
+            String durTime = dur / 1000 + "." + (dur - dur / 1000);
+            startVideoTimes.put(userId, durTime);
+        }
+    }
+    private void setVideoEnd() {
+        for (MemberBean mb :
+                _infos) {
+            String userId = mb.getId();
+            String raw_info = RxFFmpegInvoke.getInstance().getMediaInfo(srcPath + userId + ".y4m");
+            String[] raw_list = raw_info.split(";");
+            int dur = Integer.parseInt(raw_list[4].split("=|ms| |\\.")[1]);
+            String durTime = dur / 1000 + "." + (dur - dur / 1000);
+            endVideoTimes.put(userId, durTime);
+        }
     }
 
     boolean activateVideo = false;
@@ -315,49 +342,42 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
     }
 
     private void terminateVideo() {
-        long endTime = new Date().getTime();
+        setVideoEnd();
         runOnUiThread(() -> {
             Toast.makeText(getApplicationContext(), "结束录制", Toast.LENGTH_SHORT).show();
         });
-        for (String userId : _activateTimes.keySet()) {
-            long activateTime = _activateTimes.get(userId);
-            SimpleDateFormat f = new SimpleDateFormat("HH:mm:ss:SSS");
-            Log.d(TAG, "terminateVideo: "+f.format(activateTime));
-            String ftime = getBetweenStr(startTime - activateTime);
-            String ttime = getBetweenStr(endTime - activateTime);
-            String srcPath = getApplicationContext().getFilesDir().getAbsolutePath() + "/";
-            RxFFmpegInvoke.IFFmpegListener l1 = new RxFFmpegInvoke.IFFmpegListener() {
-                @Override
-                public void onFinish() {
-                    insertVideo(srcPath + userId + "-" + startTime + ".mp4", getApplicationContext());
-                    runOnUiThread(() -> {
-                        Toast.makeText(getApplicationContext(), "已保存到相册", Toast.LENGTH_SHORT).show();
-                    });
-                }
-
-                @Override
-                public void onProgress(int progress, long progressTime) {
-                }
-
-                @Override
-                public void onCancel() {
-                }
-
-                @Override
-                public void onError(String message) {
-                }
-            };
-            new Thread(() -> {
-                long initTime=_initTimes.get(userId);
-                String text = "ffmpeg -ss " + ftime + " -to " + ttime + " -accurate_seek -i " + srcPath + userId + "-" + initTime + ".y4m " + srcPath + userId + "-" + startTime + ".mp4";
-//                String text = "ffmpeg -ss " + ftime + " -to " + ttime + " -i " + srcPath + userId + "-" + activateTime + ".y4m " + srcPath + userId + "-" + startTime + ".mp4";
-                Log.d(TAG, "terminateVideo: "+RxFFmpegInvoke.getInstance().getMediaInfo(srcPath + userId + "-" + initTime + ".y4m"));
+        new Thread(() -> {
+            for (MemberBean mb : _infos) {
+                String userId = mb.getId();
+                String text = "ffmpeg -ss " + startVideoTimes.get(userId) +" -to "+endVideoTimes.get(userId)+
+                        " -accurate_seek -i " + srcPath + userId + ".y4m " + srcPath + userId + "-" + startVideoTimes.get(userId) + ".mp4";
                 Log.d(TAG, "terminateVideo: " + text);
                 String[] commands = text.split(" ");
-                RxFFmpegInvoke.getInstance().runCommand(commands, l1);
-            }).start();
+                RxFFmpegInvoke.getInstance().runCommand(commands, new RxFFmpegInvoke.IFFmpegListener() {
+                    @Override
+                    public void onFinish() {
+                        Log.e(TAG, "onFinish: " + srcPath + userId + "-" + startVideoTimes.get(userId) + ".mp4");
+                        insertVideo(srcPath + userId + "-" + startVideoTimes.get(userId) + ".mp4", getBaseContext());
+                        runOnUiThread(() -> {
+                            Toast.makeText(getApplicationContext(), "已保存到相册", Toast.LENGTH_SHORT).show();
+                        });
+                    }
 
-        }
+                    @Override
+                    public void onProgress(int progress, long progressTime) {
+                    }
+
+                    @Override
+                    public void onCancel() {
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                    }
+                });
+            }
+        }).start();
+
     }
 
 
@@ -368,35 +388,31 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
 //        Uri newUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName() + ".fileprovider", new File(videoPath));
 //        retriever.setDataSource(getApplicationContext(), newUri);// videoPath 本地视频的路径
 //
-        try {
-            retriever.setDataSource(videoPath);
-            int nVideoWidth = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-            int nVideoHeight = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
-            int duration = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-            long dateTaken = System.currentTimeMillis();
-            File file = new File(videoPath);
-            String title = file.getName();
-            String filename = file.getName();
-            String mime = "video/mp4";
-            ContentValues mCurrentVideoValues = new ContentValues(9);
-            mCurrentVideoValues.put(MediaStore.Video.Media.TITLE, title);
-            mCurrentVideoValues.put(MediaStore.Video.Media.DISPLAY_NAME, filename);
-            mCurrentVideoValues.put(MediaStore.Video.Media.DATE_TAKEN, dateTaken);
-            mCurrentVideoValues.put(MediaStore.MediaColumns.DATE_MODIFIED, dateTaken / 1000);
-            mCurrentVideoValues.put(MediaStore.Video.Media.MIME_TYPE, mime);
-            mCurrentVideoValues.put(MediaStore.Video.Media.DATA, videoPath);
-            mCurrentVideoValues.put(MediaStore.Video.Media.WIDTH, nVideoWidth);
-            mCurrentVideoValues.put(MediaStore.Video.Media.HEIGHT, nVideoHeight);
-            mCurrentVideoValues.put(MediaStore.Video.Media.RESOLUTION, Integer.toString(nVideoWidth) + "x" + Integer.toString(nVideoHeight));
-            mCurrentVideoValues.put(MediaStore.Video.Media.SIZE, new File(videoPath).length());
-            mCurrentVideoValues.put(MediaStore.Video.Media.DURATION, duration);
-            ContentResolver contentResolver = context.getContentResolver();
-            Uri videoTable = Uri.parse(VIDEO_BASE_URI);
-            Uri uri = contentResolver.insert(videoTable, mCurrentVideoValues);
-            writeFile(videoPath, mCurrentVideoValues, contentResolver, uri);
-        }catch (NumberFormatException e){
-            Log.e(TAG, "insertVideo: "+e.getMessage());
-        }
+        retriever.setDataSource(videoPath);
+        int nVideoWidth = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+        int nVideoHeight = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+        int duration = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+        long dateTaken = System.currentTimeMillis();
+        File file = new File(videoPath);
+        String title = file.getName();
+        String filename = file.getName();
+        String mime = "video/mp4";
+        ContentValues mCurrentVideoValues = new ContentValues(9);
+        mCurrentVideoValues.put(MediaStore.Video.Media.TITLE, title);
+        mCurrentVideoValues.put(MediaStore.Video.Media.DISPLAY_NAME, filename);
+        mCurrentVideoValues.put(MediaStore.Video.Media.DATE_TAKEN, dateTaken);
+        mCurrentVideoValues.put(MediaStore.MediaColumns.DATE_MODIFIED, dateTaken / 1000);
+        mCurrentVideoValues.put(MediaStore.Video.Media.MIME_TYPE, mime);
+        mCurrentVideoValues.put(MediaStore.Video.Media.DATA, videoPath);
+        mCurrentVideoValues.put(MediaStore.Video.Media.WIDTH, nVideoWidth);
+        mCurrentVideoValues.put(MediaStore.Video.Media.HEIGHT, nVideoHeight);
+        mCurrentVideoValues.put(MediaStore.Video.Media.RESOLUTION, Integer.toString(nVideoWidth) + "x" + Integer.toString(nVideoHeight));
+        mCurrentVideoValues.put(MediaStore.Video.Media.SIZE, new File(videoPath).length());
+        mCurrentVideoValues.put(MediaStore.Video.Media.DURATION, duration);
+        ContentResolver contentResolver = context.getContentResolver();
+        Uri videoTable = Uri.parse(VIDEO_BASE_URI);
+        Uri uri = contentResolver.insert(videoTable, mCurrentVideoValues);
+        writeFile(videoPath, mCurrentVideoValues, contentResolver, uri);
     }
 
     private void writeFile(String imagePath, ContentValues values, ContentResolver contentResolver, Uri item) {
@@ -417,7 +433,7 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
                 }
             }
         } catch (IOException e) {
-            Log.e(TAG, "writeFile: "+e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -471,25 +487,17 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         // set render
         ProxyVideoSink sink = new ProxyVideoSink();
         sink.setTarget(renderer);
-        renderer.addFrameListener(new EglRenderer.FrameListener() {
-            @Override
-            public void onFrame(Bitmap frame) {
-                _activateTimes.put(id,new Date().getTime());
-            }
-        },0);
         if (stream.videoTracks.size() > 0) {
             stream.videoTracks.get(0).addSink(sink);
             VideoFileRenderer vfr = null;
-            long initTime = new Date().getTime();
             try {
-                vfr = new VideoFileRenderer(getApplicationContext().getFilesDir().getAbsolutePath() + "/" + id + "-" + initTime + ".y4m",
+                vfr = new VideoFileRenderer(getApplicationContext().getFilesDir().getAbsolutePath() + "/" + id + ".y4m",
                         PeerConnectionHelper.VIDEO_RESOLUTION_WIDTH, PeerConnectionHelper.VIDEO_RESOLUTION_HEIGHT, rootEglBase.getEglBaseContext());
             } catch (IOException e) {
                 e.printStackTrace();
             }
             stream.videoTracks.get(0).addSink(vfr);
             _vfrs.put(id, vfr);
-            _initTimes.put(id, initTime);
         }
         _videoViews.put(id, renderer);
         _sinks.put(id, sink);
@@ -529,8 +537,6 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         if (vfr != null) {
             vfr.release();
         }
-        _initTimes.remove(userId);
-        _activateTimes.remove(userId);
         _sinks.remove(userId);
         _videoViews.remove(userId);
         _infos.remove(new MemberBean(userId));
@@ -629,6 +635,8 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
     @Override  // 屏蔽返回键
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         return keyCode == KeyEvent.KEYCODE_BACK || super.onKeyDown(keyCode, event);
+//        hangUp();
+//        return super.onKeyDown(keyCode,event);
     }
 
     @Override
@@ -685,12 +693,9 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         _videoViews.clear();
         _sinks.clear();
         _infos.clear();
-        _initTimes.clear();
-        _activateTimes.clear();
         _vfrs.clear();
-
+//        Utils.deleteDirectory(srcPath);
     }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
