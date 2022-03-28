@@ -25,7 +25,7 @@ public class PermissionUtil {
         }
         return isNeedRequestPermission(activity, Manifest.permission.CAMERA,
                 Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE);
     }
 
     private static boolean isNeedRequestPermission(Activity activity, String... permissions) {

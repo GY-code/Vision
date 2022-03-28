@@ -34,12 +34,15 @@ import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.VideoCapturer;
 import org.webrtc.VideoDecoderFactory;
 import org.webrtc.VideoEncoderFactory;
+import org.webrtc.VideoFileRenderer;
 import org.webrtc.VideoSource;
 import org.webrtc.VideoTrack;
 import org.webrtc.audio.JavaAudioDeviceModule;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -56,7 +59,7 @@ public class PeerConnectionHelper {
 
     public static final int VIDEO_RESOLUTION_WIDTH = 320;
     public static final int VIDEO_RESOLUTION_HEIGHT = 240;
-    public static final int FPS = 10;
+    public static final int FPS = 30;
     public static final String VIDEO_CODEC_H264 = "H264";
     public static final String VIDEO_TRACK_ID = "ARDAMSv0";
     public static final String AUDIO_TRACK_ID = "ARDAMSa0";
@@ -261,6 +264,9 @@ public class PeerConnectionHelper {
             captureAndroid.initialize(surfaceTextureHelper, _context, videoSource.getCapturerObserver());
             captureAndroid.startCapture(VIDEO_RESOLUTION_WIDTH, VIDEO_RESOLUTION_HEIGHT, FPS);
             _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
+//            //add
+//            initRecorder();
+//            _localVideoTrack.addSink(vfr);
             _localStream.addTrack(_localVideoTrack);
         }
 
@@ -270,7 +276,20 @@ public class PeerConnectionHelper {
         }
 
     }
-
+//    VideoFileRenderer vfr;
+//    public static long startVideoTime;
+//    public void initRecorder() {
+//        try {
+//            startVideoTime =new Date().getTime();
+////            SimpleDateFormat sdf =new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+////            vfr = new VideoFileRenderer(_context.getFilesDir().getAbsolutePath()+"/record_video "+sdf.format(curTime)+".mp4",
+//            vfr = new VideoFileRenderer(_context.getFilesDir().getAbsolutePath()+"/"+ startVideoTime +".y4m",
+//                    VIDEO_RESOLUTION_WIDTH, VIDEO_RESOLUTION_HEIGHT, _rootEglBase.getEglBaseContext());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//
+//    }
     // 创建所有连接
     private void createPeerConnections() {
         for (Object str : _connectionIdArray) {
