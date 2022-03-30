@@ -62,10 +62,10 @@
         android:id="@+id/bottom"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_alignParentBottom="true"
-        android:paddingBottom="20dp"
-        android:background="@color/black">
+        android:background="@color/black"
+        android:orientation="vertical"
+        android:paddingBottom="20dp">
 
         <Chronometer
             android:id="@+id/record_chronometer"
@@ -74,8 +74,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginBottom="30dp"
             android:textColor="@color/white"
-            android:textSize="20sp">
-        </Chronometer>
+            android:textSize="20sp"></Chronometer>
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -93,12 +92,12 @@
                 android:textSize="20sp"></TextView>
 
             <TextView
+                android:id="@+id/video"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="15dp"
                 android:layout_toRightOf="@+id/shoot"
                 android:text="录制"
-                android:id="@+id/video"
                 android:textColor="@color/white"
                 android:textSize="20sp"></TextView>
 
@@ -107,9 +106,8 @@
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_record_button"
-            android:layout_gravity="center_horizontal">
-        </ImageView>
+            android:layout_gravity="center_horizontal"
+            android:src="@drawable/ic_record_button"></ImageView>
     </LinearLayout>
 
 
