@@ -296,9 +296,13 @@ public class ChatSingleActivity extends AppCompatActivity {
 
             }
         });
-        if (!PermissionUtil.isNeedRequestPermission(ChatSingleActivity.this)) {
+        boolean isNeedOverLay=PermissionUtil.isNeedOverLay(ChatSingleActivity.this);
+        if (!PermissionUtil.isNeedRequestPermission(ChatSingleActivity.this)&!isNeedOverLay) {
             manager.joinRoom(getApplicationContext(), rootEglBase);
+        }else if(isNeedOverLay){
+            finish();
         }
+
 
     }
 

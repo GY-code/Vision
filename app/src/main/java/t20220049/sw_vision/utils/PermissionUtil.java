@@ -9,6 +9,7 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.Settings;
+import android.util.Log;
 
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
@@ -22,7 +23,7 @@ import java.util.List;
  */
 public class PermissionUtil {
 
-
+    private static final String TAG = "PermissionUtil";
     // 檢查是否有權限
     public static boolean isNeedRequestPermission(Activity activity) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
@@ -46,10 +47,7 @@ public class PermissionUtil {
                 mPermissionListDenied.add(permission);
             }
         }
-//        if(ContextCompat.checkSelfPermission(activity, "Manifest.permission.SYSTEM_ALERT_WINDOW")!=PackageManager.PERMISSION_GRANTED){
-//            startActivity(new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:t20220049.sw_vision" )));
-//        }
-        if (mPermissionListDenied.size() > 0) {
+                if (mPermissionListDenied.size() > 0) {
             String[] pears = new String[mPermissionListDenied.size()];
             pears = mPermissionListDenied.toArray(pears);
             ActivityCompat.requestPermissions(activity, pears, 0);
@@ -61,6 +59,15 @@ public class PermissionUtil {
 
     private static int checkPermission(Activity activity, String permission) {
         return ContextCompat.checkSelfPermission(activity, permission);
+    }
+
+    public static boolean isNeedOverLay(Activity activity){
+        if (!Settings.canDrawOverlays(activity.getApplicationContext())) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION, Uri.parse("package:t20220049.sw_vision"));
+            startActivityForResult(activity, intent, 0, null);
+            return true;
+        }else
+            return false;
     }
 
 
