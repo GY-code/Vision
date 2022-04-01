@@ -275,6 +275,35 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
             havePhoto();
         });
         videoButton.setOnClickListener(v -> {
+/*            String filename1 = "/sdcard/DCIM/Camera/temp.mp4";
+            String tsFilename1 = "/sdcard/DCIM/Camera/temp.ts";
+            String text = "ffmpeg -i " + filename1 + " -vcodec copy -acodec copy -vbsf " + tsFilename1;
+            String[] commands = text.split(" ");
+            new Thread(() -> {
+                RxFFmpegInvoke.getInstance().runCommand(commands, new RxFFmpegInvoke.IFFmpegListener() {
+                    @Override
+                    public void onFinish() {
+                        runOnUiThread(() -> {
+                            Toast.makeText(getApplicationContext(), "完成", Toast.LENGTH_SHORT).show();
+                        });
+                    }
+
+                    @Override
+                    public void onProgress(int progress, long progressTime) {
+                    }
+
+                    @Override
+                    public void onCancel() {
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        Log.e(TAG, "onError: "+message);
+                    }
+                });
+
+            }).start();*/
+
             if (!activateVideo) {
                 setVideoStart();
                 activateVideo = true;
@@ -301,6 +330,7 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
             startVideoTimes.put(userId, durTime);
         }
     }
+
     private void setVideoEnd() {
         for (MemberBean mb :
                 _infos) {
@@ -349,7 +379,7 @@ public class ChatRoomActivity extends AppCompatActivity implements IViewCallback
         new Thread(() -> {
             for (MemberBean mb : _infos) {
                 String userId = mb.getId();
-                String text = "ffmpeg -ss " + startVideoTimes.get(userId) +" -to "+endVideoTimes.get(userId)+
+                String text = "ffmpeg -ss " + startVideoTimes.get(userId) + " -to " + endVideoTimes.get(userId) +
                         " -accurate_seek -i " + srcPath + userId + ".y4m " + srcPath + userId + "-" + startVideoTimes.get(userId) + ".mp4";
                 Log.d(TAG, "terminateVideo: " + text);
                 String[] commands = text.split(" ");
