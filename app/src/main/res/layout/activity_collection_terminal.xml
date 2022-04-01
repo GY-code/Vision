@@ -12,33 +12,12 @@
         android:padding="10dp">
 
         <ImageView
+            android:id="@+id/back"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_left"></ImageView>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:id="@+id/switch_hang_up"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_end_call"></ImageView>
-
-            <Chronometer
-                android:id="@+id/chronometer"
-                android:layout_width="90dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_marginStart="7dp"
-                android:textColor="@color/white"
-                android:textSize="20sp"></Chronometer>
-
-        </LinearLayout>
+            android:src="@drawable/ic_left">
+        </ImageView>
 
     </RelativeLayout>
 
@@ -61,53 +40,65 @@
     <LinearLayout
         android:id="@+id/bottom"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="185dp"
         android:layout_alignParentBottom="true"
         android:background="@color/black"
         android:orientation="vertical"
         android:paddingBottom="20dp">
 
+
         <Chronometer
             android:id="@+id/record_chronometer"
-            android:layout_width="90dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="30dp"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="15dp"
             android:textColor="@color/white"
-            android:textSize="20sp"></Chronometer>
+            android:textSize="20sp"
+            android:visibility="invisible">
+        </Chronometer>
 
-        <RelativeLayout
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="15dp">
+            android:layout_gravity="center_vertical"
+            android:layout_margin="9dp"
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/shoot"
-                android:layout_width="wrap_content"
+            <ImageView
+                android:id="@+id/switch_camera"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="15dp"
-                android:text="拍照"
-                android:textColor="@color/white"
-                android:textSize="20sp"></TextView>
+                android:layout_marginStart="5dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_flip_camera"></ImageView>
 
-            <TextView
+            <ImageView
+                android:id="@+id/switch_hang_up"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:src="@drawable/ic_end_call"></ImageView>
+
+            <ImageView
                 android:id="@+id/video"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:layout_toRightOf="@+id/shoot"
-                android:text="录制"
-                android:textColor="@color/white"
-                android:textSize="20sp"></TextView>
+                android:layout_weight="1"
+                android:src="@drawable/ic_record_button"></ImageView>
 
-        </RelativeLayout>
+            <ImageView
+                android:id="@+id/shoot"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginRight="5dp"
+                android:layout_weight="1"
+                android:src="@drawable/ic_shoot"></ImageView>
 
-        <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_record_button"></ImageView>
+
+        </LinearLayout>
+
     </LinearLayout>
 
 

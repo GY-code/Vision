@@ -18,11 +18,11 @@ public class CollectionTerminal extends AppCompatActivity {
     }
 
     private void initView() {
-        mChronometer = (Chronometer) findViewById(R.id.chronometer);
-        //setFormat设置用于显示的格式化字符串。
-        //替换字符串中第一个“%s”为当前"MM:SS"或 "H:MM:SS"格式的时间显示。
-        mChronometer.setFormat("%s");
-        mChronometer.start();
+//        mChronometer = (Chronometer) findViewById(R.id.record_chronometer);
+//        //setFormat设置用于显示的格式化字符串。
+//        //替换字符串中第一个“%s”为当前"MM:SS"或 "H:MM:SS"格式的时间显示。
+//        mChronometer.setFormat("%s");
+//        mChronometer.start();
     }
 
 }

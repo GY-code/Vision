@@ -10,12 +10,14 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Chronometer;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,10 +63,13 @@ public class ChatSingleActivity extends AppCompatActivity {
     private boolean isSwappedFeeds;
 
     private EglBase rootEglBase;
-
+    private Chronometer mChronometer;
+    private ImageView back;
+    private ImageView switch_camera;
     private ImageView switch_hang_up;
-    private TextView photoButton;
-    private TextView videoButton;
+    private ImageView photoButton;
+    private ImageView videoButton;
+    private int videoState = 0;
 
     private ServiceConnection conn;
     private CameraService cameraService;
@@ -155,10 +160,12 @@ public class ChatSingleActivity extends AppCompatActivity {
         }
 
         startCall();
-
+        switch_camera = findViewById(R.id.switch_camera);
         switch_hang_up = findViewById(R.id.switch_hang_up);
         photoButton=findViewById(R.id.shoot);
         videoButton=findViewById(R.id.video);
+        back = findViewById(R.id.back);
+        mChronometer = (Chronometer) findViewById(R.id.record_chronometer);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -199,6 +206,20 @@ public class ChatSingleActivity extends AppCompatActivity {
 //            });
 //        }
 
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                hangUp();
+            }
+        });
+
+        switch_camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                switchCamera();
+            }
+        });
+
         switch_hang_up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -213,7 +234,23 @@ public class ChatSingleActivity extends AppCompatActivity {
         });
         videoButton.setOnClickListener(v->{
             if(cameraService!=null){
-                cameraService.activateRecord();
+//                cameraService.activateRecord();
+
+                if(videoState == 0){
+                    //setFormat设置用于显示的格式化字符串。
+                    //替换字符串中第一个“%s”为当前"MM:SS"或 "H:MM:SS"格式的时间显示。
+                    mChronometer.setBase(SystemClock.elapsedRealtime());
+                    mChronometer.setFormat("%s");
+                    mChronometer.setVisibility(View.VISIBLE);
+                    mChronometer.start();
+                    videoState = 1;
+                } else {
+                    mChronometer.stop();
+                    mChronometer.setVisibility(View.INVISIBLE);
+                    videoState = 0;
+                }
+
+
             }
         });
     }
