@@ -7,7 +7,7 @@ android {
 
     defaultConfig {
         applicationId "t20220049.sw_vision"
-        minSdk 29
+        minSdk 28
         targetSdk 32
         versionCode 1
         versionName "1.0"
@@ -43,4 +43,5 @@ dependencies {
     implementation project(path: ':libwebrtc')
     implementation "com.github.microshow:RxFFmpeg:4.9.0"
     implementation "com.squareup.okio:okio:2.4.0"
+    implementation 'com.github.tbruyelle:rxpermissions:0.10.2'
 }
