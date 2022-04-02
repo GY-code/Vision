@@ -4,10 +4,16 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -19,12 +25,15 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Chronometer;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import io.microshow.rxffmpeg.RxFFmpegInvoke;
+import okio.BufferedSource;
+import okio.Okio;
+import okio.Sink;
 import t20220049.sw_vision.CameraService;
 import t20220049.sw_vision.wtc_meeting.IViewCallback;
 import t20220049.sw_vision.wtc_meeting.PeerConnectionHelper;
@@ -38,10 +47,13 @@ import org.webrtc.EglRenderer;
 import org.webrtc.MediaStream;
 import org.webrtc.RendererCommon;
 import org.webrtc.SurfaceViewRenderer;
+import org.webrtc.VideoFileRenderer;
+import org.webrtc.VideoTrack;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -74,7 +86,7 @@ public class ChatSingleActivity extends AppCompatActivity {
 
     private ServiceConnection conn;
     private CameraService cameraService;
-
+    boolean activateVideo = false;
     private static final String TAG = "ChatSingleActivity";
 
     public static void openActivity(Activity activity, boolean videoEnable) {
@@ -83,6 +95,7 @@ public class ChatSingleActivity extends AppCompatActivity {
         activity.startActivity(intent);
     }
 
+    String srcPath;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,7 +110,11 @@ public class ChatSingleActivity extends AppCompatActivity {
         initVar();
         initListener();
         initService();
-
+        srcPath = getApplicationContext().getFilesDir().getAbsolutePath() + "/";
+        File file = new File(srcPath + "local.y4m");
+        if (file.isFile() && file.exists()) {
+            file.delete();
+        }
     }
 
 
@@ -239,7 +256,17 @@ public class ChatSingleActivity extends AppCompatActivity {
         });
         videoButton.setOnClickListener(v -> {
             if (cameraService != null) {
-                cameraService.activateRecord(remote_view);
+//                cameraService.activateRecord(remote_view);
+                if (!activateVideo) {
+                    setVideoStart();
+                    activateVideo = true;
+                    runOnUiThread(() -> {
+                        Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
+                    });
+                } else {
+                    terminateVideo();
+                    activateVideo = false;
+                }
                 if (videoState == 0) {
                     //setFormat设置用于显示的格式化字符串。
                     //替换字符串中第一个“%s”为当前"MM:SS"或 "H:MM:SS"格式的时间显示。
@@ -255,6 +282,133 @@ public class ChatSingleActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    String startVideoTime, endVideoTime;
+
+    private void setVideoStart() {
+        File file = new File(srcPath + "local.y4m");
+        if (file.isFile() && file.exists()) {
+            file.delete();
+        }
+        try {
+            vfr = new VideoFileRenderer(getApplicationContext().getFilesDir().getAbsolutePath() + "/" + "local" + ".y4m",
+                    PeerConnectionHelper.VIDEO_RESOLUTION_WIDTH, PeerConnectionHelper.VIDEO_RESOLUTION_HEIGHT, rootEglBase.getEglBaseContext());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        localTrack.addSink(vfr);
+//        String raw_info = RxFFmpegInvoke.getInstance().getMediaInfo(srcPath + "local" + ".y4m");
+//        String[] raw_list = raw_info.split(";");
+//        int dur;
+//        try {
+//            dur = Integer.parseInt(raw_list[4].split("=|ms| |\\.")[1]);
+//
+//        } catch (NumberFormatException e) {
+//            dur = 0;
+//        }
+//        startVideoTime = dur / 1000 + "." + (dur - dur / 1000);
+    }
+
+    private void setVideoEnd() {
+        localTrack.removeSink(vfr);
+//        String raw_info = RxFFmpegInvoke.getInstance().getMediaInfo(srcPath + "local" + ".y4m");
+//        String[] raw_list = raw_info.split(";");
+//        int dur = Integer.parseInt(raw_list[4].split("=|ms| |\\.")[1]);
+//        endVideoTime = dur / 1000 + "." + (dur - dur / 1000);
+    }
+
+    private void terminateVideo() {
+        setVideoEnd();
+        runOnUiThread(() -> {
+            Toast.makeText(getApplicationContext(), "结束录制", Toast.LENGTH_SHORT).show();
+        });
+        new Thread(() -> {
+//            String text = "ffmpeg -ss " + startVideoTime + " -to " + endVideoTime +
+//                    " -accurate_seek -i " + srcPath + "local" + ".y4m " + srcPath + "local" + "-" + startVideoTime + ".mp4";
+            String text = "ffmpeg -i " + srcPath + "local" + ".y4m " + srcPath + "local"  + ".mp4";
+            Log.d(TAG, "terminateVideo: " + text);
+            String[] commands = text.split(" ");
+            RxFFmpegInvoke.getInstance().runCommand(commands, new RxFFmpegInvoke.IFFmpegListener() {
+                @Override
+                public void onFinish() {
+                    Log.d(TAG, "onFinish: " + text);
+                    insertVideo(srcPath + "local" + ".mp4", getBaseContext());
+                    runOnUiThread(() -> {
+                        Toast.makeText(getApplicationContext(), "已保存到相册", Toast.LENGTH_SHORT).show();
+                    });
+                }
+
+                @Override
+                public void onProgress(int progress, long progressTime) {
+                }
+
+                @Override
+                public void onCancel() {
+                }
+
+                @Override
+                public void onError(String message) {
+                }
+            });
+        }).start();
+
+    }
+
+    private static final String VIDEO_BASE_URI = "content://media/external/video/media";
+
+    private void insertVideo(String videoPath, Context context) {
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+//        Uri newUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName() + ".fileprovider", new File(videoPath));
+//        retriever.setDataSource(getApplicationContext(), newUri);// videoPath 本地视频的路径
+//
+        retriever.setDataSource(videoPath);
+        int nVideoWidth = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
+        int nVideoHeight = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
+        int duration = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
+        long dateTaken = System.currentTimeMillis();
+        File file = new File(videoPath);
+        String title = file.getName();
+        String filename = file.getName();
+        String mime = "video/mp4";
+        ContentValues mCurrentVideoValues = new ContentValues(9);
+        mCurrentVideoValues.put(MediaStore.Video.Media.TITLE, title);
+        mCurrentVideoValues.put(MediaStore.Video.Media.DISPLAY_NAME, filename);
+        mCurrentVideoValues.put(MediaStore.Video.Media.DATE_TAKEN, dateTaken);
+        mCurrentVideoValues.put(MediaStore.MediaColumns.DATE_MODIFIED, dateTaken / 1000);
+        mCurrentVideoValues.put(MediaStore.Video.Media.MIME_TYPE, mime);
+        mCurrentVideoValues.put(MediaStore.Video.Media.DATA, videoPath);
+        mCurrentVideoValues.put(MediaStore.Video.Media.WIDTH, nVideoWidth);
+        mCurrentVideoValues.put(MediaStore.Video.Media.HEIGHT, nVideoHeight);
+        mCurrentVideoValues.put(MediaStore.Video.Media.RESOLUTION, Integer.toString(nVideoWidth) + "x" + Integer.toString(nVideoHeight));
+        mCurrentVideoValues.put(MediaStore.Video.Media.SIZE, new File(videoPath).length());
+        mCurrentVideoValues.put(MediaStore.Video.Media.DURATION, duration);
+        ContentResolver contentResolver = context.getContentResolver();
+        Uri videoTable = Uri.parse(VIDEO_BASE_URI);
+        Uri uri = contentResolver.insert(videoTable, mCurrentVideoValues);
+        writeFile(videoPath, mCurrentVideoValues, contentResolver, uri);
+    }
+
+    private void writeFile(String imagePath, ContentValues values, ContentResolver contentResolver, Uri item) {
+        try (OutputStream rw = contentResolver.openOutputStream(item, "rw")) {
+            // Write data into the pending image.
+            Sink sink = Okio.sink(rw);
+            BufferedSource buffer = Okio.buffer(Okio.source(new File(imagePath)));
+            buffer.readAll(sink);
+            values.put(MediaStore.Video.Media.IS_PRIVATE, 0);
+            contentResolver.update(item, values, null, null);
+            new File(imagePath).delete();
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                Cursor query = getContentResolver().query(item, null, null, null);
+                if (query != null) {
+                    int count = query.getCount();
+                    Log.d("writeFile", "writeFile result :" + count);
+                    query.close();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     protected void havePhoto() {
@@ -301,6 +455,9 @@ public class ChatSingleActivity extends AppCompatActivity {
         remoteRender.setTarget(isSwappedFeeds ? local_view : remote_view);
     }
 
+    VideoFileRenderer vfr = null;
+    VideoTrack localTrack = null;
+
     private void startCall() {
         manager = WebRTCManager.getInstance();
         manager.setCallback(new IViewCallback() {
@@ -308,6 +465,8 @@ public class ChatSingleActivity extends AppCompatActivity {
             public void onSetLocalStream(MediaStream stream, String socketId) {
                 if (stream.videoTracks.size() > 0) {
                     stream.videoTracks.get(0).addSink(localRender);
+                    localTrack = stream.videoTracks.get(0);
+
                 }
 
                 if (videoEnable) {
@@ -410,6 +569,9 @@ public class ChatSingleActivity extends AppCompatActivity {
         if (remoteRender != null) {
             remoteRender.setTarget(null);
             remoteRender = null;
+        }
+        if (vfr != null) {
+            vfr.release();
         }
 
         if (local_view != null) {
