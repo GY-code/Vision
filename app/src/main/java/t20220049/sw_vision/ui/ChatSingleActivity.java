@@ -61,6 +61,7 @@ public class ChatSingleActivity extends AppCompatActivity {
 
     private boolean videoEnable;
     private boolean isSwappedFeeds;
+    private boolean isMirror = true;
 
     private EglBase rootEglBase;
     private Chronometer mChronometer;
@@ -103,7 +104,8 @@ public class ChatSingleActivity extends AppCompatActivity {
     private int previewX, previewY;
     private int moveX, moveY;
     Intent serviceIntent;
-    private void initService(){
+
+    private void initService() {
         conn = new ServiceConnection() {
             /**
              * 与服务器端交互的接口方法 绑定服务的时候被回调，在这个方法获取绑定Service传递过来的IBinder对象，
@@ -116,13 +118,14 @@ public class ChatSingleActivity extends AppCompatActivity {
                 CameraService.LocalBinder binder = (CameraService.LocalBinder) service;
                 cameraService = binder.getService();
             }
+
             /**
              * 当取消绑定的时候被回调。但正常情况下是不被调用的，它的调用时机是当Service服务被意外销毁时，
              * 例如内存的资源不足时这个方法才被自动调用。
              */
             @Override
             public void onServiceDisconnected(ComponentName name) {
-                cameraService=null;
+                cameraService = null;
             }
         };
         serviceIntent = new Intent(this, CameraService.class);
@@ -162,8 +165,8 @@ public class ChatSingleActivity extends AppCompatActivity {
         startCall();
         switch_camera = findViewById(R.id.switch_camera);
         switch_hang_up = findViewById(R.id.switch_hang_up);
-        photoButton=findViewById(R.id.shoot);
-        videoButton=findViewById(R.id.video);
+        photoButton = findViewById(R.id.shoot);
+        videoButton = findViewById(R.id.video);
         back = findViewById(R.id.back);
         mChronometer = (Chronometer) findViewById(R.id.record_chronometer);
     }
@@ -217,6 +220,8 @@ public class ChatSingleActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 switchCamera();
+                if (cameraService != null)
+                    cameraService.switchCamera();
             }
         });
 
@@ -226,17 +231,16 @@ public class ChatSingleActivity extends AppCompatActivity {
                 hangUp();
             }
         });
-        photoButton.setOnClickListener(v->{
-            if(cameraService!=null){
-                Toast.makeText(getBaseContext(),"拍照",Toast.LENGTH_SHORT).show();
+        photoButton.setOnClickListener(v -> {
+            if (cameraService != null) {
+                Toast.makeText(getBaseContext(), "拍照", Toast.LENGTH_SHORT).show();
                 cameraService.takePicture();
             }
         });
-        videoButton.setOnClickListener(v->{
-            if(cameraService!=null){
-//                cameraService.activateRecord();
-
-                if(videoState == 0){
+        videoButton.setOnClickListener(v -> {
+            if (cameraService != null) {
+                cameraService.activateRecord(remote_view);
+                if (videoState == 0) {
                     //setFormat设置用于显示的格式化字符串。
                     //替换字符串中第一个“%s”为当前"MM:SS"或 "H:MM:SS"格式的时间显示。
                     mChronometer.setBase(SystemClock.elapsedRealtime());
@@ -249,14 +253,13 @@ public class ChatSingleActivity extends AppCompatActivity {
                     mChronometer.setVisibility(View.INVISIBLE);
                     videoState = 0;
                 }
-
-
             }
         });
     }
-    protected void havePhoto(){
-        SurfaceViewRenderer mySurfaceViewRenderer=local_view;
-        if (mySurfaceViewRenderer!=null)
+
+    protected void havePhoto() {
+        SurfaceViewRenderer mySurfaceViewRenderer = local_view;
+        if (mySurfaceViewRenderer != null)
             mySurfaceViewRenderer.addFrameListener(new EglRenderer.FrameListener() {
                 @Override
                 public void onFrame(Bitmap bitmap) {
@@ -268,16 +271,16 @@ public class ChatSingleActivity extends AppCompatActivity {
             }, 1);
     }
 
-    private void savePhoto(Bitmap bitmap){
-        long curTime =new Date().getTime();
-        SimpleDateFormat sdf =new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+    private void savePhoto(Bitmap bitmap) {
+        long curTime = new Date().getTime();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 //        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "record_photo "+sdf.format(curTime));
-        String fileName =  "record_photo "+sdf.format(curTime)+".png";
+        String fileName = "record_photo " + sdf.format(curTime) + ".png";
         MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, fileName, fileName);
-        runOnUiThread(()->{
-            Toast.makeText(getApplicationContext(),"已保存图片到相册",Toast.LENGTH_SHORT).show();
+        runOnUiThread(() -> {
+            Toast.makeText(getApplicationContext(), "已保存图片到相册", Toast.LENGTH_SHORT).show();
         });
-        File appDir = new File(getApplicationContext().getFilesDir()+"");
+        File appDir = new File(getApplicationContext().getFilesDir() + "");
         if (!appDir.exists()) appDir.mkdir();
         File file = new File(appDir, fileName);
         try {
@@ -333,10 +336,10 @@ public class ChatSingleActivity extends AppCompatActivity {
 
             }
         });
-        boolean isNeedOverLay=PermissionUtil.isNeedOverLay(ChatSingleActivity.this);
-        if (!PermissionUtil.isNeedRequestPermission(ChatSingleActivity.this)&!isNeedOverLay) {
+        boolean isNeedOverLay = PermissionUtil.isNeedOverLay(ChatSingleActivity.this);
+        if (!PermissionUtil.isNeedRequestPermission(ChatSingleActivity.this) & !isNeedOverLay) {
             manager.joinRoom(getApplicationContext(), rootEglBase);
-        }else if(isNeedOverLay){
+        } else if (isNeedOverLay) {
             finish();
         }
 
@@ -364,6 +367,9 @@ public class ChatSingleActivity extends AppCompatActivity {
     // 切换摄像头
     public void switchCamera() {
         manager.switchCamera();
+        isMirror = !isMirror;
+        remote_view.setMirror(isMirror);
+        local_view.setMirror(isMirror);
     }
 
     // 挂断
@@ -386,7 +392,7 @@ public class ChatSingleActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         disConnect();
-        if(cameraService!=null) {
+        if (cameraService != null) {
             cameraService = null;
             unbindService(conn);
 //            stopService(serviceIntent);

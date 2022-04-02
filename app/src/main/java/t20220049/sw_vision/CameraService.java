@@ -38,6 +38,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.webrtc.SurfaceViewRenderer;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -51,21 +53,23 @@ import java.util.Map;
 import okio.BufferedSource;
 import okio.Okio;
 import okio.Sink;
+import t20220049.sw_vision.wtc_meeting.WebRTCManager;
 
 
-public class CameraService extends Service implements SurfaceHolder.Callback{
+public class CameraService extends Service implements SurfaceHolder.Callback {
 
     private static final String TAG = "CameraTest";
     private TextureView mTextureView; //预览框对象
     private WindowManager windowManager;
     private SurfaceView surfaceView;
     private SurfaceHolder msurfaceHolder;
+    private WebRTCManager manager = WebRTCManager.getInstance();
 
     private LocalBinder binder = new LocalBinder();
 
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
-        msurfaceHolder=surfaceHolder;
+        msurfaceHolder = surfaceHolder;
         requestCamera();
     }
 
@@ -128,7 +132,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback{
         WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams(
                 1, 1,
                 WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-                WindowManager.LayoutParams.	FLAG_NOT_FOCUSABLE,
+                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
         );
         layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
@@ -154,9 +158,18 @@ public class CameraService extends Service implements SurfaceHolder.Callback{
 
 
     Camera mCamera; //可以用来对打开的摄像头进行关闭，释放
-    int mCameraId = 0;
+    private int mCameraId = 1;
     MediaRecorder mMediaRecorder = new MediaRecorder();
     boolean isRecord = false;
+
+    public void switchCamera() {
+        if (mCameraId == 1) {
+            mCameraId = 0;
+        } else {
+            mCameraId = 1;
+        }
+        requestCamera();
+    }
 
     public void requestCamera() {
         try {
@@ -164,10 +177,12 @@ public class CameraService extends Service implements SurfaceHolder.Callback{
             mCamera = Camera.open(mCameraId);//手机上可以用来切换前后摄像头，不同的设备要看底层支持情况
             Log.i(TAG, "handleRequestCamera mCameraId = " + mCameraId);
             Camera.Parameters parameters = mCamera.getParameters();
-            parameters.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
-            parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);//1连续对焦
-            mCamera.setParameters(parameters);
+            if (mCameraId == 0) {
+                parameters.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
+                parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);//1连续对焦
+            }
             mCamera.setDisplayOrientation(90);
+            mCamera.setParameters(parameters);
             mCamera.setPreviewDisplay(msurfaceHolder);
             mCamera.startPreview();
             mCamera.cancelAutoFocus();
@@ -178,7 +193,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback{
 
     File tempVideo;
 
-    public void initMedia() {
+    public void initMedia(SurfaceViewRenderer remote_view) {
         requestCamera();
         mCamera.unlock();
         mMediaRecorder.setCamera(mCamera);
@@ -190,7 +205,11 @@ public class CameraService extends Service implements SurfaceHolder.Callback{
         mMediaRecorder.setVideoSize(1920, 1080);
         mMediaRecorder.setVideoEncodingBitRate(8 * 1920 * 1080);//设置视频的比特率
         mMediaRecorder.setVideoFrameRate(60);//设置视频的帧率
-        mMediaRecorder.setOrientationHint(90);//设置视频的角度
+        if (mCameraId == 0) {
+            mMediaRecorder.setOrientationHint(90);//设置视频的角度
+        }else {
+            mMediaRecorder.setOrientationHint(270);//设置视频的角度
+        }
         mMediaRecorder.setMaxDuration(60 * 1000);//设置最大录制时间
         mMediaRecorder.setOutputFile(tempVideo);//设置文件保存路径
         mMediaRecorder.setPreviewDisplay(msurfaceHolder.getSurface());
@@ -206,6 +225,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback{
 
     public void takePicture() {
         requestCamera();
+        manager.stopCapture();
         mCamera.takePicture(null, null, (bytes, camera) -> {
             new Thread(() -> {
                 long curTime = new Date().getTime();
@@ -213,26 +233,34 @@ public class CameraService extends Service implements SurfaceHolder.Callback{
                 String fileName = "record_photo " + sdf.format(curTime) + ".png";
                 Matrix m = new Matrix();
                 Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);//重新在文件里获取图片
-                m.setRotate(90, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
+                if (mCameraId == 0) {
+                    m.setRotate(90, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
+                } else {
+                    m.setRotate(270, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
+                }
                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
                 MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, fileName, fileName);
             }).start();
-            mCamera.startPreview();
+//            mCamera.startPreview();
         });
+        manager.startCapture();
     }
 
-    public void activateRecord() {
+    public void activateRecord(SurfaceViewRenderer remote_view) {
         if (isRecord) {
-            Toast.makeText(getBaseContext(),"停止录制",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getBaseContext(), "停止录制", Toast.LENGTH_SHORT).show();
             mMediaRecorder.stop();
             mMediaRecorder.reset();//重置,将MediaRecorder调整为空闲状态
             isRecord = false;
             requestCamera();
             insertVideo(tempVideo.getAbsolutePath(), getApplicationContext());
+            manager.startCapture();
         } else {
-            Toast.makeText(getBaseContext(),"开始录制",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getBaseContext(), "开始录制", Toast.LENGTH_SHORT).show();
             mCamera.stopPreview();
-            initMedia();
+//            manager.stopCapture();
+
+            initMedia(remote_view);
             try {
                 mMediaRecorder.prepare();//准备录制
             } catch (IOException e) {

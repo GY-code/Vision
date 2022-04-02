@@ -3,6 +3,7 @@ package t20220049.sw_vision.wtc_meeting;
 
 import android.content.Context;
 import android.media.AudioManager;
+import android.media.MediaRecorder;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -83,7 +84,6 @@ public class PeerConnectionHelper {
     public int _mediaType;
 
     private AudioManager mAudioManager;
-
 
 
     enum Role {Caller, Receiver,}
@@ -264,9 +264,6 @@ public class PeerConnectionHelper {
             captureAndroid.initialize(surfaceTextureHelper, _context, videoSource.getCapturerObserver());
             captureAndroid.startCapture(VIDEO_RESOLUTION_WIDTH, VIDEO_RESOLUTION_HEIGHT, FPS);
             _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
-//            //add
-//            initRecorder();
-//            _localVideoTrack.addSink(vfr);
             _localStream.addTrack(_localVideoTrack);
         }
 
@@ -276,7 +273,8 @@ public class PeerConnectionHelper {
         }
 
     }
-//    VideoFileRenderer vfr;
+
+    //    VideoFileRenderer vfr;
 //    public static long startVideoTime;
 //    public void initRecorder() {
 //        try {
@@ -349,6 +347,22 @@ public class PeerConnectionHelper {
         } else {
             Log.d(TAG, "Will not switch camera, video caputurer is not a camera");
         }
+
+    }
+
+    public void stopCapture() {
+        if (captureAndroid == null) return;
+        try {
+            captureAndroid.stopCapture();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void startCapture() {
+        if (captureAndroid == null) return;
+        captureAndroid.initialize(surfaceTextureHelper, _context, videoSource.getCapturerObserver());
+        captureAndroid.startCapture(VIDEO_RESOLUTION_WIDTH, VIDEO_RESOLUTION_HEIGHT, FPS);
 
     }
 

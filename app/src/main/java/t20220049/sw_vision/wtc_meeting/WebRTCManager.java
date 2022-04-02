@@ -90,6 +90,17 @@ public class WebRTCManager implements ISignalingEvents {
 
     }
 
+    public void stopCapture() {
+        if (_peerHelper != null) {
+            _peerHelper.stopCapture();
+        }
+    }
+    public void startCapture() {
+        if (_peerHelper != null) {
+            _peerHelper.startCapture();
+        }
+    }
+
     public void switchCamera() {
         if (_peerHelper != null) {
             _peerHelper.switchCamera();
