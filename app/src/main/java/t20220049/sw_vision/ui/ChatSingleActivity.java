@@ -311,7 +311,10 @@ public class ChatSingleActivity extends AppCompatActivity {
     }
 
     private void setVideoEnd() {
-        localTrack.removeSink(vfr);
+        if (vfr != null) {
+            localTrack.removeSink(vfr);
+            vfr.release();
+        }
 //        String raw_info = RxFFmpegInvoke.getInstance().getMediaInfo(srcPath + "local" + ".y4m");
 //        String[] raw_list = raw_info.split(";");
 //        int dur = Integer.parseInt(raw_list[4].split("=|ms| |\\.")[1]);
@@ -326,7 +329,7 @@ public class ChatSingleActivity extends AppCompatActivity {
         new Thread(() -> {
 //            String text = "ffmpeg -ss " + startVideoTime + " -to " + endVideoTime +
 //                    " -accurate_seek -i " + srcPath + "local" + ".y4m " + srcPath + "local" + "-" + startVideoTime + ".mp4";
-            String text = "ffmpeg -i " + srcPath + "local" + ".y4m " + srcPath + "local"  + ".mp4";
+            String text = "ffmpeg -i " + srcPath + "local" + ".y4m " + srcPath + "local" + ".mp4";
             Log.d(TAG, "terminateVideo: " + text);
             String[] commands = text.split(" ");
             RxFFmpegInvoke.getInstance().runCommand(commands, new RxFFmpegInvoke.IFFmpegListener() {
