@@ -18,8 +18,8 @@ import android.widget.FrameLayout;
 import java.util.ArrayList;
 
 import t20220049.sw_vision.R;
-import t20220049.sw_vision.app.AnimationListener;
-import t20220049.sw_vision.utils.ResUtil;
+import t20220049.sw_vision.transfer.app.AnimationListener;
+import t20220049.sw_vision.transfer.utils.ResUtil;
 
 //波纹
 public class RippleRoundView extends FrameLayout {

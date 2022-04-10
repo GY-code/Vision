@@ -17,7 +17,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
@@ -32,8 +31,8 @@ import java.util.List;
 import java.util.Random;
 
 import t20220049.sw_vision.R;
-import t20220049.sw_vision.app.AnimationListener;
-import t20220049.sw_vision.utils.ResUtil;
+import t20220049.sw_vision.transfer.app.AnimationListener;
+import t20220049.sw_vision.transfer.utils.ResUtil;
 
 public class RippleView extends FrameLayout {
 

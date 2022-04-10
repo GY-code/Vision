@@ -20,8 +20,8 @@ import java.util.List;
 import java.util.Random;
 
 import t20220049.sw_vision.R;
-import t20220049.sw_vision.app.AnimationListener;
-import t20220049.sw_vision.utils.ResUtil;
+import t20220049.sw_vision.transfer.app.AnimationListener;
+import t20220049.sw_vision.transfer.utils.ResUtil;
 
 
 public class PhotoView extends FrameLayout {

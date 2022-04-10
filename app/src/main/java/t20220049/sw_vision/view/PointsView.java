@@ -12,8 +12,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import t20220049.sw_vision.R;
-import t20220049.sw_vision.app.AnimationListener;
-import t20220049.sw_vision.utils.ResUtil;
+import t20220049.sw_vision.transfer.app.AnimationListener;
+import t20220049.sw_vision.transfer.utils.ResUtil;
 
 //背景中若干个动态圆圈
 public class PointsView extends FrameLayout {
