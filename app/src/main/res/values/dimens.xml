@@ -1,0 +1,46 @@
+<resources>
+    <!--规范标准 -->
+    <!--文字大小-->
+    <dimen name="common_font_size_5sp">5dp</dimen>
+    <dimen name="common_font_size_6sp">6dp</dimen>
+
+
+    <!--线宽-->
+    <dimen name="common_divider_line">1px</dimen>
+    <dimen name="common_divider_line_bottom">2px</dimen>
+
+    <dimen name="common_avatar_size16">16dp</dimen>
+    <dimen name="common_avatar_size17">17dp</dimen>
+
+    <!--item高度-->
+    <dimen name="common_item_height_1line_30">30dp</dimen>
+    <dimen name="common_item_height_1line_40">40dp</dimen>
+
+
+    <!-- 常用的数字-->
+    <dimen name="common_padding_1">1dp</dimen>
+    <dimen name="common_padding_2">2dp</dimen>
+    <dimen name="common_padding_2.5">2.5dp</dimen>
+    <dimen name="common_padding_16">16dp</dimen>
+    <dimen name="common_padding_36">36dp</dimen>
+    <dimen name="common_padding_20">20dp</dimen>
+    <dimen name="common_padding_26">26dp</dimen>
+    <dimen name="common_padding_140">140dp</dimen>
+    <dimen name="common_padding_580">580dp</dimen>
+    <dimen name="common_padding_45">45dp</dimen>
+    <dimen name="common_padding_189">189dp</dimen>
+    <dimen name="common_padding_17">17dp</dimen>
+
+    <dimen name="common_padding_380">380dp</dimen>
+    <dimen name="common_padding_75">75dp</dimen>
+    <dimen name="common_padding_89">89dp</dimen>
+    <dimen name="common_padding_150">150dp</dimen>
+
+    <dimen name="common_padding_450">450dp</dimen>
+    <dimen name="common_padding_39">39dp</dimen>
+    <dimen name="common_padding_240">240dp</dimen>
+    <dimen name="common_padding_112">112dp</dimen>
+    <dimen name="common_padding_224">224dp</dimen>
+
+
+</resources>

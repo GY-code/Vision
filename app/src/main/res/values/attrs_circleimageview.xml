@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<resources>
+
+    <declare-styleable name="CircleImageView">
+        <attr name="CircleImageView_border_width" format="dimension"/>
+        <attr name="CircleImageView_border_color" format="color"/>
+        <attr name="CircleImageView_corner_radius" format="dimension"/>
+        <attr name="CircleImageView_corner_left_top_icon" format="reference"/>
+        <attr name="CircleImageView_corner_left_bottom_icon" format="reference"/>
+        <attr name="CircleImageView_corner_right_top_icon" format="reference"/>
+        <attr name="CircleImageView_corner_right_bottom_icon" format="reference"/>
+
+
+        <!-- 设置某几个圆角 -->
+        <attr name="CircleImageView_corner_left_top_round" format="boolean" />
+        <attr name="CircleImageView_corner_left_bottom_round" format="boolean" />
+        <attr name="CircleImageView_corner_right_top_round" format="boolean" />
+        <attr name="CircleImageView_corner_right_bottom_round" format="boolean" />
+    </declare-styleable>
+
+</resources>

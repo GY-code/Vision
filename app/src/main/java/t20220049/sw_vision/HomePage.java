@@ -25,7 +25,9 @@ public class HomePage extends AppCompatActivity {
         controlButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                WebrtcUtil.call(HomePage.this, "ws://106.13.236.207:3000", "123456");
+                Intent intent = new Intent(HomePage.this, SearchActivity.class);
+                startActivity(intent);
+//                WebrtcUtil.call(HomePage.this, "ws://106.13.236.207:3000", "123456");
             }
         });
 
