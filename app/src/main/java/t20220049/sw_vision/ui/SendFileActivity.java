@@ -138,8 +138,10 @@ public class SendFileActivity extends BaseActivity{
         @Override
         public void onPeersAvailable(Collection<WifiP2pDevice> wifiP2pDeviceList) {
             Log.e(TAG, "onPeersAvailable :" + wifiP2pDeviceList.size());
+            List<WifiP2pDevice> wifiP2pDeviceControlList = new ArrayList<>(wifiP2pDeviceList);
+            wifiP2pDeviceControlList.removeIf(wd -> !wd.isGroupOwner());
             SendFileActivity.this.wifiP2pDeviceList.clear();
-            SendFileActivity.this.wifiP2pDeviceList.addAll(wifiP2pDeviceList);
+            SendFileActivity.this.wifiP2pDeviceList.addAll(wifiP2pDeviceControlList);
             deviceAdapter.notifyDataSetChanged();
             loadingDialog.cancel();
         }

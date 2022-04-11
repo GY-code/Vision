@@ -10,6 +10,7 @@
         <entry key="..\:/Code/Android/sw-vision/app/src/main/res/layout/acticity_video.xml" value="0.2546875" />
         <entry key="..\:/Code/Android/sw-vision/app/src/main/res/layout/activity_collect_match.xml" value="0.31927083333333334" />
         <entry key="..\:/Code/Android/sw-vision/app/src/main/res/layout/activity_collection_terminal.xml" value="0.2546875" />
+        <entry key="..\:/Code/Android/sw-vision/app/src/main/res/layout/activity_send_file.xml" value="0.2916666666666667" />
         <entry key="..\:/Code/Android/sw-vision/app/src/main/res/layout/content_nodejs.xml" value="0.2546875" />
         <entry key="..\:/Code/Android/sw-vision/app/src/main/res/layout/device_list.xml" value="0.2546875" />
         <entry key="..\:/Code/Android/sw-vision/app/src/main/res/layout/dialog_loading.xml" value="0.2546875" />
@@ -17,7 +18,6 @@
         <entry key="..\:/Code/Android/sw-vision/app/src/main/res/layout/layout_bottom_sheet.xml" value="0.2546875" />
         <entry key="..\:/Code/Android/sw-vision/app/src/main/res/layout/view_comment_circleimageview.xml" value="0.2546875" />
         <entry key="..\:/Code/Android/sw-vision/app/src/main/res/layout/wr_activity_chat_single.xml" value="0.2546875" />
-        <entry key="..\:/Users/Lucas/Desktop/SW-Contest/sw_Vision/app/src/main/res/layout/activity_send_file.xml" value="0.5" />
       </map>
     </option>
   </component>
