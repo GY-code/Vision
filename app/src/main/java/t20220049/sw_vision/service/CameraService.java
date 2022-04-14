@@ -45,6 +45,7 @@ import java.util.Locale;
 import okio.BufferedSource;
 import okio.Okio;
 import okio.Sink;
+import t20220049.sw_vision.utils.RecordUtil;
 import t20220049.sw_vision.webRTC_utils.WebRTCManager;
 
 
@@ -199,7 +200,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         mMediaRecorder.setVideoFrameRate(60);//设置视频的帧率
         if (mCameraId == 0) {
             mMediaRecorder.setOrientationHint(90);//设置视频的角度
-        }else {
+        } else {
             mMediaRecorder.setOrientationHint(270);//设置视频的角度
         }
         mMediaRecorder.setMaxDuration(60 * 1000);//设置最大录制时间
@@ -245,7 +246,9 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
             mMediaRecorder.reset();//重置,将MediaRecorder调整为空闲状态
             isRecord = false;
             requestCamera();
-            insertVideo(tempVideo.getAbsolutePath(), getApplicationContext());
+
+            RecordUtil recordUtil = new RecordUtil(getApplicationContext());
+            recordUtil.insertVideo(tempVideo.getAbsolutePath(), getApplicationContext());
             manager.startCapture();
         } else {
             Toast.makeText(getBaseContext(), "开始录制", Toast.LENGTH_SHORT).show();
@@ -277,60 +280,6 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         }
     }
 
-    private static final String VIDEO_BASE_URI = "content://media/external/video/media";
-
-    private void insertVideo(String videoPath, Context context) {
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(videoPath);
-        int nVideoWidth = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-        int nVideoHeight = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
-        int duration = Integer
-                .parseInt(retriever
-                        .extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-        long dateTaken = System.currentTimeMillis();
-        File file = new File(videoPath);
-        String title = file.getName();
-        String filename = file.getName();
-        String mime = "video/mp4";
-        ContentValues mCurrentVideoValues = new ContentValues(9);
-        mCurrentVideoValues.put(MediaStore.Video.Media.TITLE, title);
-        mCurrentVideoValues.put(MediaStore.Video.Media.DISPLAY_NAME, filename);
-        mCurrentVideoValues.put(MediaStore.Video.Media.DATE_TAKEN, dateTaken);
-        mCurrentVideoValues.put(MediaStore.MediaColumns.DATE_MODIFIED, dateTaken / 1000);
-        mCurrentVideoValues.put(MediaStore.Video.Media.MIME_TYPE, mime);
-        mCurrentVideoValues.put(MediaStore.Video.Media.DATA, videoPath);
-        mCurrentVideoValues.put(MediaStore.Video.Media.WIDTH, nVideoWidth);
-        mCurrentVideoValues.put(MediaStore.Video.Media.HEIGHT, nVideoHeight);
-        mCurrentVideoValues.put(MediaStore.Video.Media.RESOLUTION, Integer.toString(nVideoWidth) + "x" + Integer.toString(nVideoHeight));
-        mCurrentVideoValues.put(MediaStore.Video.Media.SIZE, new File(videoPath).length());
-        mCurrentVideoValues.put(MediaStore.Video.Media.DURATION, duration);
-        ContentResolver contentResolver = context.getContentResolver();
-        Uri videoTable = Uri.parse(VIDEO_BASE_URI);
-        Uri uri = contentResolver.insert(videoTable, mCurrentVideoValues);
-        writeFile(videoPath, mCurrentVideoValues, contentResolver, uri);
-    }
-
-    private void writeFile(String imagePath, ContentValues values, ContentResolver contentResolver, Uri item) {
-        try (OutputStream rw = contentResolver.openOutputStream(item, "rw")) {
-            // Write data into the pending image.
-            Sink sink = Okio.sink(rw);
-            BufferedSource buffer = Okio.buffer(Okio.source(new File(imagePath)));
-            buffer.readAll(sink);
-            values.put(MediaStore.Video.Media.IS_PENDING, 0);
-            contentResolver.update(item, values, null, null);
-            new File(imagePath).delete();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Cursor query = getContentResolver().query(item, null, null, null);
-                if (query != null) {
-                    int count = query.getCount();
-                    Log.e("writeFile", "writeFile result :" + count);
-                    query.close();
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void startPreview() {
         Log.i(TAG, "startPreview");

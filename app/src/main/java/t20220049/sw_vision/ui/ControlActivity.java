@@ -347,32 +347,9 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     }
 
     boolean activateVideo = false;
-    long startTime;
     private static final String TAG = "ChatRoomActivity";
 
-    public static void copyNio(String from, String to) {
-        FileChannel input = null;
-        FileChannel output = null;
 
-        try {
-
-            input = new FileInputStream(new File(from)).getChannel();
-            output = new FileOutputStream(new File(to)).getChannel();
-            output.transferFrom(input, 0, input.size());
-            output.close();
-            input.close();
-        } catch (Exception e) {
-            Log.w(TAG + "copyNio", "error occur while copy", e);
-        }
-    }
-
-    private String getBetweenStr(long between) {
-        long hour = (between / (60 * 60 * 1000));
-        long min = ((between / (60 * 1000)) - hour * 60);
-        long s = (between / 1000 - hour * 60 * 60 - min * 60);
-        long ms = (between - hour * 60 * 60 * 1000 - min * 60 * 1000 - s * 1000);
-        return String.format("%02d:%02d:%02d.%03d", hour, min, s, ms);
-    }
 
     private void terminateVideo() {
         setVideoEnd();
