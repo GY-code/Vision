@@ -1,4 +1,4 @@
-package t20220049.sw_vision.view;
+package t20220049.sw_vision.utils;
 
 public class VideoFragment {
     public double startTime;

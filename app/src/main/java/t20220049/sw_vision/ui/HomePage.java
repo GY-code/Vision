@@ -60,22 +60,24 @@ public class HomePage extends AppCompatActivity {
         controlButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(HomePage.this, ReceiveFileActivity.class);
+//                Intent intent = new Intent(HomePage.this, ReceiveFileActivity.class);
+                Intent intent = new Intent(HomePage.this, ControlActivity.class);
+//                Intent intent = new Intent(HomePage.this, MonitorActivity.class);
                 startActivity(intent);
-//                WebrtcUtil.call(HomePage.this, "ws://106.13.236.207:3000", "123456");
+                WebrtcUtil.call(HomePage.this, "ws://106.13.236.207:3000", "123456");
             }
         });
 
         collectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(HomePage.this, SendFileActivity.class);
-                startActivity(intent);
-//                Intent intent = new Intent(HomePage.this, CollectMatch.class);
-//                Intent intent = new Intent(HomePage.this, NodejsActivity.class);
+//                Intent intent = new Intent(HomePage.this, SendFileActivity.class);
 //                startActivity(intent);
-//                WebrtcUtil.callSingle(HomePage.this, "ws://106.13.236.207:3000",
-//                        "123456", true);
+                Intent intent = new Intent(HomePage.this, CollectMatch.class);
+//                Intent intent = new Intent(HomePage.this, NodejsActivity.class);
+                startActivity(intent);
+                WebrtcUtil.callSingle(HomePage.this, "ws://106.13.236.207:3000",
+                        "123456", true);
             }
         });
     }

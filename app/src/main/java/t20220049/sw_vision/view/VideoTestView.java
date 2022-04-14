@@ -20,6 +20,7 @@ import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Consumer;
 import t20220049.sw_vision.R;
 import t20220049.sw_vision.utils.FFmpegCommandFactory;
+import t20220049.sw_vision.utils.VideoFragment;
 
 public class VideoTestView extends AppCompatActivity {
 

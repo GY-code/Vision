@@ -41,13 +41,14 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
         <ImageView
+            android:id="@+id/select_button"
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:layout_alignParentRight="true"
             android:layout_gravity="center_vertical"
-            android:src="@mipmap/setting">
-        </ImageView>
+            android:src="@mipmap/setting"></ImageView>
     </RelativeLayout>
 
 

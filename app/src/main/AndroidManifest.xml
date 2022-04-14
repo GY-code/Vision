@@ -11,7 +11,6 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -19,11 +18,9 @@
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-
 
     <uses-feature android:name="android.hardware.camera" />
     <uses-feature android:name="android.hardware.camera.autofocus" />
@@ -36,27 +33,25 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.SWVision">
-        <!--        <activity-->
-        <!--            android:name=".VideoView"-->
-        <!--            android:exported="true">-->
-        <!--            <intent-filter>&ndash;&gt;-->
-        <!--                <action android:name="android.intent.action.MAIN" />-->
-
-        <!--                <category android:name="android.intent.category.LAUNCHER" />-->
-        <!--            </intent-filter>-->
-        <!--        </activity>-->
-
+        <!-- <activity -->
+        <!-- android:name=".VideoView" -->
+        <!-- android:exported="true"> -->
+        <!-- <intent-filter>&ndash;&gt; -->
+        <!-- <action android:name="android.intent.action.MAIN" /> -->
+        <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+        <!-- </intent-filter> -->
+        <!-- </activity> -->
         <service
             android:name=".service.CameraService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
 
         <activity
             android:name=".ui.CollectMatch"
             android:exported="false" />
         <activity
             android:name=".ui.ControlMatch"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".ui.HomePage"
             android:exported="true">
@@ -68,22 +63,22 @@
         </activity>
         <activity
             android:name=".transfer.SearchActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".ui.ControlVideo"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".ui_utils.TimeShow"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".entrance.NodejsActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".ui.ReceiveFileActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".ui.SendFileActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".ui.ControlActivity"
             android:configChanges="orientation|smallestScreenSize|screenSize|screenLayout"
