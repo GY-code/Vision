@@ -64,7 +64,8 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
 
     @Override
     protected Boolean doInBackground(Object... params) {
-        WifiClientService.serverOut.println("sendFile");
+
+
 
         Log.e(TAG, "backGround");
         Socket socket = WifiClientService.socket;
@@ -72,6 +73,8 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
         ObjectOutputStream objectOutputStream = null;
         InputStream inputStream = null;
         try {
+            WifiClientService.serverOut.println("sendFile");
+            WifiClientService.serverOut.flush();
 //            String hostAddress = params[0].toString();
             Uri fileUri = Uri.parse(params[0].toString());
 

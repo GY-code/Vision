@@ -248,15 +248,15 @@ public class ReceiveFileActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (wifiServerService != null) {
-            wifiServerService.setProgressChangListener(null);
-            unbindService(serviceConnection);
-        }
-        unregisterReceiver(broadcastReceiver);
-        stopService(new Intent(this, WifiServerService.class));
-        if (connectionInfoAvailable) {
-            removeGroup();
-        }
+//        if (wifiServerService != null) {
+//            wifiServerService.setProgressChangListener(null);
+//            unbindService(serviceConnection);
+//        }
+//        unregisterReceiver(broadcastReceiver);
+//        stopService(new Intent(this, WifiServerService.class));
+//        if (connectionInfoAvailable) {
+//            removeGroup();
+//        }
     }
 
     private void removeGroup() {
