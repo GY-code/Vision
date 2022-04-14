@@ -1,6 +1,8 @@
 package t20220049.sw_vision.transfer.server;
 
+import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,6 +29,8 @@ public class WifiServer extends Thread{
     public static ArrayList<MyClient> clients = new ArrayList<>();
     public MyClient mClient;
 
+    public FileReceiveListener fileReceiveListener;
+
     public class MyClient {
         public Socket client = null;
         public String clientIP = "default ip";
@@ -48,6 +52,7 @@ public class WifiServer extends Thread{
     }
 
     public void run(){
+        Looper.prepare();
         BufferedReader in = null;
         PrintWriter out = null;
         String inputLine;
@@ -56,26 +61,41 @@ public class WifiServer extends Thread{
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             out = new PrintWriter(clientSocket.getOutputStream());
             //不断监听客户端输入
-            while((inputLine = in.readLine())!=null){
+            while(true){ //(inputLine = in.readLine())!=null
+//                if(in==null)
+                    in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                inputLine = in.readLine();
 //                Log.i(TAG,"recieve message[from client " + mClient.clientIP + "]: " + inputLine);
                 //处理客户端的各种请求
-                if(inputLine.equals("sendFile")){
+                if(inputLine==null){
+                    continue;
+                }
+                if (inputLine.equals("sendFile")){
                     Log.e(TAG,"request send file");
                     receiveFile();
                 } else if (inputLine.equals("userID")){
                     Log.e(TAG,"send user id");
-                    String userID = in.readLine();
-                    mClient.clientUserID = userID;
+                    mClient.clientUserID = in.readLine();
+                } else if(inputLine.equals("quit")){
+                    break;
                 }
             }
-            in.close();
-            clientSocket.close();
+//            in.close();
+//            clientSocket.close();
         } catch (IOException e){
             e.printStackTrace();
             clientsNum--;
-            clients.remove(clientSocket);
+            clients.remove(mClient);
             Log.i(TAG,"a client quits.");
         }
+    }
+
+    public interface FileReceiveListener {
+        void onFileReceiveFinished();
+    }
+
+    public void setListener(FileReceiveListener fileReceiveListener){
+        this.fileReceiveListener = fileReceiveListener;
     }
 
     private void receiveFile() {
@@ -86,7 +106,9 @@ public class WifiServer extends Thread{
             FileOutputStream fileOutputStream;
             Log.e(TAG, "客户端IP地址 : " + clientSocket.getInetAddress().getHostAddress());
             inputStream = clientSocket.getInputStream();
+            Log.e(TAG, "HJKLL");
             objectInputStream = new ObjectInputStream(inputStream);
+            Log.e(TAG, "HJKLL");
             FileTransfer fileTransfer = (FileTransfer) objectInputStream.readObject();
             Log.e(TAG, "待接收的文件: " + fileTransfer);
             String name = fileTransfer.getFileName();
@@ -102,28 +124,36 @@ public class WifiServer extends Thread{
                 fileOutputStream.write(buf, 0, len);
                 total += len;
                 progress = (int) ((total * 100) / fileTransfer.getFileLength());
-//                Log.e(TAG, "文件接收进度: " + progress);
+                Log.e(TAG, "文件接收进度: " + progress);
 //                if (progressChangListener != null) {
 //                    progressChangListener.onProgressChanged(fileTransfer, progress);
 //                }
+                if(progress==100)
+                    break;
             }
 
 //            serverSocket.close();
 //            inputStream.close();
-            objectInputStream.close();
-            fileOutputStream.close();
+//            objectInputStream.close();
+//            fileOutputStream.close();
 //            serverSocket = null;
             Log.e(TAG, "文件接收成功，文件的MD5码是：" + Md5Util.getMd5(file));
+            if(fileReceiveListener!=null){
+                fileReceiveListener.onFileReceiveFinished();
+            }
+//            Toast.makeText(ReceiveFileActivity.context.getApplicationContext(),"接收文件成功",Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
+            e.printStackTrace();
             Log.e(TAG, "文件接收 Exception: " + e.getMessage());
-        } finally {
+        }
+//        } finally {
 //            clean();
 //            if (progressChangListener != null) {
 //                progressChangListener.onTransferFinished(file);
 //            }
 //            //再次启动服务，等待客户端下次连接
 //            startService(new Intent(this, WifiServerService.class));
-        }
+//        }
     }
 
     public static void sendInstruction(String instruction,String clientIP) {

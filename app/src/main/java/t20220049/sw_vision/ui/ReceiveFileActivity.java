@@ -8,8 +8,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -36,6 +34,8 @@ import t20220049.sw_vision.transfer.server.WifiServerService;
 import t20220049.sw_vision.R;
 //控制端
 public class ReceiveFileActivity extends BaseActivity {
+
+    public static Context context;
 
     public static File cacheDir;
 
@@ -66,7 +66,8 @@ public class ReceiveFileActivity extends BaseActivity {
         public void onServiceConnected(ComponentName name, IBinder service) {
             WifiServerService.WifiServerBinder binder = (WifiServerService.WifiServerBinder) service;
             wifiServerService = binder.getService();
-            wifiServerService.setProgressChangListener(progressChangListener);
+//            wifiServerService.setProgressChangListener(progressChangListener);
+            wifiServerService.fileReceiveListener = fileReceiveListener;
         }
 
         @Override
@@ -128,7 +129,8 @@ public class ReceiveFileActivity extends BaseActivity {
     };
 
     //进度条变化
-    private final WifiServerService.OnProgressChangListener progressChangListener = new WifiServerService.OnProgressChangListener() {
+    private final WifiServerService.OnProgressChangListener progressChangListener = new WifiServerService.OnProgressChangListener()
+    {
 
         //不断更新进度条，
         @Override
@@ -148,6 +150,15 @@ public class ReceiveFileActivity extends BaseActivity {
                 if (file != null && file.exists()) {
                     Glide.with(ReceiveFileActivity.this).load(file.getPath()).into(iv_image);
                 }
+            });
+        }
+    };
+
+    public final WifiServer.FileReceiveListener fileReceiveListener = new WifiServer.FileReceiveListener() {
+        @Override
+        public void onFileReceiveFinished() {
+            runOnUiThread(()->{
+                showToast("接收文件成功");
             });
         }
     };
@@ -211,6 +222,8 @@ public class ReceiveFileActivity extends BaseActivity {
             WebrtcUtil.call(ReceiveFileActivity.this, "ws://106.13.236.207:3000", "123456");
         });
         cacheDir = getCacheDir();
+
+        context = this;
     }
 
     private void initView() {
