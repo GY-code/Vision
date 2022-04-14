@@ -56,6 +56,8 @@ public class WifiClientService extends IntentService {
                 serverIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 serverOut = new PrintWriter(socket.getOutputStream());
                 while (true) {
+//                    if(serverIn.)
+                        serverIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     String aLine = serverIn.readLine();
                     if (aLine != null) {
                         Log.i(TAG, "instruction received: " + aLine);

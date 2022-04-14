@@ -36,6 +36,8 @@ public class WifiServerService extends IntentService {
 
     private OnProgressChangListener progressChangListener;
 
+    public WifiServer.FileReceiveListener fileReceiveListener;
+
     public WifiServerService() {
         super("WifiServerService");
     }
@@ -58,6 +60,7 @@ public class WifiServerService extends IntentService {
                 Socket clientSocket = serverSocket.accept();
                 String clientIPAddress = clientSocket.getInetAddress().getHostAddress();
                 WifiServer server = new WifiServer(serverSocket,clientSocket,clientIPAddress);
+                server.fileReceiveListener = fileReceiveListener;
                 server.start();
             }
         } catch (SocketException e) {
