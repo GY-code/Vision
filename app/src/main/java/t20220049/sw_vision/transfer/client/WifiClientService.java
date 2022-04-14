@@ -17,7 +17,7 @@ import java.net.Socket;
 
 import t20220049.sw_vision.transfer.common.Constants;
 import t20220049.sw_vision.ui.SendFileActivity;
-
+//对应采集端，发送文件
 public class WifiClientService extends IntentService {
 
     public static BufferedReader serverIn;

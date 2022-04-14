@@ -56,7 +56,7 @@ public class WifiServer extends Thread{
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             //不断监听客户端输入
             while((inputLine = in.readLine())!=null){
-//                Log.i(TAG,"recieve message[from client " + mClient.clientIP + "]: " + inputLine);
+                Log.i(TAG,"recieve message[from client " + mClient.clientIP + "]: " + inputLine);
                 //处理客户端的各种请求
                 if(inputLine.equals("sendFile")){
                     Log.i(TAG,"request send file");
@@ -65,6 +65,7 @@ public class WifiServer extends Thread{
                     Log.i(TAG,"send user id");
                     String userID = in.readLine();
                     mClient.clientUserID = userID;
+                    Log.d(TAG, "收到userId: "+userID);
                 }
             }
             in.close();

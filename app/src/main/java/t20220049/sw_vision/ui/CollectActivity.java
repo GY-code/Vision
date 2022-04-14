@@ -35,6 +35,8 @@ import okio.BufferedSource;
 import okio.Okio;
 import okio.Sink;
 import t20220049.sw_vision.service.CameraService;
+import t20220049.sw_vision.transfer.client.WifiClientService;
+import t20220049.sw_vision.utils.RecordUtil;
 import t20220049.sw_vision.webRTC_utils.IViewCallback;
 import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
 import t20220049.sw_vision.webRTC_utils.ProxyVideoSink;
@@ -86,6 +88,7 @@ public class CollectActivity extends AppCompatActivity {
 
     private ServiceConnection conn;
     private CameraService cameraService;
+    private RecordUtil ru;
     boolean activateVideo = false;
     private static final String TAG = "ChatSingleActivity";
 
@@ -110,11 +113,8 @@ public class CollectActivity extends AppCompatActivity {
         initVar();
         initListener();
         initService();
-        srcPath = getApplicationContext().getFilesDir().getAbsolutePath() + "/";
-        File file = new File(srcPath + "local.y4m");
-        if (file.isFile() && file.exists()) {
-            file.delete();
-        }
+        ru=new RecordUtil(getApplicationContext());
+        ru.clear();
     }
 
 
@@ -288,9 +288,6 @@ public class CollectActivity extends AppCompatActivity {
 
     private void setVideoStart() {
         File file = new File(srcPath + "local.y4m");
-        if (file.isFile() && file.exists()) {
-            file.delete();
-        }
         try {
             vfr = new VideoFileRenderer(getApplicationContext().getFilesDir().getAbsolutePath() + "/" + "local" + ".y4m",
                     PeerConnectionHelper.VIDEO_RESOLUTION_WIDTH, PeerConnectionHelper.VIDEO_RESOLUTION_HEIGHT, rootEglBase.getEglBaseContext());
@@ -315,10 +312,6 @@ public class CollectActivity extends AppCompatActivity {
             localTrack.removeSink(vfr);
             vfr.release();
         }
-//        String raw_info = RxFFmpegInvoke.getInstance().getMediaInfo(srcPath + "local" + ".y4m");
-//        String[] raw_list = raw_info.split(";");
-//        int dur = Integer.parseInt(raw_list[4].split("=|ms| |\\.")[1]);
-//        endVideoTime = dur / 1000 + "." + (dur - dur / 1000);
     }
 
     private void terminateVideo() {
@@ -327,8 +320,6 @@ public class CollectActivity extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "结束录制", Toast.LENGTH_SHORT).show();
         });
         new Thread(() -> {
-//            String text = "ffmpeg -ss " + startVideoTime + " -to " + endVideoTime +
-//                    " -accurate_seek -i " + srcPath + "local" + ".y4m " + srcPath + "local" + "-" + startVideoTime + ".mp4";
             String text = "ffmpeg -i " + srcPath + "local" + ".y4m " + srcPath + "local" + ".mp4";
             Log.d(TAG, "terminateVideo: " + text);
             String[] commands = text.split(" ");
@@ -460,18 +451,27 @@ public class CollectActivity extends AppCompatActivity {
 
     VideoFileRenderer vfr = null;
     VideoTrack localTrack = null;
-
+    private void sendId2Control(String id){
+        new Thread(()->{
+            WifiClientService.serverOut.println("userID");
+            WifiClientService.serverOut.flush();
+            WifiClientService.serverOut.println(id);
+            WifiClientService.serverOut.flush();
+        }).start();
+    }
     private void startCall() {
         manager = WebRTCManager.getInstance();
         manager.setCallback(new IViewCallback() {
             @Override
             public void onSetLocalStream(MediaStream stream, String socketId) {
+
                 if (stream.videoTracks.size() > 0) {
                     stream.videoTracks.get(0).addSink(localRender);
                     localTrack = stream.videoTracks.get(0);
 
                 }
-
+                sendId2Control(socketId);
+                Log.d(TAG, "onSetLocalStream: send id");
                 if (videoEnable) {
                     stream.videoTracks.get(0).setEnabled(true);
                 }
@@ -484,7 +484,6 @@ public class CollectActivity extends AppCompatActivity {
                 }
                 if (videoEnable) {
                     stream.videoTracks.get(0).setEnabled(true);
-
                     runOnUiThread(() -> setSwappedFeeds(false));
                 }
             }

@@ -21,7 +21,7 @@ import java.net.SocketException;
 import t20220049.sw_vision.transfer.common.Constants;
 import t20220049.sw_vision.transfer.model.FileTransfer;
 
-//后台：收文件
+//后台：收文件，对应控制端
 public class WifiServerService extends IntentService {
 
     private static final String TAG = "WifiServerService";

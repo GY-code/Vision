@@ -162,6 +162,10 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         startCall();
         RxFFmpegInvoke.getInstance().setDebug(true);
         srcPath = getApplicationContext().getFilesDir().getAbsolutePath() + "/";
+        File file = new File(srcPath + "local-control.y4m");
+        if (file.isFile() && file.exists()) {
+            file.delete();
+        }
 
     }
 
