@@ -52,18 +52,17 @@ public class WifiClientService extends IntentService {
 //                serverOut.println(clientIP);
 //            }
             Log.i(TAG,"listening..");
-
-            while (true) {
-                try {
-                    serverIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    serverOut = new PrintWriter(socket.getOutputStream());
+            try {
+                serverIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                serverOut = new PrintWriter(socket.getOutputStream());
+                while (true) {
                     String aLine = serverIn.readLine();
                     if (aLine != null) {
-                        Log.i(TAG,"instruction received: "+aLine);
+                        Log.i(TAG, "instruction received: " + aLine);
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

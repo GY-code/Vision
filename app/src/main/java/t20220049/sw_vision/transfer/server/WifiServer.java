@@ -41,7 +41,7 @@ public class WifiServer extends Thread{
         clientsNum++;
         mClient = new MyClient(clientSocket,clientIP);
         clients.add(mClient);
-        Log.i(TAG,"a client has connected.(" + clientsNum + "clients now.)");
+        Log.i(TAG,"a client has connected.(" + clientsNum + " clients now.)");
         this.clientSocket = clientSocket;
         if(WifiServer.serverSocket==null)
             WifiServer.serverSocket = serverSocket;
@@ -56,7 +56,7 @@ public class WifiServer extends Thread{
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             //不断监听客户端输入
             while((inputLine = in.readLine())!=null){
-                Log.i(TAG,"recieve message[from client " + mClient.clientIP + "]: " + inputLine);
+//                Log.i(TAG,"recieve message[from client " + mClient.clientIP + "]: " + inputLine);
                 //处理客户端的各种请求
                 if(inputLine.equals("sendFile")){
                     Log.i(TAG,"request send file");
@@ -101,7 +101,7 @@ public class WifiServer extends Thread{
                 fileOutputStream.write(buf, 0, len);
                 total += len;
                 progress = (int) ((total * 100) / fileTransfer.getFileLength());
-                Log.e(TAG, "文件接收进度: " + progress);
+//                Log.e(TAG, "文件接收进度: " + progress);
 //                if (progressChangListener != null) {
 //                    progressChangListener.onProgressChanged(fileTransfer, progress);
 //                }
