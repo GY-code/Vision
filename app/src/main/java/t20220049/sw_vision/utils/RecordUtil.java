@@ -43,12 +43,17 @@ public class RecordUtil {
     private static final String TAG = "RecordUtil";
     private long stime;
     private long ltime;
+    public static boolean isFullDefinition = true;
 
     public RecordUtil(Context c) {
         context = c;
         srcPath = context.getFilesDir().getAbsolutePath() + "/";
-        y4mfile=new File(srcPath + "local.y4m");
+        y4mfile = new File(srcPath + "local.y4m");
         RxFFmpegInvoke.getInstance().setDebug(true);
+    }
+
+    public static void setFullDefinition(boolean b) {
+        isFullDefinition = b;
     }
 
     public void cleary4m() {
@@ -58,7 +63,7 @@ public class RecordUtil {
     }
 
     public void setVideoStart(VideoFileRenderer vfr, VideoTrack localTrack, EglBase rootEglBase) {
-        stime=new Date().getTime();
+        stime = new Date().getTime();
         try {
             vfr = new VideoFileRenderer(y4mfile.toString(),
                     PeerConnectionHelper.VIDEO_RESOLUTION_WIDTH, PeerConnectionHelper.VIDEO_RESOLUTION_HEIGHT, rootEglBase.getEglBaseContext());
@@ -68,8 +73,8 @@ public class RecordUtil {
         localTrack.addSink(vfr);
     }
 
-    public void  terminateVideo(VideoFileRenderer vfr, VideoTrack localTrack, EglBase rootEglBase, Activity activity) {
-        ltime=(new Date().getTime()-stime)/1000;
+    public void terminateVideo(VideoFileRenderer vfr, VideoTrack localTrack, EglBase rootEglBase, Activity activity) {
+        ltime = (new Date().getTime() - stime) / 1000;
         if (vfr != null) {
             localTrack.removeSink(vfr);
             vfr.release();
@@ -78,7 +83,7 @@ public class RecordUtil {
             Toast.makeText(context, "结束录制", Toast.LENGTH_SHORT).show();
         });
         new Thread(() -> {
-            String text = "ffmpeg -t "+ltime+" -accurate_seek -i " + y4mfile.toString()+" " + srcPath + "local" + ".mp4";
+            String text = "ffmpeg -t " + ltime + " -accurate_seek -i " + y4mfile.toString() + " " + srcPath + "local" + ".mp4";
             Log.d(TAG, "terminateVideo: " + text);
             String[] commands = text.split(" ");
             RxFFmpegInvoke.getInstance().runCommand(commands, new RxFFmpegInvoke.IFFmpegListener() {
@@ -94,7 +99,7 @@ public class RecordUtil {
 
                 @Override
                 public void onProgress(int progress, long progressTime) {
-                    Log.d(TAG, "onProgress: "+progress);
+                    Log.d(TAG, "onProgress: " + progress);
                 }
 
                 @Override
@@ -163,9 +168,12 @@ public class RecordUtil {
             e.printStackTrace();
         }
     }
+
     //照一张本地缩略图片
     public void havePhoto(Activity activity, SurfaceViewRenderer mySurfaceViewRenderer) {
+        Log.e(TAG, "havePhoto");
         if (mySurfaceViewRenderer != null)
+        Log.e(TAG, "add");
             mySurfaceViewRenderer.addFrameListener(new EglRenderer.FrameListener() {
                 @Override
                 public void onFrame(Bitmap bitmap) {
@@ -176,6 +184,7 @@ public class RecordUtil {
                 }
             }, 1);
     }
+
     //控制端存储所有缩略画面
     public void haveAllPhoto(Activity activity, Map<String, SurfaceViewRenderer> _videoViews) {
         for (String userId : _videoViews.keySet()) {
@@ -192,19 +201,20 @@ public class RecordUtil {
                 }, 1);
         }
     }
+
     //存到本地photo
     public void savePhoto(Activity activity, Bitmap bitmap) {
         long curTime = new Date().getTime();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 //        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "record_photo "+sdf.format(curTime));
         String fileName = "record_photo " + sdf.format(curTime) + ".png";
+        Log.e(TAG, "save");
         MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, fileName, fileName);
         activity.runOnUiThread(() -> {
             Toast.makeText(context, "已保存图片到相册", Toast.LENGTH_SHORT).show();
         });
-        File appDir = new File(context.getFilesDir() + "");
-        if (!appDir.exists()) appDir.mkdir();
-        File file = new File(appDir, fileName);
+
+        File file = new File(srcPath, fileName);
         try {
             FileOutputStream fos = new FileOutputStream(file);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
@@ -214,6 +224,7 @@ public class RecordUtil {
             e.printStackTrace();
         }
     }
+
     private String getBetweenStr(long between) {
         long hour = (between / (60 * 60 * 1000));
         long min = ((between / (60 * 1000)) - hour * 60);

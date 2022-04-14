@@ -248,9 +248,13 @@ public class CollectActivity extends AppCompatActivity {
             }
         });
         photoButton.setOnClickListener(v -> {
-            if (cameraService != null) {
-                Toast.makeText(getBaseContext(), "拍照", Toast.LENGTH_SHORT).show();
-                cameraService.takePicture();
+            if(RecordUtil.isFullDefinition){
+                if (cameraService != null) {
+                    Toast.makeText(getBaseContext(), "拍照", Toast.LENGTH_SHORT).show();
+                    cameraService.takePicture();
+                }
+            }else {
+                ru.havePhoto(CollectActivity.this,local_view);
             }
         });
         videoButton.setOnClickListener(v -> {

@@ -1,16 +1,20 @@
 package t20220049.sw_vision.ui;
 
 import android.app.Activity;
+import android.app.Service;
+import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -37,6 +41,7 @@ import io.microshow.rxffmpeg.RxFFmpegInvoke;
 import okio.BufferedSource;
 import okio.Okio;
 import okio.Sink;
+import t20220049.sw_vision.service.CameraService;
 import t20220049.sw_vision.utils.RecordUtil;
 import t20220049.sw_vision.webRTC_utils.IViewCallback;
 import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
@@ -101,6 +106,10 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     boolean isMirrror = true;
     RecordUtil ru;
 
+    private ServiceConnection conn;
+    private CameraService cameraService;
+    Intent serviceIntent;
+
     public class Device {
         String type;
         String name;
@@ -144,6 +153,34 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         }
     }
 
+    private void initService() {
+        conn = new ServiceConnection() {
+            /**
+             * 与服务器端交互的接口方法 绑定服务的时候被回调，在这个方法获取绑定Service传递过来的IBinder对象，
+             * 通过这个IBinder对象，实现宿主和Service的交互。
+             */
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                Log.d(TAG, "绑定成功调用：onServiceConnected");
+                // 获取Binder
+                CameraService.LocalBinder binder = (CameraService.LocalBinder) service;
+                cameraService = binder.getService();
+            }
+
+            /**
+             * 当取消绑定的时候被回调。但正常情况下是不被调用的，它的调用时机是当Service服务被意外销毁时，
+             * 例如内存的资源不足时这个方法才被自动调用。
+             */
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                cameraService = null;
+            }
+        };
+        serviceIntent = new Intent(this, CameraService.class);
+        bindService(serviceIntent, conn, Service.BIND_AUTO_CREATE);
+//        startService(serviceIntent);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -158,6 +195,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         initView();
         initVar();
         initListner();
+        initService();
 //        ChatRoomFragment chatRoomFragment = new ChatRoomFragment();
 //        replaceFragment(chatRoomFragment);
         startCall();
@@ -172,6 +210,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         switch_hang_up = findViewById(R.id.switch_hang_up);
         videoButton = findViewById(R.id.video_button);
         photoButton = findViewById(R.id.photo_button);
+
 
         //底部抽屉栏展示地址
         bottomSheet = findViewById(R.id.bottom_sheet);
@@ -231,7 +270,14 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         });
 
         photoButton.setOnClickListener(v -> {
-//            havePhoto();
+            if (RecordUtil.isFullDefinition) {
+                if (cameraService != null) {
+                    Toast.makeText(getBaseContext(), "拍照", Toast.LENGTH_SHORT).show();
+                    cameraService.takePicture();
+                }
+            }else {
+                ru.havePhoto(ControlActivity.this,_videoViews.get(myId));
+            }
         });
         videoButton.setOnClickListener(v -> {
             if (!activateVideo) {
@@ -467,10 +513,12 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 
     // 切换摄像头
     public void switchCamera() {
+        if (cameraService != null)
+            cameraService.switchCamera();
         manager.switchCamera();
-        isMirrror=!isMirrror;
-        for (String id:
-             _videoViews.keySet()) {
+        isMirrror = !isMirrror;
+        for (String id :
+                _videoViews.keySet()) {
             _videoViews.get(id).setMirror(isMirrror);
         }
     }
