@@ -28,6 +28,12 @@
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
             android:text="Send Message" />
+        <Button
+            android:id="@+id/btnControl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:text="进入控制端画面" />
 
         <ImageView
             android:id="@+id/iv_image"
