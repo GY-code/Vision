@@ -1,4 +1,4 @@
-package t20220049.sw_vision.transfer.task;
+package t20220049.sw_vision.transfer.client;
 
 import android.annotation.SuppressLint;
 import android.app.ProgressDialog;
@@ -22,7 +22,7 @@ import t20220049.sw_vision.transfer.common.Constants;
 import t20220049.sw_vision.transfer.model.FileTransfer;
 import t20220049.sw_vision.transfer.util.Md5Util;
 
-
+//后台: 发送文件
 public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
 
     private static final String TAG = "WifiClientTask";
@@ -40,6 +40,7 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
         progressDialog.setCanceledOnTouchOutside(false);
         progressDialog.setTitle("正在发送文件");
         progressDialog.setMax(100);
+        Log.e(TAG, "构造");
     }
 
     @Override
@@ -63,17 +64,22 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
 
     @Override
     protected Boolean doInBackground(Object... params) {
-        Socket socket = null;
+        WifiClientService.serverOut.println("sendFile");
+
+        Log.e(TAG, "backGround");
+        Socket socket = WifiClientService.socket;
         OutputStream outputStream = null;
         ObjectOutputStream objectOutputStream = null;
         InputStream inputStream = null;
         try {
-            String hostAddress = params[0].toString();
-            Uri imageUri = Uri.parse(params[1].toString());
+//            String hostAddress = params[0].toString();
+            Uri fileUri = Uri.parse(params[0].toString());
 
-            String outputFilePath = getOutputFilePath(imageUri);
+            //获取文件
+            String outputFilePath = getOutputFilePath(fileUri);
             File outputFile = new File(outputFilePath);
 
+            //将文件转化为对象
             FileTransfer fileTransfer = new FileTransfer();
             String fileName = outputFile.getName();
             String fileMa5 = Md5Util.getMd5(outputFile);
@@ -84,9 +90,7 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
 
             Log.e(TAG, "文件的MD5码值是：" + fileTransfer.getMd5());
 
-            socket = new Socket();
-            socket.bind(null);
-            socket.connect((new InetSocketAddress(hostAddress, Constants.PORT)), 10000);
+            //inputStream负责读文件，outputStream负责向服务器传输文件流
             outputStream = socket.getOutputStream();
             objectOutputStream = new ObjectOutputStream(outputStream);
             objectOutputStream.writeObject(fileTransfer);
@@ -102,26 +106,27 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
                 publishProgress(progress);
                 Log.e(TAG, "文件发送进度：" + progress);
             }
-            socket.close();
+//            socket.close();
             inputStream.close();
             outputStream.close();
             objectOutputStream.close();
-            socket = null;
+//            socket = null;
             inputStream = null;
             outputStream = null;
             objectOutputStream = null;
             Log.e(TAG, "文件发送成功");
             return true;
         } catch (Exception e) {
+            e.printStackTrace();
             Log.e(TAG, "文件发送异常 Exception: " + e.getMessage());
         } finally {
-            if (socket != null && !socket.isClosed()) {
-                try {
-                    socket.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
+//            if (socket != null && !socket.isClosed()) {
+//                try {
+//                    socket.close();
+//                } catch (Exception e) {
+//                    e.printStackTrace();
+//                }
+//            }
             if (inputStream != null) {
                 try {
                     inputStream.close();

@@ -4,14 +4,18 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,11 +29,18 @@ import java.util.Collection;
 import t20220049.sw_vision.transfer.broadcast.DirectBroadcastReceiver;
 import t20220049.sw_vision.transfer.callback.DirectActionListener;
 import t20220049.sw_vision.transfer.model.FileTransfer;
-import t20220049.sw_vision.transfer.service.WifiServerService;
+import t20220049.sw_vision.transfer.server.WifiServer;
+import t20220049.sw_vision.transfer.server.WifiServerService;
 
 import t20220049.sw_vision.R;
 //控制端
 public class ReceiveFileActivity extends BaseActivity {
+
+    public static File cacheDir;
+
+    private static final String TAG = "ReceiveFileActivity";
+
+    Collection<WifiP2pDevice> wifiP2pDeviceList = null;
 
     private ImageView iv_image;
 
@@ -63,7 +74,7 @@ public class ReceiveFileActivity extends BaseActivity {
                 wifiServerService.setProgressChangListener(null);
                 wifiServerService = null;
             }
-            bindService();
+//            bindService();
         }
     };
 
@@ -81,9 +92,10 @@ public class ReceiveFileActivity extends BaseActivity {
             log("groupFormed：" + wifiP2pInfo.groupFormed);
             if (wifiP2pInfo.groupFormed && wifiP2pInfo.isGroupOwner) {
                 connectionInfoAvailable = true;
-                if (wifiServerService != null) {
-                    startService(WifiServerService.class);
-                }
+//                if (wifiServerService != null) {
+//                    log("start service");
+//                    startService(WifiServerService.class);
+//                }
             }
         }
 
@@ -100,9 +112,10 @@ public class ReceiveFileActivity extends BaseActivity {
         }
 
         @Override
-        public void onPeersAvailable(Collection<WifiP2pDevice> wifiP2pDeviceList) {
-            log("onPeersAvailable,size:" + wifiP2pDeviceList.size());
-            for (WifiP2pDevice wifiP2pDevice : wifiP2pDeviceList) {
+        public void onPeersAvailable(Collection<WifiP2pDevice> dl) {
+            wifiP2pDeviceList = dl;
+            log("onPeersAvailable,size:" + dl.size());
+            for (WifiP2pDevice wifiP2pDevice : dl) {
                 log(wifiP2pDevice.toString());
             }
         }
@@ -115,6 +128,8 @@ public class ReceiveFileActivity extends BaseActivity {
 
     //进度条变化
     private final WifiServerService.OnProgressChangListener progressChangListener = new WifiServerService.OnProgressChangListener() {
+
+        //不断更新进度条，
         @Override
         public void onProgressChanged(final FileTransfer fileTransfer, final int progress) {
             runOnUiThread(() -> {
@@ -124,6 +139,7 @@ public class ReceiveFileActivity extends BaseActivity {
             });
         }
 
+        //文件传输完成后，在ui界面上，取消进度条，将接收到的图片放置在imgView上
         @Override
         public void onTransferFinished(final File file) {
             runOnUiThread(() -> {
@@ -145,17 +161,60 @@ public class ReceiveFileActivity extends BaseActivity {
             finish();
             return;
         }
+
+
         channel = wifiP2pManager.initialize(this, getMainLooper(), directActionListener);
+        if (ActivityCompat.checkSelfPermission(ReceiveFileActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        //建立群组
+        wifiP2pManager.createGroup(channel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                log("createGroup onSuccess");
+                dismissLoadingDialog();
+                showToast("onSuccess");
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                log("createGroup onFailure: " + reason);
+                dismissLoadingDialog();
+                showToast("onFailure");
+            }
+        });
         broadcastReceiver = new DirectBroadcastReceiver(wifiP2pManager, channel, directActionListener);
         registerReceiver(broadcastReceiver, DirectBroadcastReceiver.getIntentFilter());
-        bindService();
+
+        Log.i(TAG,"flag1");
+        bindService();//start WifiServerService
+
+//        if (wifiServerService != null) {
+            log("start service");
+            startService(WifiServerService.class);
+//        }
+
+        findViewById(R.id.btnSendMsg).setOnClickListener(view -> {
+            Log.i(TAG,"HELLO MM");
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    for(WifiServer.MyClient client:WifiServer.clients){
+                        WifiServer.sendInstruction("instruction",client.clientIP);
+                    }
+                }
+            }).start();
+
+        });
+
+        cacheDir = getCacheDir();
     }
 
     private void initView() {
         setTitle("接收文件");
         iv_image = findViewById(R.id.iv_image);
         tv_log = findViewById(R.id.tv_log);
-        //新建群组
+//        新建群组
         findViewById(R.id.btnCreateGroup).setOnClickListener(v -> {
             if (ActivityCompat.checkSelfPermission(ReceiveFileActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
@@ -176,7 +235,7 @@ public class ReceiveFileActivity extends BaseActivity {
                 }
             });
         });
-        //移除群组
+//        移除群组
         findViewById(R.id.btnRemoveGroup).setOnClickListener(v -> removeGroup());
         progressDialog = new ProgressDialog(this);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
@@ -224,6 +283,7 @@ public class ReceiveFileActivity extends BaseActivity {
     private void bindService() {
         Intent intent = new Intent(ReceiveFileActivity.this, WifiServerService.class);
         bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+        Log.i(TAG,"flag2");
     }
 
 }

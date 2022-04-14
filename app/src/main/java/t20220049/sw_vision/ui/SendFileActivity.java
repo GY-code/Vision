@@ -2,7 +2,9 @@ package t20220049.sw_vision.ui;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.net.wifi.WpsInfo;
@@ -11,6 +13,7 @@ import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
@@ -23,6 +26,14 @@ import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -30,7 +41,11 @@ import java.util.List;
 import t20220049.sw_vision.transfer.adapter.DeviceAdapter;
 import t20220049.sw_vision.transfer.broadcast.DirectBroadcastReceiver;
 import t20220049.sw_vision.transfer.callback.DirectActionListener;
-import t20220049.sw_vision.transfer.task.WifiClientTask;
+import t20220049.sw_vision.transfer.client.WifiClientService;
+import t20220049.sw_vision.transfer.common.Constants;
+import t20220049.sw_vision.transfer.client.WifiClientTask;
+import t20220049.sw_vision.transfer.server.WifiServer;
+import t20220049.sw_vision.transfer.server.WifiServerService;
 import t20220049.sw_vision.transfer.util.WifiP2pUtils;
 import t20220049.sw_vision.transfer.widget.LoadingDialog;
 
@@ -39,6 +54,12 @@ import t20220049.sw_vision.R;
 public class SendFileActivity extends BaseActivity{
 
     private static final String TAG = "SendFileActivity";
+
+    private WifiClientService wifiClientService;
+
+    public static String groupOwnerIP;
+
+    private String selfDeviceName = null;
 
     private static final int CODE_CHOOSE_FILE = 100;
 
@@ -72,6 +93,25 @@ public class SendFileActivity extends BaseActivity{
 
     private WifiP2pDevice mWifiP2pDevice;
 
+    private final ServiceConnection serviceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+
+        }
+
+    };
+
+    private void bindService() {
+        Intent intent = new Intent(SendFileActivity.this, WifiClientService.class);
+        bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+    }
+
     private final DirectActionListener directActionListener = new DirectActionListener() {
 
         @Override
@@ -92,23 +132,34 @@ public class SendFileActivity extends BaseActivity{
             Log.e(TAG, "onConnectionInfoAvailable isGroupOwner: " + wifiP2pInfo.isGroupOwner);
             Log.e(TAG, "onConnectionInfoAvailable getHostAddress: " + wifiP2pInfo.groupOwnerAddress.getHostAddress());
             StringBuilder stringBuilder = new StringBuilder();
-            if (mWifiP2pDevice != null) {
-                stringBuilder.append("连接的设备名：");
-                stringBuilder.append(mWifiP2pDevice.deviceName);
-                stringBuilder.append("\n");
-                stringBuilder.append("连接的设备的地址：");
-                stringBuilder.append(mWifiP2pDevice.deviceAddress);
-            }
-            stringBuilder.append("\n");
-            stringBuilder.append("是否群主：");
+            stringBuilder.append("本设备-是否群主：");
             stringBuilder.append(wifiP2pInfo.isGroupOwner ? "是群主" : "非群主");
             stringBuilder.append("\n");
-            stringBuilder.append("群主IP地址：");
+            stringBuilder.append("\n");
+            stringBuilder.append("连接设备-IP地址：");//连接设备就是群主
             stringBuilder.append(wifiP2pInfo.groupOwnerAddress.getHostAddress());
+            stringBuilder.append("\n");
+            if (mWifiP2pDevice != null) {
+                stringBuilder.append("连接设备-设备名：");
+                stringBuilder.append(mWifiP2pDevice.deviceName);
+                stringBuilder.append("\n");
+                stringBuilder.append("连接设备-物理地址：");
+                stringBuilder.append(mWifiP2pDevice.deviceAddress);
+            }
             tv_status.setText(stringBuilder);
             if (wifiP2pInfo.groupFormed && !wifiP2pInfo.isGroupOwner) {
                 SendFileActivity.this.wifiP2pInfo = wifiP2pInfo;
             }
+
+            groupOwnerIP = wifiP2pInfo.groupOwnerAddress.getHostAddress();
+
+            Intent intent = new Intent(SendFileActivity.this, WifiClientService.class);
+//            intent.putExtra("serverIP",wifiP2pInfo.groupOwnerAddress.getHostAddress());
+            Log.i(TAG,wifiP2pInfo.groupOwnerAddress.getHostAddress());
+            bindService(intent, serviceConnection, BIND_AUTO_CREATE);
+
+            startService(WifiClientService.class);
+            Log.i(TAG,"sFlag");
         }
 
         @Override
@@ -121,6 +172,11 @@ public class SendFileActivity extends BaseActivity{
             deviceAdapter.notifyDataSetChanged();
             tv_status.setText(null);
             SendFileActivity.this.wifiP2pInfo = null;
+
+            if(wifiClientService != null) {
+                unbindService(serviceConnection);
+            }
+            stopService(new Intent(SendFileActivity.this,WifiClientService.class));
         }
 
         @Override
@@ -129,9 +185,10 @@ public class SendFileActivity extends BaseActivity{
             Log.e(TAG, "DeviceName: " + wifiP2pDevice.deviceName);
             Log.e(TAG, "DeviceAddress: " + wifiP2pDevice.deviceAddress);
             Log.e(TAG, "Status: " + wifiP2pDevice.status);
-            tv_myDeviceName.setText(wifiP2pDevice.deviceName);
-            tv_myDeviceAddress.setText(wifiP2pDevice.deviceAddress);
-            tv_myDeviceStatus.setText(WifiP2pUtils.getDeviceStatus(wifiP2pDevice.status));
+            selfDeviceName = wifiP2pDevice.deviceName;
+            tv_myDeviceName.setText("本设备-设备名称："+wifiP2pDevice.deviceName);
+            tv_myDeviceAddress.setText("本设备-物理地址："+wifiP2pDevice.deviceAddress);
+            tv_myDeviceStatus.setText("本设备-连接状态："+WifiP2pUtils.getDeviceStatus(wifiP2pDevice.status));
         }
 
         //刷新RecyclerView
@@ -240,6 +297,10 @@ public class SendFileActivity extends BaseActivity{
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(broadcastReceiver);
+        if(wifiClientService != null) {
+            unbindService(serviceConnection);
+        }
+        stopService(new Intent(this,WifiClientService.class));
     }
 
     @Override
@@ -247,10 +308,12 @@ public class SendFileActivity extends BaseActivity{
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == CODE_CHOOSE_FILE) {
             if (resultCode == RESULT_OK) {
-                Uri imageUri = data.getData();
-                Log.e(TAG, "文件路径：" + imageUri);
+                Uri fileUri = data.getData();
+                Log.e(TAG, "文件路径：" + fileUri);
                 if (wifiP2pInfo != null) {
-                    new WifiClientTask(this).execute(wifiP2pInfo.groupOwnerAddress.getHostAddress(), imageUri);
+                    if(WifiClientService.socket!=null)
+                        new WifiClientTask(this).execute(fileUri);
+//                    new WifiClientTask(this).execute(wifiP2pInfo.groupOwnerAddress.getHostAddress(), fileUri);
                 }
             }
         }
@@ -270,6 +333,7 @@ public class SendFileActivity extends BaseActivity{
                 @Override
                 public void onSuccess() {
                     Log.e(TAG, "connect onSuccess");
+
                 }
 
                 @Override

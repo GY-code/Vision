@@ -67,7 +67,7 @@
         android:layout_marginTop="6dp"
         android:textColor="@android:color/black"
         android:textSize="18sp"
-        tools:text="小米5X" />
+        tools:text="设备名称" />
 
     <TextView
         android:id="@+id/tv_myDeviceAddress"
@@ -76,7 +76,7 @@
         android:layout_marginTop="6dp"
         android:textColor="@android:color/black"
         android:textSize="18sp"
-        tools:text="192.168.0.1" />
+        tools:text="MAC地址" />
 
     <TextView
         android:id="@+id/tv_myDeviceStatus"
@@ -85,7 +85,7 @@
         android:layout_marginTop="6dp"
         android:textColor="@android:color/black"
         android:textSize="18sp"
-        tools:text="可用的" />
+        tools:text="连接状态" />
 
     <TextView
         android:id="@+id/tv_status"
@@ -93,8 +93,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="6dp"
         android:textColor="@android:color/black"
-        android:textSize="18sp"
-        tools:text="连接状态" />
+        android:textSize="18sp" />
 
     <TextView
         android:layout_width="match_parent"

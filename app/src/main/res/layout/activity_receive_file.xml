@@ -13,14 +13,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
-            android:text="创建群组" />
+            android:text="Create Group" />
 
         <Button
             android:id="@+id/btnRemoveGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
-            android:text="移除群组" />
+            android:text="Remove Group" />
+
+        <Button
+            android:id="@+id/btnSendMsg"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:text="Send Message" />
 
         <ImageView
             android:id="@+id/iv_image"
@@ -29,9 +36,19 @@
             android:contentDescription="@string/app_name" />
 
         <TextView
+            android:id="@+id/tvDeviceList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:text="设备列表"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <TextView
             android:id="@+id/tv_log"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp" />
 
     </LinearLayout>
 
