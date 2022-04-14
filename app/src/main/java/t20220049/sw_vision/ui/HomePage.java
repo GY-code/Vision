@@ -74,8 +74,7 @@ public class HomePage extends AppCompatActivity {
 //                Intent intent = new Intent(HomePage.this, CollectMatch.class);
 //                Intent intent = new Intent(HomePage.this, NodejsActivity.class);
 //                startActivity(intent);
-//                WebrtcUtil.callSingle(HomePage.this, "ws://106.13.236.207:3000",
-//                        "123456", true);
+//                WebrtcUtil.callSingle(HomePage.this, "ws://106.13.236.207:3000","123456", true);
             }
         });
     }

@@ -26,6 +26,7 @@ import com.bumptech.glide.Glide;
 import java.io.File;
 import java.util.Collection;
 
+import t20220049.sw_vision.entrance.WebrtcUtil;
 import t20220049.sw_vision.transfer.broadcast.DirectBroadcastReceiver;
 import t20220049.sw_vision.transfer.callback.DirectActionListener;
 import t20220049.sw_vision.transfer.model.FileTransfer;
@@ -206,7 +207,9 @@ public class ReceiveFileActivity extends BaseActivity {
             }).start();
 
         });
-
+        findViewById(R.id.btnControl).setOnClickListener(v->{
+            WebrtcUtil.call(ReceiveFileActivity.this, "ws://106.13.236.207:3000", "123456");
+        });
         cacheDir = getCacheDir();
     }
 

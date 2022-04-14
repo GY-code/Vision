@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import t20220049.sw_vision.entrance.WebrtcUtil;
 import t20220049.sw_vision.transfer.adapter.DeviceAdapter;
 import t20220049.sw_vision.transfer.broadcast.DirectBroadcastReceiver;
 import t20220049.sw_vision.transfer.callback.DirectActionListener;
@@ -50,8 +51,9 @@ import t20220049.sw_vision.transfer.util.WifiP2pUtils;
 import t20220049.sw_vision.transfer.widget.LoadingDialog;
 
 import t20220049.sw_vision.R;
+
 //客户端
-public class SendFileActivity extends BaseActivity{
+public class SendFileActivity extends BaseActivity {
 
     private static final String TAG = "SendFileActivity";
 
@@ -155,11 +157,11 @@ public class SendFileActivity extends BaseActivity{
 
             Intent intent = new Intent(SendFileActivity.this, WifiClientService.class);
 //            intent.putExtra("serverIP",wifiP2pInfo.groupOwnerAddress.getHostAddress());
-            Log.i(TAG,wifiP2pInfo.groupOwnerAddress.getHostAddress());
+            Log.i(TAG, wifiP2pInfo.groupOwnerAddress.getHostAddress());
             bindService(intent, serviceConnection, BIND_AUTO_CREATE);
 
             startService(WifiClientService.class);
-            Log.i(TAG,"sFlag");
+            Log.i(TAG, "sFlag");
         }
 
         @Override
@@ -173,10 +175,10 @@ public class SendFileActivity extends BaseActivity{
             tv_status.setText(null);
             SendFileActivity.this.wifiP2pInfo = null;
 
-            if(wifiClientService != null) {
+            if (wifiClientService != null) {
                 unbindService(serviceConnection);
             }
-            stopService(new Intent(SendFileActivity.this,WifiClientService.class));
+            stopService(new Intent(SendFileActivity.this, WifiClientService.class));
         }
 
         @Override
@@ -186,9 +188,9 @@ public class SendFileActivity extends BaseActivity{
             Log.e(TAG, "DeviceAddress: " + wifiP2pDevice.deviceAddress);
             Log.e(TAG, "Status: " + wifiP2pDevice.status);
             selfDeviceName = wifiP2pDevice.deviceName;
-            tv_myDeviceName.setText("本设备-设备名称："+wifiP2pDevice.deviceName);
-            tv_myDeviceAddress.setText("本设备-物理地址："+wifiP2pDevice.deviceAddress);
-            tv_myDeviceStatus.setText("本设备-连接状态："+WifiP2pUtils.getDeviceStatus(wifiP2pDevice.status));
+            tv_myDeviceName.setText("本设备-设备名称：" + wifiP2pDevice.deviceName);
+            tv_myDeviceAddress.setText("本设备-物理地址：" + wifiP2pDevice.deviceAddress);
+            tv_myDeviceStatus.setText("本设备-连接状态：" + WifiP2pUtils.getDeviceStatus(wifiP2pDevice.status));
         }
 
         //刷新RecyclerView
@@ -267,7 +269,7 @@ public class SendFileActivity extends BaseActivity{
                 showToast("当前设备不支持Wifi Direct");
             }
         });
-        findViewById(R.id.btnSearch).setOnClickListener(view->{
+        findViewById(R.id.btnSearch).setOnClickListener(view -> {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 showToast("请先授予位置权限");
             }
@@ -291,16 +293,19 @@ public class SendFileActivity extends BaseActivity{
                 }
             });
         });
+        findViewById(R.id.btnCollect).setOnClickListener(v->{
+            WebrtcUtil.callSingle(SendFileActivity.this, "ws://106.13.236.207:3000","123456", true);
+        });
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(broadcastReceiver);
-        if(wifiClientService != null) {
+        if (wifiClientService != null) {
             unbindService(serviceConnection);
         }
-        stopService(new Intent(this,WifiClientService.class));
+        stopService(new Intent(this, WifiClientService.class));
     }
 
     @Override
@@ -311,7 +316,7 @@ public class SendFileActivity extends BaseActivity{
                 Uri fileUri = data.getData();
                 Log.e(TAG, "文件路径：" + fileUri);
                 if (wifiP2pInfo != null) {
-                    if(WifiClientService.socket!=null)
+                    if (WifiClientService.socket != null)
                         new WifiClientTask(this).execute(fileUri);
 //                    new WifiClientTask(this).execute(wifiP2pInfo.groupOwnerAddress.getHostAddress(), fileUri);
                 }
