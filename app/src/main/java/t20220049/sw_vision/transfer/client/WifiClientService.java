@@ -37,8 +37,6 @@ public class WifiClientService extends IntentService {
         }
     }
 
-
-
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {

@@ -30,6 +30,7 @@ public class WifiServer extends Thread{
     public class MyClient {
         public Socket client = null;
         public String clientIP = "default ip";
+        public String clientUserID;
         public MyClient (Socket client,String clientIP) {
             this.client = client;
             this.clientIP = clientIP;
@@ -60,8 +61,10 @@ public class WifiServer extends Thread{
                 if(inputLine.equals("sendFile")){
                     Log.i(TAG,"request send file");
                     receiveFile();
-                } else if (inputLine.equals("")){
-
+                } else if (inputLine.equals("userID")){
+                    Log.i(TAG,"send user id");
+                    String userID = in.readLine();
+                    mClient.clientUserID = userID;
                 }
             }
             in.close();
@@ -132,7 +135,7 @@ public class WifiServer extends Thread{
                 try {
                     out = new PrintWriter(c.client.getOutputStream(),true);
                     out.println(instruction);
-                    Log.i(TAG,"a instruction has sended.");
+                    Log.i(TAG,"a instruction has sent.");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
