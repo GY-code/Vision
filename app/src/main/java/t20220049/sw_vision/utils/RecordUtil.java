@@ -25,6 +25,7 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
 
 import io.microshow.rxffmpeg.RxFFmpegInvoke;
 import okio.BufferedSource;
@@ -47,6 +48,7 @@ public class RecordUtil {
         context = c;
         srcPath = context.getFilesDir().getAbsolutePath() + "/";
         y4mfile=new File(srcPath + "local.y4m");
+        RxFFmpegInvoke.getInstance().setDebug(true);
     }
 
     public void cleary4m() {
@@ -161,7 +163,7 @@ public class RecordUtil {
             e.printStackTrace();
         }
     }
-
+    //照一张本地缩略图片
     public void havePhoto(Activity activity, SurfaceViewRenderer mySurfaceViewRenderer) {
         if (mySurfaceViewRenderer != null)
             mySurfaceViewRenderer.addFrameListener(new EglRenderer.FrameListener() {
@@ -173,6 +175,22 @@ public class RecordUtil {
                     });
                 }
             }, 1);
+    }
+    //控制端存储所有缩略画面
+    public void haveAllPhoto(Activity activity, Map<String, SurfaceViewRenderer> _videoViews) {
+        for (String userId : _videoViews.keySet()) {
+            SurfaceViewRenderer svr = _videoViews.get(userId);
+            if (svr != null)
+                svr.addFrameListener(new EglRenderer.FrameListener() {
+                    @Override
+                    public void onFrame(Bitmap bitmap) {
+                        activity.runOnUiThread(() -> {
+                            savePhoto(activity, bitmap);
+                            svr.removeFrameListener(this);
+                        });
+                    }
+                }, 1);
+        }
     }
     //存到本地photo
     public void savePhoto(Activity activity, Bitmap bitmap) {
