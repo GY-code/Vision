@@ -1,5 +1,6 @@
 package t20220049.sw_vision.ui;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Service;
 import android.content.ComponentName;
@@ -13,6 +14,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
@@ -22,6 +24,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -41,6 +45,8 @@ import io.microshow.rxffmpeg.RxFFmpegInvoke;
 import okio.BufferedSource;
 import okio.Okio;
 import okio.Sink;
+import t20220049.sw_vision.utils.TimerManager;
+import t20220049.sw_vision.utils.VideoFragment;
 import t20220049.sw_vision.service.CameraService;
 import t20220049.sw_vision.utils.RecordUtil;
 import t20220049.sw_vision.webRTC_utils.IViewCallback;
@@ -85,7 +91,13 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     private Map<String, SurfaceViewRenderer> _videoViews = new HashMap<>();
     private Map<String, ProxyVideoSink> _sinks = new HashMap<>();
     private Map<String, VideoFileRenderer> _vfrs = new HashMap<>();
+    private Map<String, String> startVideoTimes = new HashMap<>();
+    private Map<String, String> endVideoTimes = new HashMap<>();
     private List<MemberBean> _infos = new ArrayList<>();
+    private List<MediaStream> streamList = new ArrayList<>();
+    private List<VideoFragment> fragmentList = new ArrayList<>();
+    private List<String> userIdList = new ArrayList<>();
+    private int currentIndex = 0;
     private VideoTrack _localVideoTrack;
 
     private int mScreenWidth;
@@ -113,6 +125,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     public class Device {
         String type;
         String name;
+        String userId;
     }
 
     public static void openActivity(Activity activity) {
@@ -121,6 +134,13 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     }
 
     class deviceAdapter extends RecyclerView.Adapter<MyViewHolder> {
+
+        private final List<Device> deviceList;
+
+        public deviceAdapter(List<Device> deviceList) {
+            this.deviceList = deviceList;
+        }
+
         @NonNull
         @Override
         public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -129,12 +149,20 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             return myViewHolder;
         }
 
+
         @Override
-        public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-            Device device = mDevicesList.get(position);
+        public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
+            Device device = this.deviceList.get(position);
             holder.mType.setText(device.type);
             holder.mName.setText(device.name);
+            holder.selectButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    changeRecordCapture(deviceList.get(position).userId);
+                }
+            });
         }
+
 
         @Override
         public int getItemCount() {
@@ -145,11 +173,13 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     class MyViewHolder extends RecyclerView.ViewHolder {
         TextView mType;
         TextView mName;
+        ImageView selectButton;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             mType = itemView.findViewById(R.id.txt_mType);
             mName = itemView.findViewById(R.id.txt_mName);
+            selectButton = itemView.findViewById(R.id.select_button);
         }
     }
 
@@ -192,6 +222,9 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 //        setContentView(R.layout.wr_activity_chat_room);
         setContentView(R.layout.acticity_control);
 
+        userIdList.add("_all");
+        streamList.add(null);
+
         initView();
         initVar();
         initListner();
@@ -200,6 +233,122 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 //        replaceFragment(chatRoomFragment);
         startCall();
         ru = new RecordUtil(getApplicationContext());
+
+        Button switchButton = findViewById(R.id.button6);
+
+        switchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+//                if (currentIndex == 0) {
+//                    for (int i = 0; i < userIdList.size(); i++) {
+//                        String tempId = userIdList.get(i);
+//                        if (!tempId.equals("_all")) {
+//                            runOnUiThread(() -> {
+//                                removeView(tempId);
+//                            });
+//                        }
+//                    }
+//                } else {
+//                    String tempId = userIdList.get(currentIndex);
+//                    runOnUiThread(() -> {
+//                        removeView(tempId);
+//                    });
+//                }
+
+                int size = userIdList.size();
+                currentIndex = (currentIndex+1) % size;
+
+//                if (currentIndex == 0) {
+//                    for (int i = 0; i < userIdList.size(); i++) {
+//                        String tempId = userIdList.get(i);
+//                        MediaStream tempStream = streamList.get(i);
+//                        if (!tempId.equals("_all") && tempStream != null) {
+//                            runOnUiThread(() -> {
+//                                addView(tempId, tempStream);
+//                            });
+//                        }
+//                    }
+//                } else {
+//                    String tempId = userIdList.get(currentIndex);
+//                    MediaStream tempStream = streamList.get(currentIndex);
+//                    runOnUiThread(() -> {
+//                        addView(tempId, tempStream);
+//                    });
+//                }
+
+//                Toast.makeText(ControlActivity.this, "switch to " + userIdList.get(currentIndex), Toast.LENGTH_LONG).show();
+                double[] cuts = TimerManager.getInstance().cut();
+                double startTime = cuts[0];
+                double durance = cuts[1];
+                Toast.makeText(ControlActivity.this,
+                        "Start at: " + Double.toString(startTime) + "\nRecord: " + Double.toString(durance) + "seconds",
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+
+        RxFFmpegInvoke.getInstance().setDebug(true);
+    }
+
+    private void changeRecordCapture(String s) {
+        if (userIdList.contains(s)) {
+            cutRecordCapture();
+            currentIndex = userIdList.indexOf(s);
+        }
+    }
+
+    private void endRecordCapture() {
+        cutRecordCapture();
+    }
+
+    private void cutRecordCapture() {
+        double[] cuts = TimerManager.getInstance().cut();
+        double startTime = cuts[0];
+        double durance = cuts[1];
+        String filename = userIdList.get(currentIndex) + ".mp4";
+        fragmentList.add(new VideoFragment(startTime, durance, filename));
+        Toast.makeText(ControlActivity.this,
+                userIdList.get(currentIndex) + " Start at: " + Double.toString(startTime) + "\nRecord: " + Double.toString(durance) + "seconds",
+                Toast.LENGTH_LONG).show();
+    }
+
+    protected void havePhoto() {
+        for (String userId : _videoViews.keySet()) {
+            SurfaceViewRenderer svr = _videoViews.get(userId);
+            if (svr != null)
+                svr.addFrameListener(new EglRenderer.FrameListener() {
+                    @Override
+                    public void onFrame(Bitmap bitmap) {
+                        runOnUiThread(() -> {
+                            savePhoto(userId, bitmap);
+                            svr.removeFrameListener(this);
+                        });
+                    }
+                }, 1);
+        }
+    }
+
+    private void savePhoto(String userId, Bitmap bitmap) {
+        long curTime = new Date().getTime();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+//        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "record_photo "+sdf.format(curTime));
+        String fileName = "photo-" + userId + "-" + sdf.format(curTime) + ".png";
+        MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, fileName, fileName);
+        runOnUiThread(() -> {
+            Toast.makeText(getApplicationContext(), "已保存图片到相册", Toast.LENGTH_SHORT).show();
+        });
+
+        File appDir = new File(getApplicationContext().getFilesDir() + "");
+        if (!appDir.exists()) appDir.mkdir();
+        File file = new File(appDir, fileName);
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -211,20 +360,20 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         videoButton = findViewById(R.id.video_button);
         photoButton = findViewById(R.id.photo_button);
 
-
         //底部抽屉栏展示地址
         bottomSheet = findViewById(R.id.bottom_sheet);
         behavior = BottomSheetBehavior.from(bottomSheet);
         v1 = findViewById(R.id.recyclerview);
 
-        for (int i = 0; i < 20; i++) {
-            Device device = new Device();
-            device.type = "标题" + i;
-            device.name = "内容" + i;
-            mDevicesList.add(device);
-        }
+        Device device = new Device();
+        device.type = "None";
+        device.name = "查看全部";
+        device.userId = "_all";
 
-        deviceAdapter = new deviceAdapter();
+        mDevicesList.add(device);
+
+        deviceAdapter = new deviceAdapter(mDevicesList);
+
         v1.setAdapter(deviceAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(ControlActivity.this);
         v1.setLayoutManager(layoutManager);
@@ -233,6 +382,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             public void onStateChanged(@NonNull View bottomSheet, @BottomSheetBehavior.State int newState) {
                 behavior.setState(newState);
             }
+
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
@@ -281,6 +431,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         });
         videoButton.setOnClickListener(v -> {
             if (!activateVideo) {
+                TimerManager.getInstance().restart();
                 ru.setVideoStart(_vfrs.get(myId), _localVideoTrack, rootEglBase);
                 activateVideo = true;
                 runOnUiThread(() -> {
@@ -313,25 +464,74 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             _localVideoTrack = videoTracks.get(0);
         }
         myId = userId;
+        userIdList.add(userId);
+        streamList.add(stream);
+
+        Device device = new Device();
+
+        device.type = userId.substring(0, 5);
+        device.name = "你爹";
+        device.userId = userId;
+
+        mDevicesList.add(device);
         runOnUiThread(() -> {
-            addView(userId, stream);
+            deviceAdapter.notifyDataSetChanged();
         });
+
+
+
+        if (currentIndex == 0) {
+            runOnUiThread(() -> {
+                addView(userId, stream);
+            });
+        }
     }
 
     @Override
     public void onAddRemoteStream(MediaStream stream, String userId) {
+        userIdList.add(userId);
+        streamList.add(stream);
+
+        Device device = new Device();
+
+        device.type = userId.substring(0, 5);
+        device.name = "也是你爹";
+        device.userId = userId;
+
+        mDevicesList.add(device);
         runOnUiThread(() -> {
-            addView(userId, stream);
+            deviceAdapter.notifyDataSetChanged();
         });
 
+        if (currentIndex == 0) {
+            runOnUiThread(() -> {
+                addView(userId, stream);
+            });
+        }
 
     }
 
     @Override
     public void onCloseWithId(String userId) {
+        int pos = userIdList.indexOf(userId);
+        userIdList.remove(userId);
+        streamList.remove(pos-1);
+        for (int i = 0; i < mDevicesList.size(); i++) {
+            if (mDevicesList.get(i).userId.equals(userId)) {
+                mDevicesList.remove(i);
+            }
+        }
+
         runOnUiThread(() -> {
-            removeView(userId);
+            deviceAdapter.notifyDataSetChanged();
         });
+
+
+        if (currentIndex == 0) {
+            runOnUiThread(() -> {
+                removeView(userId);
+            });
+        }
 
 
     }
