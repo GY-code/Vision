@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -16,7 +17,10 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import t20220049.sw_vision.transfer.common.Constants;
+import t20220049.sw_vision.ui.CollectActivity;
 import t20220049.sw_vision.ui.SendFileActivity;
+import t20220049.sw_vision.utils.CameraService;
+
 //对应采集端，发送文件
 public class WifiClientService extends IntentService {
 
@@ -58,9 +62,9 @@ public class WifiClientService extends IntentService {
                 while (true) {
 //                    if(serverIn.)
                         serverIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    String aLine = serverIn.readLine();
-                    if (aLine != null) {
-                        Log.i(TAG, "instruction received: " + aLine);
+                    String instruction = serverIn.readLine();
+                    if(instruction.equals("photo")){
+                        CollectActivity.CallTakePicture(true,true);
                     }
                 }
             } catch (IOException e) {

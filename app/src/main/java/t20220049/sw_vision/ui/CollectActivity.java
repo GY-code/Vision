@@ -4,20 +4,12 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Service;
 import android.content.ComponentName;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -30,13 +22,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import io.microshow.rxffmpeg.RxFFmpegInvoke;
-import okio.BufferedSource;
-import okio.Okio;
-import okio.Sink;
-import t20220049.sw_vision.service.CameraService;
-import t20220049.sw_vision.transfer.client.WifiClientService;
+import t20220049.sw_vision.utils.CameraService;
 import t20220049.sw_vision.utils.RecordUtil;
+import t20220049.sw_vision.utils.TransferUtil;
 import t20220049.sw_vision.webRTC_utils.IViewCallback;
 import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
 import t20220049.sw_vision.webRTC_utils.ProxyVideoSink;
@@ -45,20 +33,11 @@ import t20220049.sw_vision.webRTC_utils.WebRTCManager;
 import t20220049.sw_vision.utils.PermissionUtil;
 
 import org.webrtc.EglBase;
-import org.webrtc.EglRenderer;
 import org.webrtc.MediaStream;
 import org.webrtc.RendererCommon;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoFileRenderer;
 import org.webrtc.VideoTrack;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 /**
  * 单聊界面
@@ -87,7 +66,7 @@ public class CollectActivity extends AppCompatActivity {
     private int videoState = 0;
 
     private ServiceConnection conn;
-    private CameraService cameraService;
+    public static CameraService cameraService;
     private RecordUtil ru;
     boolean activateVideo = false;
     private static final String TAG = "ChatSingleActivity";
@@ -113,7 +92,7 @@ public class CollectActivity extends AppCompatActivity {
         initVar();
         initListener();
         initService();
-        ru=new RecordUtil(getApplicationContext());
+        ru = new RecordUtil(getApplicationContext());
     }
 
 
@@ -187,6 +166,10 @@ public class CollectActivity extends AppCompatActivity {
         mChronometer = (Chronometer) findViewById(R.id.record_chronometer);
     }
 
+    public static void CallTakePicture(boolean isCollect,boolean isSend) {
+        cameraService.takePicture(isCollect, isSend);
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private void initListener() {
 //        if (videoEnable) {
@@ -248,39 +231,39 @@ public class CollectActivity extends AppCompatActivity {
             }
         });
         photoButton.setOnClickListener(v -> {
-            if(RecordUtil.isFullDefinition){
+            if (RecordUtil.isFullDefinition) {
                 if (cameraService != null) {
                     Toast.makeText(getBaseContext(), "拍照", Toast.LENGTH_SHORT).show();
-                    cameraService.takePicture();
+                    cameraService.takePicture(true, false);
                 }
-            }else {
-                ru.havePhoto(CollectActivity.this,local_view);
+            } else {
+                ru.catchPhoto(CollectActivity.this, local_view);
             }
         });
         videoButton.setOnClickListener(v -> {
-                if (!activateVideo) {
-                    ru.setVideoStart(vfr,localTrack,rootEglBase);
-                    activateVideo = true;
-                    runOnUiThread(() -> {
-                        Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
-                    });
-                } else {
-                    ru.terminateVideo(vfr, localTrack, rootEglBase, CollectActivity.this);
-                    activateVideo = false;
-                }
-                if (videoState == 0) {
-                    //setFormat设置用于显示的格式化字符串。
-                    //替换字符串中第一个“%s”为当前"MM:SS"或 "H:MM:SS"格式的时间显示。
-                    mChronometer.setBase(SystemClock.elapsedRealtime());
-                    mChronometer.setFormat("%s");
-                    mChronometer.setVisibility(View.VISIBLE);
-                    mChronometer.start();
-                    videoState = 1;
-                } else {
-                    mChronometer.stop();
-                    mChronometer.setVisibility(View.INVISIBLE);
-                    videoState = 0;
-                }
+            if (!activateVideo) {
+                ru.setVideoStart(vfr, localTrack, rootEglBase);
+                activateVideo = true;
+                runOnUiThread(() -> {
+                    Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
+                });
+            } else {
+                ru.terminateVideo(vfr, localTrack, rootEglBase, CollectActivity.this);
+                activateVideo = false;
+            }
+            if (videoState == 0) {
+                //setFormat设置用于显示的格式化字符串。
+                //替换字符串中第一个“%s”为当前"MM:SS"或 "H:MM:SS"格式的时间显示。
+                mChronometer.setBase(SystemClock.elapsedRealtime());
+                mChronometer.setFormat("%s");
+                mChronometer.setVisibility(View.VISIBLE);
+                mChronometer.start();
+                videoState = 1;
+            } else {
+                mChronometer.stop();
+                mChronometer.setVisibility(View.INVISIBLE);
+                videoState = 0;
+            }
 
         });
     }
@@ -295,14 +278,11 @@ public class CollectActivity extends AppCompatActivity {
 
     VideoFileRenderer vfr = null;
     VideoTrack localTrack = null;
-    private void sendId2Control(String id){
-        new Thread(()->{
-            WifiClientService.serverOut.println("userID");
-            WifiClientService.serverOut.flush();
-            WifiClientService.serverOut.println(id);
-            WifiClientService.serverOut.flush();
-        }).start();
+
+    private void sendId2Control(String id) {
+        TransferUtil.C2S_UserID(id);
     }
+
     private void startCall() {
         manager = WebRTCManager.getInstance();
         manager.setCallback(new IViewCallback() {
@@ -314,6 +294,7 @@ public class CollectActivity extends AppCompatActivity {
                     localTrack = stream.videoTracks.get(0);
 
                 }
+                RecordUtil.setMyId(socketId);
                 sendId2Control(socketId);
                 Log.d(TAG, "onSetLocalStream: send id");
                 if (videoEnable) {

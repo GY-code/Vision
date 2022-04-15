@@ -1,27 +1,20 @@
-package t20220049.sw_vision.service;
+package t20220049.sw_vision.utils;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
-import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
-import android.net.Uri;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
@@ -37,15 +30,10 @@ import org.webrtc.SurfaceViewRenderer;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import okio.BufferedSource;
-import okio.Okio;
-import okio.Sink;
-import t20220049.sw_vision.utils.RecordUtil;
 import t20220049.sw_vision.webRTC_utils.WebRTCManager;
 
 
@@ -63,7 +51,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
     @Override
     public void surfaceCreated(@NonNull SurfaceHolder surfaceHolder) {
         msurfaceHolder = surfaceHolder;
-        requestCamera();
+//        requestCamera();
     }
 
     @Override
@@ -161,7 +149,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         } else {
             mCameraId = 1;
         }
-        requestCamera();
+//        requestCamera();
     }
 
     public void requestCamera() {
@@ -169,6 +157,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
             //0/1/2
             mCamera = Camera.open(mCameraId);//手机上可以用来切换前后摄像头，不同的设备要看底层支持情况
             Log.i(TAG, "handleRequestCamera mCameraId = " + mCameraId);
+            mCamera.lock();
             Camera.Parameters parameters = mCamera.getParameters();
             if (mCameraId == 0) {
                 parameters.setFlashMode(Camera.Parameters.FLASH_MODE_AUTO);
@@ -179,6 +168,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
             mCamera.setPreviewDisplay(msurfaceHolder);
             mCamera.startPreview();
             mCamera.cancelAutoFocus();
+            mCamera.unlock();
         } catch (Exception error) {
             Log.e(TAG, "handleRequestCamera error = " + error.getMessage());
         }
@@ -188,7 +178,6 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
 
     public void initMedia(SurfaceViewRenderer remote_view) {
         requestCamera();
-        mCamera.unlock();
         mMediaRecorder.setCamera(mCamera);
         mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);//设置音频源
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.DEFAULT);//设置视频源
@@ -216,7 +205,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         });
     }
 
-    public void takePicture() {
+    public void takePicture(boolean isCollect,boolean isSend) {
         requestCamera();
         manager.stopCapture();
         mCamera.takePicture(null, null, (bytes, camera) -> {
@@ -232,11 +221,23 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                     m.setRotate(270, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
                 }
                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
-                MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, fileName, fileName);
+                //存储文件，照片照的都先放在local
+                RecordUtil recordUtil = new RecordUtil(getApplicationContext());
+                recordUtil.savePhoto2Gallery(bitmap);
+                if (isCollect) {
+                    recordUtil.savePhotoInLocal(bitmap);
+                    if(isSend){
+                        TransferUtil.C2S_Photo(RecordUtil.localPhoto,getApplicationContext());
+                    }
+
+                }else{
+                    recordUtil.savePhotoInRemote(bitmap);
+                }
             }).start();
 //            mCamera.startPreview();
         });
         manager.startCapture();
+        mCamera.release();
     }
 
     public void activateRecord(SurfaceViewRenderer remote_view) {
@@ -248,7 +249,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
             requestCamera();
 
             RecordUtil recordUtil = new RecordUtil(getApplicationContext());
-            recordUtil.insertVideo(tempVideo.getAbsolutePath(), getApplicationContext());
+            recordUtil.saveVideo2Gallery(tempVideo.getAbsolutePath(), getApplicationContext());
             manager.startCapture();
         } else {
             Toast.makeText(getBaseContext(), "开始录制", Toast.LENGTH_SHORT).show();

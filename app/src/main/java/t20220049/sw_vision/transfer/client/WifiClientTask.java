@@ -33,6 +33,7 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
 
     @SuppressLint("StaticFieldLeak")
     private final Context context;
+    private boolean usePath = false;
 
     public WifiClientTask(Context context) {
         this.context = context.getApplicationContext();
@@ -43,6 +44,18 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
 //        progressDialog.setTitle("正在发送文件");
 //        progressDialog.setMax(100);
         Log.e(TAG, "构造");
+    }
+
+    public WifiClientTask(Context context, boolean usePath) {
+        this.context = context.getApplicationContext();
+//        progressDialog = new ProgressDialog(context);
+//        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+//        progressDialog.setCancelable(false);
+//        progressDialog.setCanceledOnTouchOutside(false);
+//        progressDialog.setTitle("正在发送文件");
+//        progressDialog.setMax(100);
+        Log.e(TAG, "构造");
+        this.usePath = usePath;
     }
 
     @Override
@@ -68,20 +81,30 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
     protected Boolean doInBackground(Object... params) {
 
 
-
         Log.e(TAG, "backGround");
         Socket socket = WifiClientService.socket;
         OutputStream outputStream = null;
         ObjectOutputStream objectOutputStream = null;
         InputStream inputStream = null;
         try {
-            WifiClientService.serverOut.println("sendFile");
+            if (params[1] != null && params[1].toString().equals("photo")) {
+                WifiClientService.serverOut.println("sendPhoto");
+            } else if (params[1] != null && params[1].toString().equals("video")) {
+                WifiClientService.serverOut.println("sendVideo");
+            } else {
+                WifiClientService.serverOut.println("sendFile");
+            }
             WifiClientService.serverOut.flush();
 //            String hostAddress = params[0].toString();
-            Uri fileUri = Uri.parse(params[0].toString());
 
             //获取文件
-            String outputFilePath = getOutputFilePath(fileUri);
+            String outputFilePath;
+            if (!usePath) {
+                Uri fileUri = Uri.parse(params[0].toString());
+                outputFilePath = getOutputFilePath(fileUri);
+            } else {
+                outputFilePath = params[0].toString();
+            }
             File outputFile = new File(outputFilePath);
 
             //将文件转化为对象

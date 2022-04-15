@@ -37,36 +37,72 @@ import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
 public class RecordUtil {
     //0表示采集端  1 表示控制端
     Context context;
-    String srcPath;
-    File y4mfile;
+    String filePath;
+    static String localPath;
+    String remotePath;
+    String localy4m;
+    String localmp4;
+    public static String localPhoto;
+    public  static String remotePhotoPath;
+    public static String remoteVideoPath;
     private static final String VIDEO_BASE_URI = "content://media/external/video/media";
     private static final String TAG = "RecordUtil";
     private long stime;
     private long ltime;
     public static boolean isFullDefinition = true;
 
+    public static void setMyId(String myId) {
+        RecordUtil.myId = myId;
+        localPhoto = localPath + myId + ".png";
+    }
+
+    private static String myId;
+
     public RecordUtil(Context c) {
         context = c;
-        srcPath = context.getFilesDir().getAbsolutePath() + "/";
-        y4mfile = new File(srcPath + "local.y4m");
+        filePath = context.getFilesDir().getAbsolutePath() + "/";
+        localPath = filePath + "local/";
+        remotePath = filePath + "remote/";
+        localy4m = localPath + "local.y4m";
+        localmp4 = localPath + "local.mp4";
+        remotePhotoPath = remotePath + "photo/";
+        remoteVideoPath = remotePath + "video/";
         RxFFmpegInvoke.getInstance().setDebug(true);
+        mkDir(localPath);
+        mkDir(remotePath);
+        mkDir(remotePhotoPath);
+        mkDir(remoteVideoPath);
     }
 
     public static void setFullDefinition(boolean b) {
         isFullDefinition = b;
     }
 
+    public void mkDir(String path) {
+        File file = new File(path);
+        if (!file.exists()) {
+            file.mkdir();
+        }
+    }
+
     public void cleary4m() {
+        File y4mfile = new File(localy4m);
         if (y4mfile.isFile() && y4mfile.exists()) {
             y4mfile.delete();
+        }
+    }
+
+    public void clearlocalPhoto() {
+        File photoFile = new File(localPhoto);
+        if (photoFile.isFile() && photoFile.exists()) {
+            photoFile.delete();
         }
     }
 
     public void setVideoStart(VideoFileRenderer vfr, VideoTrack localTrack, EglBase rootEglBase) {
         stime = new Date().getTime();
         try {
-            vfr = new VideoFileRenderer(y4mfile.toString(),
-                    PeerConnectionHelper.VIDEO_RESOLUTION_WIDTH, PeerConnectionHelper.VIDEO_RESOLUTION_HEIGHT, rootEglBase.getEglBaseContext());
+            vfr = new VideoFileRenderer(localy4m, PeerConnectionHelper.VIDEO_RESOLUTION_WIDTH, PeerConnectionHelper.VIDEO_RESOLUTION_HEIGHT, rootEglBase.getEglBaseContext());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -83,14 +119,14 @@ public class RecordUtil {
             Toast.makeText(context, "结束录制", Toast.LENGTH_SHORT).show();
         });
         new Thread(() -> {
-            String text = "ffmpeg -t " + ltime + " -accurate_seek -i " + y4mfile.toString() + " " + srcPath + "local" + ".mp4";
+            String text = "ffmpeg -t " + ltime + " -accurate_seek -i " + localy4m + " " + localmp4;
             Log.d(TAG, "terminateVideo: " + text);
             String[] commands = text.split(" ");
             RxFFmpegInvoke.getInstance().runCommand(commands, new RxFFmpegInvoke.IFFmpegListener() {
                 @Override
                 public void onFinish() {
                     Log.e(TAG, "onFinish: " + text);
-                    insertVideo(srcPath + "local" + ".mp4", context);
+                    saveVideo2Gallery(localmp4, context);
                     activity.runOnUiThread(() -> {
                         Toast.makeText(context, "已保存到相册", Toast.LENGTH_SHORT).show();
                     });
@@ -115,7 +151,7 @@ public class RecordUtil {
 
     }
 
-    public void insertVideo(String videoPath, Context context) {
+    public void saveVideo2Gallery(String videoPath, Context context) {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
 //        Uri newUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName() + ".fileprovider", new File(videoPath));
 //        retriever.setDataSource(getApplicationContext(), newUri);// videoPath 本地视频的路径
@@ -155,7 +191,7 @@ public class RecordUtil {
             buffer.readAll(sink);
             values.put(MediaStore.Video.Media.IS_PRIVATE, 0);
             contentResolver.update(item, values, null, null);
-            new File(imagePath).delete();
+//            new File(imagePath).delete();
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                 Cursor query = context.getContentResolver().query(item, null, null, null);
                 if (query != null) {
@@ -170,23 +206,23 @@ public class RecordUtil {
     }
 
     //照一张本地缩略图片
-    public void havePhoto(Activity activity, SurfaceViewRenderer mySurfaceViewRenderer) {
+    public void catchPhoto(Activity activity, SurfaceViewRenderer mySurfaceViewRenderer) {
         Log.e(TAG, "havePhoto");
         if (mySurfaceViewRenderer != null)
-        Log.e(TAG, "add");
-            mySurfaceViewRenderer.addFrameListener(new EglRenderer.FrameListener() {
-                @Override
-                public void onFrame(Bitmap bitmap) {
-                    activity.runOnUiThread(() -> {
-                        savePhoto(activity, bitmap);
-                        mySurfaceViewRenderer.removeFrameListener(this);
-                    });
-                }
-            }, 1);
+            Log.e(TAG, "add");
+        mySurfaceViewRenderer.addFrameListener(new EglRenderer.FrameListener() {
+            @Override
+            public void onFrame(Bitmap bitmap) {
+                activity.runOnUiThread(() -> {
+                    savePhotoInLocal(bitmap);
+                    mySurfaceViewRenderer.removeFrameListener(this);
+                });
+            }
+        }, 1);
     }
 
     //控制端存储所有缩略画面
-    public void haveAllPhoto(Activity activity, Map<String, SurfaceViewRenderer> _videoViews) {
+    public void catchAllPhoto(Activity activity, Map<String, SurfaceViewRenderer> _videoViews) {
         for (String userId : _videoViews.keySet()) {
             SurfaceViewRenderer svr = _videoViews.get(userId);
             if (svr != null)
@@ -194,7 +230,7 @@ public class RecordUtil {
                     @Override
                     public void onFrame(Bitmap bitmap) {
                         activity.runOnUiThread(() -> {
-                            savePhoto(activity, bitmap);
+                            savePhotoInLocal(bitmap);
                             svr.removeFrameListener(this);
                         });
                     }
@@ -202,19 +238,17 @@ public class RecordUtil {
         }
     }
 
-    //存到本地photo
-    public void savePhoto(Activity activity, Bitmap bitmap) {
+    public String getCurTimeStr() {
         long curTime = new Date().getTime();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-//        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "record_photo "+sdf.format(curTime));
-        String fileName = "record_photo " + sdf.format(curTime) + ".png";
-        Log.e(TAG, "save");
-        MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, fileName, fileName);
-        activity.runOnUiThread(() -> {
-            Toast.makeText(context, "已保存图片到相册", Toast.LENGTH_SHORT).show();
-        });
+        return sdf.format(curTime);
+    }
 
-        File file = new File(srcPath, fileName);
+    //存photo到文件系统
+    public void savePhotoInLocal(Bitmap bitmap) {
+        Log.e(TAG, "save");
+        clearlocalPhoto();
+        File file = new File(localPhoto);
         try {
             FileOutputStream fos = new FileOutputStream(file);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
@@ -223,6 +257,32 @@ public class RecordUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    //存photo到文件系统
+    public void savePhotoInRemote(Bitmap bitmap) {
+        Log.e(TAG, "save");
+        clearlocalPhoto();
+        File file = new File(remotePhotoPath+myId+".png" +
+                "");
+        try {
+            FileOutputStream fos = new FileOutputStream(file);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void savePhoto2Gallery(Activity activity, Bitmap bitmap, String fileName) {
+        activity.runOnUiThread(() -> {
+            Toast.makeText(context, "已保存图片到相册", Toast.LENGTH_SHORT).show();
+        });
+        MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, fileName, fileName);
+    }
+
+    public void savePhoto2Gallery(Bitmap bitmap) {
+        MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, getCurTimeStr(), getCurTimeStr());
     }
 
     private String getBetweenStr(long between) {

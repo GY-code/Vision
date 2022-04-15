@@ -4,17 +4,10 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Service;
 import android.content.ComponentName;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
-import android.net.Uri;
-import android.net.wifi.p2p.WifiP2pDevice;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
@@ -25,7 +18,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.Chronometer;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -42,12 +34,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import io.microshow.rxffmpeg.RxFFmpegInvoke;
-import okio.BufferedSource;
-import okio.Okio;
-import okio.Sink;
 import t20220049.sw_vision.utils.TimerManager;
+import t20220049.sw_vision.utils.TransferUtil;
 import t20220049.sw_vision.utils.VideoFragment;
-import t20220049.sw_vision.service.CameraService;
+import t20220049.sw_vision.utils.CameraService;
 import t20220049.sw_vision.utils.RecordUtil;
 import t20220049.sw_vision.webRTC_utils.IViewCallback;
 import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
@@ -66,11 +56,8 @@ import org.webrtc.VideoFileRenderer;
 import org.webrtc.VideoTrack;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -422,11 +409,12 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         photoButton.setOnClickListener(v -> {
             if (RecordUtil.isFullDefinition) {
                 if (cameraService != null) {
-                    Toast.makeText(getBaseContext(), "拍照", Toast.LENGTH_SHORT).show();
-                    cameraService.takePicture();
+                    Toast.makeText(getBaseContext(), "控制所有端拍照", Toast.LENGTH_SHORT).show();
+                    cameraService.takePicture(false,false);
+                    TransferUtil.S2C("photo");
                 }
             }else {
-                ru.havePhoto(ControlActivity.this,_videoViews.get(myId));
+                ru.catchPhoto(ControlActivity.this,_videoViews.get(myId));
             }
         });
         videoButton.setOnClickListener(v -> {
@@ -464,6 +452,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             _localVideoTrack = videoTracks.get(0);
         }
         myId = userId;
+        RecordUtil.setMyId(userId);
         userIdList.add(userId);
         streamList.add(stream);
 
@@ -548,13 +537,6 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         if (stream.videoTracks.size() > 0) {
             stream.videoTracks.get(0).addSink(sink);
             VideoFileRenderer vfr = null;
-            try {
-                vfr = new VideoFileRenderer(getApplicationContext().getFilesDir().getAbsolutePath() + "/" + id + ".y4m",
-                        PeerConnectionHelper.VIDEO_RESOLUTION_WIDTH, PeerConnectionHelper.VIDEO_RESOLUTION_HEIGHT, rootEglBase.getEglBaseContext());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            stream.videoTracks.get(0).addSink(vfr);
             _vfrs.put(id, vfr);
         }
         _videoViews.put(id, renderer);

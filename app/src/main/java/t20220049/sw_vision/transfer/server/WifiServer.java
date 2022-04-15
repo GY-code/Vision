@@ -19,8 +19,9 @@ import java.util.ArrayList;
 import t20220049.sw_vision.transfer.model.FileTransfer;
 import t20220049.sw_vision.transfer.util.Md5Util;
 import t20220049.sw_vision.ui.ReceiveFileActivity;
+import t20220049.sw_vision.utils.RecordUtil;
 
-public class WifiServer extends Thread{
+public class WifiServer extends Thread {
     private static final String TAG = "WifiServer";
     static ServerSocket serverSocket = null;//自己的ServerSocket
     Socket clientSocket = null;//自己的ServerSocket对应的(client)Socket
@@ -35,59 +36,64 @@ public class WifiServer extends Thread{
         public Socket client = null;
         public String clientIP = "default ip";
         public String clientUserID;
-        public MyClient (Socket client,String clientIP) {
+
+        public MyClient(Socket client, String clientIP) {
             this.client = client;
             this.clientIP = clientIP;
         }
     }
 
-    public WifiServer(ServerSocket serverSocket, Socket clientSocket, String clientIP){
+    public WifiServer(ServerSocket serverSocket, Socket clientSocket, String clientIP) {
         clientsNum++;
-        mClient = new MyClient(clientSocket,clientIP);
+        mClient = new MyClient(clientSocket, clientIP);
         clients.add(mClient);
-        Log.i(TAG,"a client has connected.(" + clientsNum + " clients now.)");
+        Log.i(TAG, "a client has connected.(" + clientsNum + " clients now.)");
         this.clientSocket = clientSocket;
-        if(WifiServer.serverSocket==null)
+        if (WifiServer.serverSocket == null)
             WifiServer.serverSocket = serverSocket;
     }
 
-    public void run(){
+    public void run() {
         Looper.prepare();
         BufferedReader in = null;
         PrintWriter out = null;
         String inputLine;
-        try{
+        try {
             //获取客户端输入流
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             out = new PrintWriter(clientSocket.getOutputStream());
             //不断监听客户端输入
-            while(true){ //(inputLine = in.readLine())!=null
+            while (true) { //(inputLine = in.readLine())!=null
 //                if(in==null)
-                    in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
                 inputLine = in.readLine();
 //                Log.i(TAG,"recieve message[from client " + mClient.clientIP + "]: " + inputLine);
                 //处理客户端的各种请求
-                if(inputLine==null){
+                if (inputLine == null) {
                     continue;
                 }
-                if (inputLine.equals("sendFile")){
-                    Log.e(TAG,"request send file");
-                    receiveFile();
-                } else if (inputLine.equals("userID")){
-                    Log.e(TAG,"send user id");
+                if (inputLine.equals("sendPhoto")) {
+                    Log.e(TAG, "request send photo");
+                    receiveFile("photo");
+                } else if (inputLine.equals("sendVideo")) {
+                    receiveFile("video");
+                } else if (inputLine.equals("sendFile")) {
+                    receiveFile("file");
+                } else if (inputLine.equals("userID")) {
+                    Log.e(TAG, "receive user id");
                     mClient.clientUserID = in.readLine();
-                    Log.d(TAG, "收到userId: "+mClient.clientUserID);
-                } else if(inputLine.equals("quit")){
+                    Log.d(TAG, "收到userId: " + mClient.clientUserID);
+                } else if (inputLine.equals("quit")) {
                     break;
                 }
             }
 //            in.close();
 //            clientSocket.close();
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             clientsNum--;
             clients.remove(mClient);
-            Log.i(TAG,"a client quits.");
+            Log.i(TAG, "a client quits.");
         }
     }
 
@@ -95,11 +101,11 @@ public class WifiServer extends Thread{
         void onFileReceiveFinished();
     }
 
-    public void setListener(FileReceiveListener fileReceiveListener){
+    public void setListener(FileReceiveListener fileReceiveListener) {
         this.fileReceiveListener = fileReceiveListener;
     }
 
-    private void receiveFile() {
+    private void receiveFile(String type) {
         File file = null;
         try {
             InputStream inputStream;
@@ -115,7 +121,13 @@ public class WifiServer extends Thread{
             String name = fileTransfer.getFileName();
 
             //将文件存储至指定位置
-            file = new File(ReceiveFileActivity.cacheDir, name);
+            if (type.equals("photo")) {
+                file = new File(RecordUtil.remotePhotoPath, name);
+            } else if (type.equals("video")) {
+                file = new File(RecordUtil.remoteVideoPath, name);
+            } else {
+                file = new File(ReceiveFileActivity.cacheDir, name);
+            }
             fileOutputStream = new FileOutputStream(file);
             byte[] buf = new byte[1024];
             int len;
@@ -129,7 +141,7 @@ public class WifiServer extends Thread{
 //                if (progressChangListener != null) {
 //                    progressChangListener.onProgressChanged(fileTransfer, progress);
 //                }
-                if(progress==100)
+                if (progress == 100)
                     break;
             }
 
@@ -139,7 +151,7 @@ public class WifiServer extends Thread{
 //            fileOutputStream.close();
 //            serverSocket = null;
             Log.e(TAG, "文件接收成功，文件的MD5码是：" + Md5Util.getMd5(file));
-            if(fileReceiveListener!=null){
+            if (fileReceiveListener != null) {
                 fileReceiveListener.onFileReceiveFinished();
             }
 //            Toast.makeText(ReceiveFileActivity.context.getApplicationContext(),"接收文件成功",Toast.LENGTH_SHORT).show();
@@ -157,17 +169,17 @@ public class WifiServer extends Thread{
 //        }
     }
 
-    public static void sendInstruction(String instruction,String clientIP) {
+    public static void sendInstruction(String instruction, String clientIP) {
 
         PrintWriter out;
-        System.out.println("this:"+clientIP);
-        for(MyClient c:clients){
+        System.out.println("this:" + clientIP);
+        for (MyClient c : clients) {
             System.out.println(c.clientIP);
-            if (c.clientIP.equals(clientIP)){
+            if (c.clientIP.equals(clientIP)) {
                 try {
-                    out = new PrintWriter(c.client.getOutputStream(),true);
+                    out = new PrintWriter(c.client.getOutputStream(), true);
                     out.println(instruction);
-                    Log.i(TAG,"a instruction has sent.");
+                    Log.i(TAG, "a instruction has sent.");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
