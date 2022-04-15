@@ -244,7 +244,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 //                }
 
                 int size = userIdList.size();
-                currentIndex = (currentIndex+1) % size;
+                currentIndex = (currentIndex + 1) % size;
 
 //                if (currentIndex == 0) {
 //                    for (int i = 0; i < userIdList.size(); i++) {
@@ -307,34 +307,11 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                     @Override
                     public void onFrame(Bitmap bitmap) {
                         runOnUiThread(() -> {
-                            savePhoto(userId, bitmap);
+                            ru.savePhoto2Gallery(ControlActivity.this, bitmap, userId);
                             svr.removeFrameListener(this);
                         });
                     }
                 }, 1);
-        }
-    }
-
-    private void savePhoto(String userId, Bitmap bitmap) {
-        long curTime = new Date().getTime();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-//        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "record_photo "+sdf.format(curTime));
-        String fileName = "photo-" + userId + "-" + sdf.format(curTime) + ".png";
-        MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, fileName, fileName);
-        runOnUiThread(() -> {
-            Toast.makeText(getApplicationContext(), "已保存图片到相册", Toast.LENGTH_SHORT).show();
-        });
-
-        File appDir = new File(getApplicationContext().getFilesDir() + "");
-        if (!appDir.exists()) appDir.mkdir();
-        File file = new File(appDir, fileName);
-        try {
-            FileOutputStream fos = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-            fos.flush();
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -410,11 +387,11 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             if (RecordUtil.isFullDefinition) {
                 if (cameraService != null) {
                     Toast.makeText(getBaseContext(), "控制所有端拍照", Toast.LENGTH_SHORT).show();
-                    cameraService.takePicture(false,false);
+                    cameraService.takePicture(false, false);
                     TransferUtil.S2C("photo");
                 }
-            }else {
-                ru.catchPhoto(ControlActivity.this,_videoViews.get(myId));
+            } else {
+                ru.catchPhoto(ControlActivity.this, _videoViews.get(myId));
             }
         });
         videoButton.setOnClickListener(v -> {
@@ -425,9 +402,11 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                 runOnUiThread(() -> {
                     Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
                 });
+                TransferUtil.S2C("start");
             } else {
-                ru.terminateVideo(_vfrs.get(myId), _localVideoTrack, rootEglBase, ControlActivity.this);
+                ru.terminateVideo(_vfrs.get(myId), _localVideoTrack, rootEglBase, ControlActivity.this,false,false);
                 activateVideo = false;
+                TransferUtil.S2C("stop");
             }
         });
     }
@@ -468,7 +447,6 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         });
 
 
-
         if (currentIndex == 0) {
             runOnUiThread(() -> {
                 addView(userId, stream);
@@ -504,7 +482,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     public void onCloseWithId(String userId) {
         int pos = userIdList.indexOf(userId);
         userIdList.remove(userId);
-        streamList.remove(pos-1);
+        streamList.remove(pos - 1);
         for (int i = 0; i < mDevicesList.size(); i++) {
             if (mDevicesList.get(i).userId.equals(userId)) {
                 mDevicesList.remove(i);

@@ -41,9 +41,9 @@ public class RecordUtil {
     static String localPath;
     String remotePath;
     String localy4m;
-    String localmp4;
+    static String localmp4;
     public static String localPhoto;
-    public  static String remotePhotoPath;
+    public static String remotePhotoPath;
     public static String remoteVideoPath;
     private static final String VIDEO_BASE_URI = "content://media/external/video/media";
     private static final String TAG = "RecordUtil";
@@ -54,6 +54,7 @@ public class RecordUtil {
     public static void setMyId(String myId) {
         RecordUtil.myId = myId;
         localPhoto = localPath + myId + ".png";
+        localmp4 = localPath + myId + ".mp4";
     }
 
     private static String myId;
@@ -64,7 +65,6 @@ public class RecordUtil {
         localPath = filePath + "local/";
         remotePath = filePath + "remote/";
         localy4m = localPath + "local.y4m";
-        localmp4 = localPath + "local.mp4";
         remotePhotoPath = remotePath + "photo/";
         remoteVideoPath = remotePath + "video/";
         RxFFmpegInvoke.getInstance().setDebug(true);
@@ -85,19 +85,13 @@ public class RecordUtil {
         }
     }
 
-    public void cleary4m() {
-        File y4mfile = new File(localy4m);
-        if (y4mfile.isFile() && y4mfile.exists()) {
-            y4mfile.delete();
+    public static void clearFile(String path) {
+        File file = new File(path);
+        if (file.isFile() && file.exists()) {
+            file.delete();
         }
     }
 
-    public void clearlocalPhoto() {
-        File photoFile = new File(localPhoto);
-        if (photoFile.isFile() && photoFile.exists()) {
-            photoFile.delete();
-        }
-    }
 
     public void setVideoStart(VideoFileRenderer vfr, VideoTrack localTrack, EglBase rootEglBase) {
         stime = new Date().getTime();
@@ -109,7 +103,7 @@ public class RecordUtil {
         localTrack.addSink(vfr);
     }
 
-    public void terminateVideo(VideoFileRenderer vfr, VideoTrack localTrack, EglBase rootEglBase, Activity activity) {
+    public void terminateVideo(VideoFileRenderer vfr, VideoTrack localTrack, EglBase rootEglBase, Activity activity, boolean isCollect, boolean isSend) {
         ltime = (new Date().getTime() - stime) / 1000;
         if (vfr != null) {
             localTrack.removeSink(vfr);
@@ -118,19 +112,33 @@ public class RecordUtil {
         activity.runOnUiThread(() -> {
             Toast.makeText(context, "结束录制", Toast.LENGTH_SHORT).show();
         });
+        clearFile(localmp4);
+        clearFile(remoteVideoPath + myId + ".mp4");
         new Thread(() -> {
-            String text = "ffmpeg -t " + ltime + " -accurate_seek -i " + localy4m + " " + localmp4;
-            Log.d(TAG, "terminateVideo: " + text);
+            String text;
+            if (isCollect) {
+                text = "ffmpeg -t " + ltime + " -accurate_seek -i " + localy4m + " " + localmp4;
+            } else {
+                text = "ffmpeg -t " + ltime + " -accurate_seek -i " + localy4m + " " + remoteVideoPath + myId + ".mp4";
+            }
+            Log.e(TAG, "terminateVideo: " + text);
             String[] commands = text.split(" ");
             RxFFmpegInvoke.getInstance().runCommand(commands, new RxFFmpegInvoke.IFFmpegListener() {
                 @Override
                 public void onFinish() {
                     Log.e(TAG, "onFinish: " + text);
-                    saveVideo2Gallery(localmp4, context);
+                    if (isCollect) {
+                        saveVideo2Gallery(localmp4, context);
+                    } else {
+                        saveVideo2Gallery(remoteVideoPath + myId + ".mp4", context);
+                    }
                     activity.runOnUiThread(() -> {
                         Toast.makeText(context, "已保存到相册", Toast.LENGTH_SHORT).show();
                     });
-                    cleary4m();
+                    clearFile(localy4m);
+                    if (isCollect && isSend) {
+                        TransferUtil.C2S_Video(remoteVideoPath + myId + ".mp4", context);
+                    }
                 }
 
                 @Override
@@ -247,7 +255,7 @@ public class RecordUtil {
     //存photo到文件系统
     public void savePhotoInLocal(Bitmap bitmap) {
         Log.e(TAG, "save");
-        clearlocalPhoto();
+        clearFile(localPhoto);
         File file = new File(localPhoto);
         try {
             FileOutputStream fos = new FileOutputStream(file);
@@ -258,12 +266,12 @@ public class RecordUtil {
             e.printStackTrace();
         }
     }
+
     //存photo到文件系统
     public void savePhotoInRemote(Bitmap bitmap) {
         Log.e(TAG, "save");
-        clearlocalPhoto();
-        File file = new File(remotePhotoPath+myId+".png" +
-                "");
+        clearFile(localPhoto);
+        File file = new File(remotePhotoPath + myId + ".png");
         try {
             FileOutputStream fos = new FileOutputStream(file);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);

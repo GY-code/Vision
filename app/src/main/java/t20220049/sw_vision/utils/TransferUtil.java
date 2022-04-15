@@ -35,4 +35,10 @@ public class TransferUtil {
             new WifiClientTask(context,true).execute(path,"photo");
         }
     }
+
+    public static void C2S_Video(String path, Context context){
+        if(WifiClientService.socket!=null){
+            new WifiClientTask(context,true).execute(path,"video");
+        }
+    }
 }

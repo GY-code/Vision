@@ -22,6 +22,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import t20220049.sw_vision.transfer.client.WifiClientService;
 import t20220049.sw_vision.utils.CameraService;
 import t20220049.sw_vision.utils.RecordUtil;
 import t20220049.sw_vision.utils.TransferUtil;
@@ -56,7 +57,7 @@ public class CollectActivity extends AppCompatActivity {
     private boolean isSwappedFeeds;
     private boolean isMirror = true;
 
-    private EglBase rootEglBase;
+    private static EglBase rootEglBase;
     private Chronometer mChronometer;
     private ImageView back;
     private ImageView switch_camera;
@@ -66,8 +67,8 @@ public class CollectActivity extends AppCompatActivity {
     private int videoState = 0;
 
     private ServiceConnection conn;
-    public static CameraService cameraService;
-    private RecordUtil ru;
+    public CameraService cameraService;
+    private static RecordUtil ru;
     boolean activateVideo = false;
     private static final String TAG = "ChatSingleActivity";
 
@@ -93,6 +94,7 @@ public class CollectActivity extends AppCompatActivity {
         initListener();
         initService();
         ru = new RecordUtil(getApplicationContext());
+        WifiClientService.setBaseActivityWeakRef(this);
     }
 
 
@@ -166,8 +168,18 @@ public class CollectActivity extends AppCompatActivity {
         mChronometer = (Chronometer) findViewById(R.id.record_chronometer);
     }
 
-    public static void CallTakePicture(boolean isCollect,boolean isSend) {
+    public void CallTakePicture(boolean isCollect,boolean isSend) {
         cameraService.takePicture(isCollect, isSend);
+    }
+
+    public void CallSetVideoStart(){
+        runOnUiThread(()->{
+        Toast.makeText(getApplicationContext(),"开始录制",Toast.LENGTH_SHORT).show();
+        });
+        ru.setVideoStart(vfr,localTrack,rootEglBase);
+    }
+    public void CallSetVideoEnd(boolean isCollect,boolean isSend){
+        ru.terminateVideo(vfr,localTrack,rootEglBase,CollectActivity.this,isCollect,isSend);
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -248,7 +260,7 @@ public class CollectActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
                 });
             } else {
-                ru.terminateVideo(vfr, localTrack, rootEglBase, CollectActivity.this);
+                ru.terminateVideo(vfr, localTrack, rootEglBase, CollectActivity.this,true,false);
                 activateVideo = false;
             }
             if (videoState == 0) {
@@ -268,7 +280,6 @@ public class CollectActivity extends AppCompatActivity {
         });
     }
 
-
     private void setSwappedFeeds(boolean isSwappedFeeds) {
         this.isSwappedFeeds = isSwappedFeeds;
         localRender.setTarget(isSwappedFeeds ? remote_view : local_view);
@@ -276,8 +287,8 @@ public class CollectActivity extends AppCompatActivity {
         remoteRender.setTarget(isSwappedFeeds ? local_view : remote_view);
     }
 
-    VideoFileRenderer vfr = null;
-    VideoTrack localTrack = null;
+    static VideoFileRenderer vfr = null;
+    static VideoTrack localTrack = null;
 
     private void sendId2Control(String id) {
         TransferUtil.C2S_UserID(id);

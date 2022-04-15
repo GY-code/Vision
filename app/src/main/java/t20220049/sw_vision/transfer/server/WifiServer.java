@@ -1,6 +1,8 @@
 package t20220049.sw_vision.transfer.server;
 
+import android.os.Handler;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -23,6 +25,8 @@ import t20220049.sw_vision.utils.RecordUtil;
 
 public class WifiServer extends Thread {
     private static final String TAG = "WifiServer";
+    public static final int PHOTO = 1;
+    public static final int VIDEO = 2;
     static ServerSocket serverSocket = null;//自己的ServerSocket
     Socket clientSocket = null;//自己的ServerSocket对应的(client)Socket
     static int clientsNum = 0;//当前有多少个客户端连接
@@ -31,6 +35,8 @@ public class WifiServer extends Thread {
     public MyClient mClient;
 
     public FileReceiveListener fileReceiveListener;
+    private ArrayList<String> photoWL = new ArrayList<>();
+    private ArrayList<String> videoWL = new ArrayList<>();
 
     public class MyClient {
         public Socket client = null;
@@ -59,6 +65,11 @@ public class WifiServer extends Thread {
         PrintWriter out = null;
         String inputLine;
         try {
+            for (MyClient mc : clients) {
+                photoWL.add(mc.clientIP);
+                videoWL.add(mc.clientIP);
+            }
+
             //获取客户端输入流
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             out = new PrintWriter(clientSocket.getOutputStream());
@@ -122,10 +133,13 @@ public class WifiServer extends Thread {
 
             //将文件存储至指定位置
             if (type.equals("photo")) {
+                RecordUtil.clearFile(RecordUtil.remotePhotoPath + name);
                 file = new File(RecordUtil.remotePhotoPath, name);
             } else if (type.equals("video")) {
+                RecordUtil.clearFile(RecordUtil.remoteVideoPath + name);
                 file = new File(RecordUtil.remoteVideoPath, name);
             } else {
+                RecordUtil.clearFile(ReceiveFileActivity.cacheDir + name);
                 file = new File(ReceiveFileActivity.cacheDir, name);
             }
             fileOutputStream = new FileOutputStream(file);
@@ -153,6 +167,27 @@ public class WifiServer extends Thread {
             Log.e(TAG, "文件接收成功，文件的MD5码是：" + Md5Util.getMd5(file));
             if (fileReceiveListener != null) {
                 fileReceiveListener.onFileReceiveFinished();
+            }
+            String[] alias = name.split("\\.", 2);
+            String address = clientSocket.getInetAddress().getHostAddress();
+            if (alias[1].equals("png")) {
+                Log.e(TAG, "receive photo from " + address);
+                photoWL.remove(address);
+                if (photoWL.isEmpty()) {
+                    Log.e(TAG, "photo all received! ");
+                    for (MyClient mc : clients) {
+                        photoWL.add(mc.clientIP);
+                    }
+                }
+                photoWL.remove(address);
+            } else {
+                Log.e(TAG, "video all received! ");
+                videoWL.remove(address);
+                if (videoWL.isEmpty()) {
+                    for (MyClient mc : clients) {
+                        videoWL.add(mc.clientIP);
+                    }
+                }
             }
 //            Toast.makeText(ReceiveFileActivity.context.getApplicationContext(),"接收文件成功",Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
