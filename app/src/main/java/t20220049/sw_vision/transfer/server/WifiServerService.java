@@ -21,7 +21,7 @@ import java.net.SocketException;
 import t20220049.sw_vision.transfer.common.Constants;
 import t20220049.sw_vision.transfer.model.FileTransfer;
 
-//后台：收文件
+//后台：收文件，对应控制端
 public class WifiServerService extends IntentService {
 
     private static final String TAG = "WifiServerService";
@@ -35,6 +35,8 @@ public class WifiServerService extends IntentService {
     private FileOutputStream fileOutputStream;
 
     private OnProgressChangListener progressChangListener;
+
+    public WifiServer.FileReceiveListener fileReceiveListener;
 
     public WifiServerService() {
         super("WifiServerService");
@@ -58,6 +60,7 @@ public class WifiServerService extends IntentService {
                 Socket clientSocket = serverSocket.accept();
                 String clientIPAddress = clientSocket.getInetAddress().getHostAddress();
                 WifiServer server = new WifiServer(serverSocket,clientSocket,clientIPAddress);
+                server.fileReceiveListener = fileReceiveListener;
                 server.start();
             }
         } catch (SocketException e) {

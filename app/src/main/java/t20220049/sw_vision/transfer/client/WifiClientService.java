@@ -1,10 +1,12 @@
 package t20220049.sw_vision.transfer.client;
 
+import android.app.Activity;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -12,12 +14,17 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
 import t20220049.sw_vision.transfer.common.Constants;
+import t20220049.sw_vision.ui.CollectActivity;
 import t20220049.sw_vision.ui.SendFileActivity;
+import t20220049.sw_vision.utils.CameraService;
+import t20220049.sw_vision.utils.RecordUtil;
 
+//对应采集端，发送文件
 public class WifiClientService extends IntentService {
 
     public static BufferedReader serverIn;
@@ -26,6 +33,11 @@ public class WifiClientService extends IntentService {
 
     public static Socket socket = null;
     private String clientIP = null;
+    private static WeakReference<CollectActivity> CollectActivityWeakRef;
+
+    public static void setBaseActivityWeakRef(CollectActivity activity) {
+        CollectActivityWeakRef = new WeakReference<>(activity);
+    }
 
     public WifiClientService() {
         super("WifiClientService");
@@ -51,15 +63,25 @@ public class WifiClientService extends IntentService {
 //                serverOut.println("initialize device name");
 //                serverOut.println(clientIP);
 //            }
-            Log.i(TAG,"listening..");
+            Log.i(TAG, "listening..");
             try {
                 serverIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                 serverOut = new PrintWriter(socket.getOutputStream());
+                RecordUtil recordUtil = new RecordUtil(getApplicationContext());
                 while (true) {
-                    String aLine = serverIn.readLine();
-                    if (aLine != null) {
-                        Log.i(TAG, "instruction received: " + aLine);
+//                    if(serverIn.)
+                    serverIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                    String instruction = serverIn.readLine();
+                    if (instruction.equals("photo")) {
+                        CollectActivityWeakRef.get().CallTakePicture(true, true);
                     }
+                    if (instruction.equals("start")) {
+                        CollectActivityWeakRef.get().CallSetVideoStart();
+                    }
+                    if (instruction.equals("stop")) {
+                        CollectActivityWeakRef.get().CallSetVideoEnd(true,true);
+                    }
+
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -75,7 +97,7 @@ public class WifiClientService extends IntentService {
         try {
             socket = new Socket();
             socket.bind(null);
-            socket.connect((new InetSocketAddress(serverIP, Constants.PORT)),10000);
+            socket.connect((new InetSocketAddress(serverIP, Constants.PORT)), 10000);
 
             ClientRunnable r = new ClientRunnable();
             Thread t = new Thread(r);
@@ -87,7 +109,7 @@ public class WifiClientService extends IntentService {
     }
 
     @Override
-    public void onDestroy(){
+    public void onDestroy() {
         super.onDestroy();
     }
 

@@ -1,27 +1,21 @@
-package t20220049.sw_vision.service;
+package t20220049.sw_vision.utils;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
-import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.SurfaceHolder;
@@ -32,19 +26,16 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 
 import org.webrtc.SurfaceViewRenderer;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import okio.BufferedSource;
-import okio.Okio;
-import okio.Sink;
 import t20220049.sw_vision.webRTC_utils.WebRTCManager;
 
 
@@ -97,6 +88,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         return super.onUnbind(intent);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onCreate() {
         tempVideo = new File(getBaseContext().getFilesDir() + "", "temp.mp4");
@@ -185,6 +177,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
 
     File tempVideo;
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void initMedia(SurfaceViewRenderer remote_view) {
         requestCamera();
         mCamera.unlock();
@@ -199,7 +192,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         mMediaRecorder.setVideoFrameRate(60);//设置视频的帧率
         if (mCameraId == 0) {
             mMediaRecorder.setOrientationHint(90);//设置视频的角度
-        }else {
+        } else {
             mMediaRecorder.setOrientationHint(270);//设置视频的角度
         }
         mMediaRecorder.setMaxDuration(60 * 1000);//设置最大录制时间
@@ -215,7 +208,9 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         });
     }
 
-    public void takePicture() {
+    RecordUtil recordUtil;
+
+    public void takePicture(boolean isCollect, boolean isSend) {
         requestCamera();
         manager.stopCapture();
         mCamera.takePicture(null, null, (bytes, camera) -> {
@@ -231,13 +226,25 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                     m.setRotate(270, (float) bitmap.getWidth() / 2, (float) bitmap.getHeight() / 2);
                 }
                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
-                MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, fileName, fileName);
+                //存储文件，照片照的都先放在local
+                recordUtil = new RecordUtil(getApplicationContext());
+                recordUtil.savePhoto2Gallery(bitmap);
+
+                if (isCollect) {
+                    recordUtil.savePhotoInLocal(bitmap);
+                    if (isSend) {
+                        TransferUtil.C2S_Photo(RecordUtil.localPhoto, getApplicationContext());
+                    }
+                } else {
+                    recordUtil.savePhotoInRemote(bitmap);
+                }
             }).start();
 //            mCamera.startPreview();
         });
         manager.startCapture();
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public void activateRecord(SurfaceViewRenderer remote_view) {
         if (isRecord) {
             Toast.makeText(getBaseContext(), "停止录制", Toast.LENGTH_SHORT).show();
@@ -245,7 +252,9 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
             mMediaRecorder.reset();//重置,将MediaRecorder调整为空闲状态
             isRecord = false;
             requestCamera();
-            insertVideo(tempVideo.getAbsolutePath(), getApplicationContext());
+
+            RecordUtil recordUtil = new RecordUtil(getApplicationContext());
+            recordUtil.saveVideo2Gallery(tempVideo.getAbsolutePath(), getApplicationContext());
             manager.startCapture();
         } else {
             Toast.makeText(getBaseContext(), "开始录制", Toast.LENGTH_SHORT).show();
@@ -277,60 +286,6 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
         }
     }
 
-    private static final String VIDEO_BASE_URI = "content://media/external/video/media";
-
-    private void insertVideo(String videoPath, Context context) {
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-        retriever.setDataSource(videoPath);
-        int nVideoWidth = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-        int nVideoHeight = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
-        int duration = Integer
-                .parseInt(retriever
-                        .extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-        long dateTaken = System.currentTimeMillis();
-        File file = new File(videoPath);
-        String title = file.getName();
-        String filename = file.getName();
-        String mime = "video/mp4";
-        ContentValues mCurrentVideoValues = new ContentValues(9);
-        mCurrentVideoValues.put(MediaStore.Video.Media.TITLE, title);
-        mCurrentVideoValues.put(MediaStore.Video.Media.DISPLAY_NAME, filename);
-        mCurrentVideoValues.put(MediaStore.Video.Media.DATE_TAKEN, dateTaken);
-        mCurrentVideoValues.put(MediaStore.MediaColumns.DATE_MODIFIED, dateTaken / 1000);
-        mCurrentVideoValues.put(MediaStore.Video.Media.MIME_TYPE, mime);
-        mCurrentVideoValues.put(MediaStore.Video.Media.DATA, videoPath);
-        mCurrentVideoValues.put(MediaStore.Video.Media.WIDTH, nVideoWidth);
-        mCurrentVideoValues.put(MediaStore.Video.Media.HEIGHT, nVideoHeight);
-        mCurrentVideoValues.put(MediaStore.Video.Media.RESOLUTION, Integer.toString(nVideoWidth) + "x" + Integer.toString(nVideoHeight));
-        mCurrentVideoValues.put(MediaStore.Video.Media.SIZE, new File(videoPath).length());
-        mCurrentVideoValues.put(MediaStore.Video.Media.DURATION, duration);
-        ContentResolver contentResolver = context.getContentResolver();
-        Uri videoTable = Uri.parse(VIDEO_BASE_URI);
-        Uri uri = contentResolver.insert(videoTable, mCurrentVideoValues);
-        writeFile(videoPath, mCurrentVideoValues, contentResolver, uri);
-    }
-
-    private void writeFile(String imagePath, ContentValues values, ContentResolver contentResolver, Uri item) {
-        try (OutputStream rw = contentResolver.openOutputStream(item, "rw")) {
-            // Write data into the pending image.
-            Sink sink = Okio.sink(rw);
-            BufferedSource buffer = Okio.buffer(Okio.source(new File(imagePath)));
-            buffer.readAll(sink);
-            values.put(MediaStore.Video.Media.IS_PENDING, 0);
-            contentResolver.update(item, values, null, null);
-            new File(imagePath).delete();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                Cursor query = getContentResolver().query(item, null, null, null);
-                if (query != null) {
-                    int count = query.getCount();
-                    Log.e("writeFile", "writeFile result :" + count);
-                    query.close();
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     private void startPreview() {
         Log.i(TAG, "startPreview");

@@ -6,6 +6,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -21,31 +22,45 @@ import java.util.Random;
 import t20220049.sw_vision.transfer.common.Constants;
 import t20220049.sw_vision.transfer.model.FileTransfer;
 import t20220049.sw_vision.transfer.util.Md5Util;
+import t20220049.sw_vision.ui.SendFileActivity;
 
 //后台: 发送文件
 public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
 
     private static final String TAG = "WifiClientTask";
 
-    private final ProgressDialog progressDialog;
+//    private final ProgressDialog progressDialog;
 
     @SuppressLint("StaticFieldLeak")
     private final Context context;
+    private boolean usePath = false;
 
     public WifiClientTask(Context context) {
         this.context = context.getApplicationContext();
-        progressDialog = new ProgressDialog(context);
-        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        progressDialog.setCancelable(false);
-        progressDialog.setCanceledOnTouchOutside(false);
-        progressDialog.setTitle("正在发送文件");
-        progressDialog.setMax(100);
+//        progressDialog = new ProgressDialog(context);
+//        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+//        progressDialog.setCancelable(false);
+//        progressDialog.setCanceledOnTouchOutside(false);
+//        progressDialog.setTitle("正在发送文件");
+//        progressDialog.setMax(100);
         Log.e(TAG, "构造");
+    }
+
+    public WifiClientTask(Context context, boolean usePath) {
+        this.context = context.getApplicationContext();
+//        progressDialog = new ProgressDialog(context);
+//        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+//        progressDialog.setCancelable(false);
+//        progressDialog.setCanceledOnTouchOutside(false);
+//        progressDialog.setTitle("正在发送文件");
+//        progressDialog.setMax(100);
+        Log.e(TAG, "构造");
+        this.usePath = usePath;
     }
 
     @Override
     protected void onPreExecute() {
-        progressDialog.show();
+//        progressDialog.show();
     }
 
     private String getOutputFilePath(Uri fileUri) throws Exception {
@@ -64,7 +79,7 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
 
     @Override
     protected Boolean doInBackground(Object... params) {
-        WifiClientService.serverOut.println("sendFile");
+
 
         Log.e(TAG, "backGround");
         Socket socket = WifiClientService.socket;
@@ -72,11 +87,24 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
         ObjectOutputStream objectOutputStream = null;
         InputStream inputStream = null;
         try {
+            if (params[1] != null && params[1].toString().equals("photo")) {
+                WifiClientService.serverOut.println("sendPhoto");
+            } else if (params[1] != null && params[1].toString().equals("video")) {
+                WifiClientService.serverOut.println("sendVideo");
+            } else {
+                WifiClientService.serverOut.println("sendFile");
+            }
+            WifiClientService.serverOut.flush();
 //            String hostAddress = params[0].toString();
-            Uri fileUri = Uri.parse(params[0].toString());
 
             //获取文件
-            String outputFilePath = getOutputFilePath(fileUri);
+            String outputFilePath;
+            if (!usePath) {
+                Uri fileUri = Uri.parse(params[0].toString());
+                outputFilePath = getOutputFilePath(fileUri);
+            } else {
+                outputFilePath = params[0].toString();
+            }
             File outputFile = new File(outputFilePath);
 
             //将文件转化为对象
@@ -107,13 +135,13 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
                 Log.e(TAG, "文件发送进度：" + progress);
             }
 //            socket.close();
-            inputStream.close();
-            outputStream.close();
-            objectOutputStream.close();
+//            inputStream.close();
+//            outputStream.close();
+//            objectOutputStream.close();
 //            socket = null;
-            inputStream = null;
-            outputStream = null;
-            objectOutputStream = null;
+//            inputStream = null;
+//            outputStream = null;
+//            objectOutputStream = null;
             Log.e(TAG, "文件发送成功");
             return true;
         } catch (Exception e) {
@@ -127,27 +155,27 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
 //                    e.printStackTrace();
 //                }
 //            }
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (outputStream != null) {
-                try {
-                    outputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (objectOutputStream != null) {
-                try {
-                    objectOutputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+//            if (inputStream != null) {
+//                try {
+//                    inputStream.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            if (outputStream != null) {
+//                try {
+//                    outputStream.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//            if (objectOutputStream != null) {
+//                try {
+//                    objectOutputStream.close();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
         }
         return false;
     }
@@ -169,13 +197,18 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
 
     @Override
     protected void onProgressUpdate(Integer... values) {
-        progressDialog.setProgress(values[0]);
+//        progressDialog.setProgress(values[0]);
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(context.getApplicationContext(), message, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     protected void onPostExecute(Boolean aBoolean) {
-        progressDialog.cancel();
+//        progressDialog.cancel();
         Log.e(TAG, "onPostExecute: " + aBoolean);
+        showToast("发送文件成功");
     }
 
 }

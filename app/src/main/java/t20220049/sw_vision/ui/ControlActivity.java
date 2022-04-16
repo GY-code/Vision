@@ -1,16 +1,15 @@
 package t20220049.sw_vision.ui;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
+import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
-import android.net.Uri;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -18,6 +17,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -34,9 +34,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import io.microshow.rxffmpeg.RxFFmpegInvoke;
-import okio.BufferedSource;
-import okio.Okio;
-import okio.Sink;
+import t20220049.sw_vision.utils.TimerManager;
+import t20220049.sw_vision.utils.TransferUtil;
+import t20220049.sw_vision.utils.VideoFragment;
+import t20220049.sw_vision.utils.CameraService;
+import t20220049.sw_vision.utils.RecordUtil;
 import t20220049.sw_vision.webRTC_utils.IViewCallback;
 import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
 import t20220049.sw_vision.webRTC_utils.ProxyVideoSink;
@@ -54,11 +56,8 @@ import org.webrtc.VideoFileRenderer;
 import org.webrtc.VideoTrack;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.channels.FileChannel;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -82,6 +81,10 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     private Map<String, String> startVideoTimes = new HashMap<>();
     private Map<String, String> endVideoTimes = new HashMap<>();
     private List<MemberBean> _infos = new ArrayList<>();
+    private List<MediaStream> streamList = new ArrayList<>();
+    private List<VideoFragment> fragmentList = new ArrayList<>();
+    private List<String> userIdList = new ArrayList<>();
+    private int currentIndex = 0;
     private VideoTrack _localVideoTrack;
 
     private int mScreenWidth;
@@ -99,10 +102,17 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     RecyclerView v1;
     deviceAdapter deviceAdapter;
     List<Device> mDevicesList = new ArrayList<>();
+    boolean isMirrror = true;
+    RecordUtil ru;
+
+    private ServiceConnection conn;
+    private CameraService cameraService;
+    Intent serviceIntent;
 
     public class Device {
         String type;
         String name;
+        String userId;
     }
 
     public static void openActivity(Activity activity) {
@@ -111,6 +121,13 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     }
 
     class deviceAdapter extends RecyclerView.Adapter<MyViewHolder> {
+
+        private final List<Device> deviceList;
+
+        public deviceAdapter(List<Device> deviceList) {
+            this.deviceList = deviceList;
+        }
+
         @NonNull
         @Override
         public MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -119,12 +136,20 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             return myViewHolder;
         }
 
+
         @Override
-        public void onBindViewHolder(@NonNull MyViewHolder holder, int position) {
-            Device device = mDevicesList.get(position);
+        public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
+            Device device = this.deviceList.get(position);
             holder.mType.setText(device.type);
             holder.mName.setText(device.name);
+            holder.selectButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    changeRecordCapture(deviceList.get(position).userId);
+                }
+            });
         }
+
 
         @Override
         public int getItemCount() {
@@ -135,12 +160,42 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     class MyViewHolder extends RecyclerView.ViewHolder {
         TextView mType;
         TextView mName;
+        ImageView selectButton;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             mType = itemView.findViewById(R.id.txt_mType);
             mName = itemView.findViewById(R.id.txt_mName);
+            selectButton = itemView.findViewById(R.id.select_button);
         }
+    }
+
+    private void initService() {
+        conn = new ServiceConnection() {
+            /**
+             * 与服务器端交互的接口方法 绑定服务的时候被回调，在这个方法获取绑定Service传递过来的IBinder对象，
+             * 通过这个IBinder对象，实现宿主和Service的交互。
+             */
+            @Override
+            public void onServiceConnected(ComponentName name, IBinder service) {
+                Log.d(TAG, "绑定成功调用：onServiceConnected");
+                // 获取Binder
+                CameraService.LocalBinder binder = (CameraService.LocalBinder) service;
+                cameraService = binder.getService();
+            }
+
+            /**
+             * 当取消绑定的时候被回调。但正常情况下是不被调用的，它的调用时机是当Service服务被意外销毁时，
+             * 例如内存的资源不足时这个方法才被自动调用。
+             */
+            @Override
+            public void onServiceDisconnected(ComponentName name) {
+                cameraService = null;
+            }
+        };
+        serviceIntent = new Intent(this, CameraService.class);
+        bindService(serviceIntent, conn, Service.BIND_AUTO_CREATE);
+//        startService(serviceIntent);
     }
 
     @Override
@@ -154,15 +209,94 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 //        setContentView(R.layout.wr_activity_chat_room);
         setContentView(R.layout.acticity_control);
 
+        userIdList.add("_all");
+        streamList.add(null);
+
         initView();
         initVar();
         initListner();
+        initService();
 //        ChatRoomFragment chatRoomFragment = new ChatRoomFragment();
 //        replaceFragment(chatRoomFragment);
         startCall();
-        RxFFmpegInvoke.getInstance().setDebug(true);
-        srcPath = getApplicationContext().getFilesDir().getAbsolutePath() + "/";
+        ru = new RecordUtil(getApplicationContext());
 
+        Button switchButton = findViewById(R.id.button6);
+
+        switchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+//                if (currentIndex == 0) {
+//                    for (int i = 0; i < userIdList.size(); i++) {
+//                        String tempId = userIdList.get(i);
+//                        if (!tempId.equals("_all")) {
+//                            runOnUiThread(() -> {
+//                                removeView(tempId);
+//                            });
+//                        }
+//                    }
+//                } else {
+//                    String tempId = userIdList.get(currentIndex);
+//                    runOnUiThread(() -> {
+//                        removeView(tempId);
+//                    });
+//                }
+
+                int size = userIdList.size();
+                currentIndex = (currentIndex + 1) % size;
+
+//                if (currentIndex == 0) {
+//                    for (int i = 0; i < userIdList.size(); i++) {
+//                        String tempId = userIdList.get(i);
+//                        MediaStream tempStream = streamList.get(i);
+//                        if (!tempId.equals("_all") && tempStream != null) {
+//                            runOnUiThread(() -> {
+//                                addView(tempId, tempStream);
+//                            });
+//                        }
+//                    }
+//                } else {
+//                    String tempId = userIdList.get(currentIndex);
+//                    MediaStream tempStream = streamList.get(currentIndex);
+//                    runOnUiThread(() -> {
+//                        addView(tempId, tempStream);
+//                    });
+//                }
+
+//                Toast.makeText(ControlActivity.this, "switch to " + userIdList.get(currentIndex), Toast.LENGTH_LONG).show();
+                double[] cuts = TimerManager.getInstance().cut();
+                double startTime = cuts[0];
+                double durance = cuts[1];
+                Toast.makeText(ControlActivity.this,
+                        "Start at: " + Double.toString(startTime) + "\nRecord: " + Double.toString(durance) + "seconds",
+                        Toast.LENGTH_LONG).show();
+            }
+        });
+
+        RxFFmpegInvoke.getInstance().setDebug(true);
+    }
+
+    private void changeRecordCapture(String s) {
+        if (userIdList.contains(s)) {
+            cutRecordCapture();
+            currentIndex = userIdList.indexOf(s);
+        }
+    }
+
+    private void endRecordCapture() {
+        cutRecordCapture();
+    }
+
+    private void cutRecordCapture() {
+        double[] cuts = TimerManager.getInstance().cut();
+        double startTime = cuts[0];
+        double durance = cuts[1];
+        String filename = userIdList.get(currentIndex) + ".mp4";
+        fragmentList.add(new VideoFragment(startTime, durance, filename));
+        Toast.makeText(ControlActivity.this,
+                userIdList.get(currentIndex) + " Start at: " + Double.toString(startTime) + "\nRecord: " + Double.toString(durance) + "seconds",
+                Toast.LENGTH_LONG).show();
     }
 
     protected void havePhoto() {
@@ -173,34 +307,11 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                     @Override
                     public void onFrame(Bitmap bitmap) {
                         runOnUiThread(() -> {
-                            savePhoto(userId, bitmap);
+                            ru.savePhoto2Gallery(ControlActivity.this, bitmap, userId);
                             svr.removeFrameListener(this);
                         });
                     }
                 }, 1);
-        }
-    }
-
-    private void savePhoto(String userId, Bitmap bitmap) {
-        long curTime = new Date().getTime();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-//        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "record_photo "+sdf.format(curTime));
-        String fileName = "photo-" + userId + "-" + sdf.format(curTime) + ".png";
-        MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, fileName, fileName);
-        runOnUiThread(() -> {
-            Toast.makeText(getApplicationContext(), "已保存图片到相册", Toast.LENGTH_SHORT).show();
-        });
-
-        File appDir = new File(getApplicationContext().getFilesDir() + "");
-        if (!appDir.exists()) appDir.mkdir();
-        File file = new File(appDir, fileName);
-        try {
-            FileOutputStream fos = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-            fos.flush();
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -218,14 +329,15 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         behavior = BottomSheetBehavior.from(bottomSheet);
         v1 = findViewById(R.id.recyclerview);
 
-        for (int i = 0; i < 20; i++) {
-            Device device = new Device();
-            device.type = "标题" + i;
-            device.name = "内容" + i;
-            mDevicesList.add(device);
-        }
+        Device device = new Device();
+        device.type = "None";
+        device.name = "查看全部";
+        device.userId = "_all";
 
-        deviceAdapter = new deviceAdapter();
+        mDevicesList.add(device);
+
+        deviceAdapter = new deviceAdapter(mDevicesList);
+
         v1.setAdapter(deviceAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(ControlActivity.this);
         v1.setLayoutManager(layoutManager);
@@ -234,6 +346,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             public void onStateChanged(@NonNull View bottomSheet, @BottomSheetBehavior.State int newState) {
                 behavior.setState(newState);
             }
+
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
@@ -271,201 +384,35 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         });
 
         photoButton.setOnClickListener(v -> {
-            havePhoto();
+            if (RecordUtil.isFullDefinition) {
+                if (cameraService != null) {
+                    Toast.makeText(getBaseContext(), "控制所有端拍照", Toast.LENGTH_SHORT).show();
+                    cameraService.takePicture(false, false);
+                    TransferUtil.S2C("photo");
+                }
+            } else {
+                ru.catchPhoto(ControlActivity.this, _videoViews.get(myId));
+            }
         });
         videoButton.setOnClickListener(v -> {
-/*            String filename1 = "/sdcard/DCIM/Camera/temp.mp4";
-            String tsFilename1 = "/sdcard/DCIM/Camera/temp.ts";
-            String text = "ffmpeg -i " + filename1 + " -vcodec copy -acodec copy -vbsf " + tsFilename1;
-            String[] commands = text.split(" ");
-            new Thread(() -> {
-                RxFFmpegInvoke.getInstance().runCommand(commands, new RxFFmpegInvoke.IFFmpegListener() {
-                    @Override
-                    public void onFinish() {
-                        runOnUiThread(() -> {
-                            Toast.makeText(getApplicationContext(), "完成", Toast.LENGTH_SHORT).show();
-                        });
-                    }
-
-                    @Override
-                    public void onProgress(int progress, long progressTime) {
-                    }
-
-                    @Override
-                    public void onCancel() {
-                    }
-
-                    @Override
-                    public void onError(String message) {
-                        Log.e(TAG, "onError: "+message);
-                    }
-                });
-
-            }).start();*/
-
             if (!activateVideo) {
-                setVideoStart();
+                TimerManager.getInstance().restart();
+                ru.setVideoStart(_vfrs.get(myId), _localVideoTrack, rootEglBase);
                 activateVideo = true;
                 runOnUiThread(() -> {
                     Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
                 });
+                TransferUtil.S2C("start");
             } else {
-                terminateVideo();
+                ru.terminateVideo(_vfrs.get(myId), _localVideoTrack, rootEglBase, ControlActivity.this,false,false);
                 activateVideo = false;
+                TransferUtil.S2C("stop");
             }
         });
-    }
-
-    String srcPath;
-
-    private void setVideoStart() {
-        for (MemberBean mb :
-                _infos) {
-            String userId = mb.getId();
-            String raw_info = RxFFmpegInvoke.getInstance().getMediaInfo(srcPath + userId + ".y4m");
-            String[] raw_list = raw_info.split(";");
-            int dur = Integer.parseInt(raw_list[4].split("=|ms| |\\.")[1]);
-            String durTime = dur / 1000 + "." + (dur - dur / 1000);
-            startVideoTimes.put(userId, durTime);
-        }
-    }
-
-    private void setVideoEnd() {
-        for (MemberBean mb :
-                _infos) {
-            String userId = mb.getId();
-            String raw_info = RxFFmpegInvoke.getInstance().getMediaInfo(srcPath + userId + ".y4m");
-            String[] raw_list = raw_info.split(";");
-            int dur = Integer.parseInt(raw_list[4].split("=|ms| |\\.")[1]);
-            String durTime = dur / 1000 + "." + (dur - dur / 1000);
-            endVideoTimes.put(userId, durTime);
-        }
     }
 
     boolean activateVideo = false;
-    long startTime;
     private static final String TAG = "ChatRoomActivity";
-
-    public static void copyNio(String from, String to) {
-        FileChannel input = null;
-        FileChannel output = null;
-
-        try {
-
-            input = new FileInputStream(new File(from)).getChannel();
-            output = new FileOutputStream(new File(to)).getChannel();
-            output.transferFrom(input, 0, input.size());
-            output.close();
-            input.close();
-        } catch (Exception e) {
-            Log.w(TAG + "copyNio", "error occur while copy", e);
-        }
-    }
-
-    private String getBetweenStr(long between) {
-        long hour = (between / (60 * 60 * 1000));
-        long min = ((between / (60 * 1000)) - hour * 60);
-        long s = (between / 1000 - hour * 60 * 60 - min * 60);
-        long ms = (between - hour * 60 * 60 * 1000 - min * 60 * 1000 - s * 1000);
-        return String.format("%02d:%02d:%02d.%03d", hour, min, s, ms);
-    }
-
-    private void terminateVideo() {
-        setVideoEnd();
-        runOnUiThread(() -> {
-            Toast.makeText(getApplicationContext(), "结束录制", Toast.LENGTH_SHORT).show();
-        });
-        new Thread(() -> {
-            for (MemberBean mb : _infos) {
-                String userId = mb.getId();
-                String text = "ffmpeg -ss " + startVideoTimes.get(userId) + " -to " + endVideoTimes.get(userId) +
-                        " -accurate_seek -i " + srcPath + userId + ".y4m " + srcPath + userId + "-" + startVideoTimes.get(userId) + ".mp4";
-                Log.d(TAG, "terminateVideo: " + text);
-                String[] commands = text.split(" ");
-                RxFFmpegInvoke.getInstance().runCommand(commands, new RxFFmpegInvoke.IFFmpegListener() {
-                    @Override
-                    public void onFinish() {
-                        Log.e(TAG, "onFinish: " + srcPath + userId + "-" + startVideoTimes.get(userId) + ".mp4");
-                        insertVideo(srcPath + userId + "-" + startVideoTimes.get(userId) + ".mp4", getBaseContext());
-                        runOnUiThread(() -> {
-                            Toast.makeText(getApplicationContext(), "已保存到相册", Toast.LENGTH_SHORT).show();
-                        });
-                    }
-
-                    @Override
-                    public void onProgress(int progress, long progressTime) {
-                    }
-
-                    @Override
-                    public void onCancel() {
-                    }
-
-                    @Override
-                    public void onError(String message) {
-                    }
-                });
-            }
-        }).start();
-
-    }
-
-
-    private static final String VIDEO_BASE_URI = "content://media/external/video/media";
-
-    private void insertVideo(String videoPath, Context context) {
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-//        Uri newUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName() + ".fileprovider", new File(videoPath));
-//        retriever.setDataSource(getApplicationContext(), newUri);// videoPath 本地视频的路径
-//
-        retriever.setDataSource(videoPath);
-        int nVideoWidth = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-        int nVideoHeight = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
-        int duration = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-        long dateTaken = System.currentTimeMillis();
-        File file = new File(videoPath);
-        String title = file.getName();
-        String filename = file.getName();
-        String mime = "video/mp4";
-        ContentValues mCurrentVideoValues = new ContentValues(9);
-        mCurrentVideoValues.put(MediaStore.Video.Media.TITLE, title);
-        mCurrentVideoValues.put(MediaStore.Video.Media.DISPLAY_NAME, filename);
-        mCurrentVideoValues.put(MediaStore.Video.Media.DATE_TAKEN, dateTaken);
-        mCurrentVideoValues.put(MediaStore.MediaColumns.DATE_MODIFIED, dateTaken / 1000);
-        mCurrentVideoValues.put(MediaStore.Video.Media.MIME_TYPE, mime);
-        mCurrentVideoValues.put(MediaStore.Video.Media.DATA, videoPath);
-        mCurrentVideoValues.put(MediaStore.Video.Media.WIDTH, nVideoWidth);
-        mCurrentVideoValues.put(MediaStore.Video.Media.HEIGHT, nVideoHeight);
-        mCurrentVideoValues.put(MediaStore.Video.Media.RESOLUTION, Integer.toString(nVideoWidth) + "x" + Integer.toString(nVideoHeight));
-        mCurrentVideoValues.put(MediaStore.Video.Media.SIZE, new File(videoPath).length());
-        mCurrentVideoValues.put(MediaStore.Video.Media.DURATION, duration);
-        ContentResolver contentResolver = context.getContentResolver();
-        Uri videoTable = Uri.parse(VIDEO_BASE_URI);
-        Uri uri = contentResolver.insert(videoTable, mCurrentVideoValues);
-        writeFile(videoPath, mCurrentVideoValues, contentResolver, uri);
-    }
-
-    private void writeFile(String imagePath, ContentValues values, ContentResolver contentResolver, Uri item) {
-        try (OutputStream rw = contentResolver.openOutputStream(item, "rw")) {
-            // Write data into the pending image.
-            Sink sink = Okio.sink(rw);
-            BufferedSource buffer = Okio.buffer(Okio.source(new File(imagePath)));
-            buffer.readAll(sink);
-            values.put(MediaStore.Video.Media.IS_PRIVATE, 0);
-            contentResolver.update(item, values, null, null);
-            new File(imagePath).delete();
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                Cursor query = getContentResolver().query(item, null, null, null);
-                if (query != null) {
-                    int count = query.getCount();
-                    Log.d("writeFile", "writeFile result :" + count);
-                    query.close();
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
 
     private void startCall() {
         manager = WebRTCManager.getInstance();
@@ -484,25 +431,74 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             _localVideoTrack = videoTracks.get(0);
         }
         myId = userId;
+        RecordUtil.setMyId(userId);
+        userIdList.add(userId);
+        streamList.add(stream);
+
+        Device device = new Device();
+
+        device.type = userId.substring(0, 5);
+        device.name = "你爹";
+        device.userId = userId;
+
+        mDevicesList.add(device);
         runOnUiThread(() -> {
-            addView(userId, stream);
+            deviceAdapter.notifyDataSetChanged();
         });
+
+
+        if (currentIndex == 0) {
+            runOnUiThread(() -> {
+                addView(userId, stream);
+            });
+        }
     }
 
     @Override
     public void onAddRemoteStream(MediaStream stream, String userId) {
+        userIdList.add(userId);
+        streamList.add(stream);
+
+        Device device = new Device();
+
+        device.type = userId.substring(0, 5);
+        device.name = "也是你爹";
+        device.userId = userId;
+
+        mDevicesList.add(device);
         runOnUiThread(() -> {
-            addView(userId, stream);
+            deviceAdapter.notifyDataSetChanged();
         });
 
+        if (currentIndex == 0) {
+            runOnUiThread(() -> {
+                addView(userId, stream);
+            });
+        }
 
     }
 
     @Override
     public void onCloseWithId(String userId) {
+        int pos = userIdList.indexOf(userId);
+        userIdList.remove(userId);
+        streamList.remove(pos - 1);
+        for (int i = 0; i < mDevicesList.size(); i++) {
+            if (mDevicesList.get(i).userId.equals(userId)) {
+                mDevicesList.remove(i);
+            }
+        }
+
         runOnUiThread(() -> {
-            removeView(userId);
+            deviceAdapter.notifyDataSetChanged();
         });
+
+
+        if (currentIndex == 0) {
+            runOnUiThread(() -> {
+                removeView(userId);
+            });
+        }
 
 
     }
@@ -519,13 +515,6 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         if (stream.videoTracks.size() > 0) {
             stream.videoTracks.get(0).addSink(sink);
             VideoFileRenderer vfr = null;
-            try {
-                vfr = new VideoFileRenderer(getApplicationContext().getFilesDir().getAbsolutePath() + "/" + id + ".y4m",
-                        PeerConnectionHelper.VIDEO_RESOLUTION_WIDTH, PeerConnectionHelper.VIDEO_RESOLUTION_HEIGHT, rootEglBase.getEglBaseContext());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            stream.videoTracks.get(0).addSink(vfr);
             _vfrs.put(id, vfr);
         }
         _videoViews.put(id, renderer);
@@ -684,7 +673,14 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 
     // 切换摄像头
     public void switchCamera() {
+        if (cameraService != null)
+            cameraService.switchCamera();
         manager.switchCamera();
+        isMirrror = !isMirrror;
+        for (String id :
+                _videoViews.keySet()) {
+            _videoViews.get(id).setMirror(isMirrror);
+        }
     }
 
     // 挂断
@@ -723,7 +719,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         _sinks.clear();
         _infos.clear();
         _vfrs.clear();
-//        Utils.deleteDirectory(srcPath);
+
     }
 
     @Override

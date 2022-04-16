@@ -4,20 +4,12 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Service;
 import android.content.ComponentName;
-import android.content.ContentResolver;
-import android.content.ContentValues;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
@@ -30,11 +22,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import io.microshow.rxffmpeg.RxFFmpegInvoke;
-import okio.BufferedSource;
-import okio.Okio;
-import okio.Sink;
-import t20220049.sw_vision.service.CameraService;
+import t20220049.sw_vision.transfer.client.WifiClientService;
+import t20220049.sw_vision.utils.CameraService;
+import t20220049.sw_vision.utils.RecordUtil;
+import t20220049.sw_vision.utils.TransferUtil;
 import t20220049.sw_vision.webRTC_utils.IViewCallback;
 import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
 import t20220049.sw_vision.webRTC_utils.ProxyVideoSink;
@@ -43,20 +34,11 @@ import t20220049.sw_vision.webRTC_utils.WebRTCManager;
 import t20220049.sw_vision.utils.PermissionUtil;
 
 import org.webrtc.EglBase;
-import org.webrtc.EglRenderer;
 import org.webrtc.MediaStream;
 import org.webrtc.RendererCommon;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoFileRenderer;
 import org.webrtc.VideoTrack;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 
 /**
  * 单聊界面
@@ -75,7 +57,7 @@ public class CollectActivity extends AppCompatActivity {
     private boolean isSwappedFeeds;
     private boolean isMirror = true;
 
-    private EglBase rootEglBase;
+    private static EglBase rootEglBase;
     private Chronometer mChronometer;
     private ImageView back;
     private ImageView switch_camera;
@@ -85,7 +67,8 @@ public class CollectActivity extends AppCompatActivity {
     private int videoState = 0;
 
     private ServiceConnection conn;
-    private CameraService cameraService;
+    public CameraService cameraService;
+    private static RecordUtil ru;
     boolean activateVideo = false;
     private static final String TAG = "ChatSingleActivity";
 
@@ -110,11 +93,8 @@ public class CollectActivity extends AppCompatActivity {
         initVar();
         initListener();
         initService();
-        srcPath = getApplicationContext().getFilesDir().getAbsolutePath() + "/";
-        File file = new File(srcPath + "local.y4m");
-        if (file.isFile() && file.exists()) {
-            file.delete();
-        }
+        ru = new RecordUtil(getApplicationContext());
+        WifiClientService.setBaseActivityWeakRef(this);
     }
 
 
@@ -188,6 +168,20 @@ public class CollectActivity extends AppCompatActivity {
         mChronometer = (Chronometer) findViewById(R.id.record_chronometer);
     }
 
+    public void CallTakePicture(boolean isCollect,boolean isSend) {
+        cameraService.takePicture(isCollect, isSend);
+    }
+
+    public void CallSetVideoStart(){
+        runOnUiThread(()->{
+        Toast.makeText(getApplicationContext(),"开始录制",Toast.LENGTH_SHORT).show();
+        });
+        ru.setVideoStart(vfr,localTrack,rootEglBase);
+    }
+    public void CallSetVideoEnd(boolean isCollect,boolean isSend){
+        ru.terminateVideo(vfr,localTrack,rootEglBase,CollectActivity.this,isCollect,isSend);
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private void initListener() {
 //        if (videoEnable) {
@@ -249,207 +243,42 @@ public class CollectActivity extends AppCompatActivity {
             }
         });
         photoButton.setOnClickListener(v -> {
-            if (cameraService != null) {
-                Toast.makeText(getBaseContext(), "拍照", Toast.LENGTH_SHORT).show();
-                cameraService.takePicture();
+            if (RecordUtil.isFullDefinition) {
+                if (cameraService != null) {
+                    Toast.makeText(getBaseContext(), "拍照", Toast.LENGTH_SHORT).show();
+                    cameraService.takePicture(true, false);
+                }
+            } else {
+                ru.catchPhoto(CollectActivity.this, local_view);
             }
         });
         videoButton.setOnClickListener(v -> {
-            if (cameraService != null) {
-//                cameraService.activateRecord(remote_view);
-                if (!activateVideo) {
-                    setVideoStart();
-                    activateVideo = true;
-                    runOnUiThread(() -> {
-                        Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
-                    });
-                } else {
-                    terminateVideo();
-                    activateVideo = false;
-                }
-                if (videoState == 0) {
-                    //setFormat设置用于显示的格式化字符串。
-                    //替换字符串中第一个“%s”为当前"MM:SS"或 "H:MM:SS"格式的时间显示。
-                    mChronometer.setBase(SystemClock.elapsedRealtime());
-                    mChronometer.setFormat("%s");
-                    mChronometer.setVisibility(View.VISIBLE);
-                    mChronometer.start();
-                    videoState = 1;
-                } else {
-                    mChronometer.stop();
-                    mChronometer.setVisibility(View.INVISIBLE);
-                    videoState = 0;
-                }
+            if (!activateVideo) {
+                ru.setVideoStart(vfr, localTrack, rootEglBase);
+                activateVideo = true;
+                runOnUiThread(() -> {
+                    Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
+                });
+            } else {
+                ru.terminateVideo(vfr, localTrack, rootEglBase, CollectActivity.this,true,false);
+                activateVideo = false;
             }
-        });
-    }
-
-    String startVideoTime, endVideoTime;
-
-    private void setVideoStart() {
-        File file = new File(srcPath + "local.y4m");
-        if (file.isFile() && file.exists()) {
-            file.delete();
-        }
-        try {
-            vfr = new VideoFileRenderer(getApplicationContext().getFilesDir().getAbsolutePath() + "/" + "local" + ".y4m",
-                    PeerConnectionHelper.VIDEO_RESOLUTION_WIDTH, PeerConnectionHelper.VIDEO_RESOLUTION_HEIGHT, rootEglBase.getEglBaseContext());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        localTrack.addSink(vfr);
-//        String raw_info = RxFFmpegInvoke.getInstance().getMediaInfo(srcPath + "local" + ".y4m");
-//        String[] raw_list = raw_info.split(";");
-//        int dur;
-//        try {
-//            dur = Integer.parseInt(raw_list[4].split("=|ms| |\\.")[1]);
-//
-//        } catch (NumberFormatException e) {
-//            dur = 0;
-//        }
-//        startVideoTime = dur / 1000 + "." + (dur - dur / 1000);
-    }
-
-    private void setVideoEnd() {
-        if (vfr != null) {
-            localTrack.removeSink(vfr);
-            vfr.release();
-        }
-//        String raw_info = RxFFmpegInvoke.getInstance().getMediaInfo(srcPath + "local" + ".y4m");
-//        String[] raw_list = raw_info.split(";");
-//        int dur = Integer.parseInt(raw_list[4].split("=|ms| |\\.")[1]);
-//        endVideoTime = dur / 1000 + "." + (dur - dur / 1000);
-    }
-
-    private void terminateVideo() {
-        setVideoEnd();
-        runOnUiThread(() -> {
-            Toast.makeText(getApplicationContext(), "结束录制", Toast.LENGTH_SHORT).show();
-        });
-        new Thread(() -> {
-//            String text = "ffmpeg -ss " + startVideoTime + " -to " + endVideoTime +
-//                    " -accurate_seek -i " + srcPath + "local" + ".y4m " + srcPath + "local" + "-" + startVideoTime + ".mp4";
-            String text = "ffmpeg -i " + srcPath + "local" + ".y4m " + srcPath + "local" + ".mp4";
-            Log.d(TAG, "terminateVideo: " + text);
-            String[] commands = text.split(" ");
-            RxFFmpegInvoke.getInstance().runCommand(commands, new RxFFmpegInvoke.IFFmpegListener() {
-                @Override
-                public void onFinish() {
-                    Log.d(TAG, "onFinish: " + text);
-                    insertVideo(srcPath + "local" + ".mp4", getBaseContext());
-                    runOnUiThread(() -> {
-                        Toast.makeText(getApplicationContext(), "已保存到相册", Toast.LENGTH_SHORT).show();
-                    });
-                }
-
-                @Override
-                public void onProgress(int progress, long progressTime) {
-                }
-
-                @Override
-                public void onCancel() {
-                }
-
-                @Override
-                public void onError(String message) {
-                }
-            });
-        }).start();
-
-    }
-
-    private static final String VIDEO_BASE_URI = "content://media/external/video/media";
-
-    private void insertVideo(String videoPath, Context context) {
-        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
-//        Uri newUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName() + ".fileprovider", new File(videoPath));
-//        retriever.setDataSource(getApplicationContext(), newUri);// videoPath 本地视频的路径
-//
-        retriever.setDataSource(videoPath);
-        int nVideoWidth = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH));
-        int nVideoHeight = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT));
-        int duration = Integer.parseInt(retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION));
-        long dateTaken = System.currentTimeMillis();
-        File file = new File(videoPath);
-        String title = file.getName();
-        String filename = file.getName();
-        String mime = "video/mp4";
-        ContentValues mCurrentVideoValues = new ContentValues(9);
-        mCurrentVideoValues.put(MediaStore.Video.Media.TITLE, title);
-        mCurrentVideoValues.put(MediaStore.Video.Media.DISPLAY_NAME, filename);
-        mCurrentVideoValues.put(MediaStore.Video.Media.DATE_TAKEN, dateTaken);
-        mCurrentVideoValues.put(MediaStore.MediaColumns.DATE_MODIFIED, dateTaken / 1000);
-        mCurrentVideoValues.put(MediaStore.Video.Media.MIME_TYPE, mime);
-        mCurrentVideoValues.put(MediaStore.Video.Media.DATA, videoPath);
-        mCurrentVideoValues.put(MediaStore.Video.Media.WIDTH, nVideoWidth);
-        mCurrentVideoValues.put(MediaStore.Video.Media.HEIGHT, nVideoHeight);
-        mCurrentVideoValues.put(MediaStore.Video.Media.RESOLUTION, Integer.toString(nVideoWidth) + "x" + Integer.toString(nVideoHeight));
-        mCurrentVideoValues.put(MediaStore.Video.Media.SIZE, new File(videoPath).length());
-        mCurrentVideoValues.put(MediaStore.Video.Media.DURATION, duration);
-        ContentResolver contentResolver = context.getContentResolver();
-        Uri videoTable = Uri.parse(VIDEO_BASE_URI);
-        Uri uri = contentResolver.insert(videoTable, mCurrentVideoValues);
-        writeFile(videoPath, mCurrentVideoValues, contentResolver, uri);
-    }
-
-    private void writeFile(String imagePath, ContentValues values, ContentResolver contentResolver, Uri item) {
-        try (OutputStream rw = contentResolver.openOutputStream(item, "rw")) {
-            // Write data into the pending image.
-            Sink sink = Okio.sink(rw);
-            BufferedSource buffer = Okio.buffer(Okio.source(new File(imagePath)));
-            buffer.readAll(sink);
-            values.put(MediaStore.Video.Media.IS_PRIVATE, 0);
-            contentResolver.update(item, values, null, null);
-            new File(imagePath).delete();
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                Cursor query = getContentResolver().query(item, null, null, null);
-                if (query != null) {
-                    int count = query.getCount();
-                    Log.d("writeFile", "writeFile result :" + count);
-                    query.close();
-                }
+            if (videoState == 0) {
+                //setFormat设置用于显示的格式化字符串。
+                //替换字符串中第一个“%s”为当前"MM:SS"或 "H:MM:SS"格式的时间显示。
+                mChronometer.setBase(SystemClock.elapsedRealtime());
+                mChronometer.setFormat("%s");
+                mChronometer.setVisibility(View.VISIBLE);
+                mChronometer.start();
+                videoState = 1;
+            } else {
+                mChronometer.stop();
+                mChronometer.setVisibility(View.INVISIBLE);
+                videoState = 0;
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
-    protected void havePhoto() {
-        SurfaceViewRenderer mySurfaceViewRenderer = local_view;
-        if (mySurfaceViewRenderer != null)
-            mySurfaceViewRenderer.addFrameListener(new EglRenderer.FrameListener() {
-                @Override
-                public void onFrame(Bitmap bitmap) {
-                    runOnUiThread(() -> {
-                        savePhoto(bitmap);
-                        mySurfaceViewRenderer.removeFrameListener(this);
-                    });
-                }
-            }, 1);
-    }
-
-    private void savePhoto(Bitmap bitmap) {
-        long curTime = new Date().getTime();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-//        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "record_photo "+sdf.format(curTime));
-        String fileName = "record_photo " + sdf.format(curTime) + ".png";
-        MediaStore.Images.Media.insertImage(getContentResolver(), bitmap, fileName, fileName);
-        runOnUiThread(() -> {
-            Toast.makeText(getApplicationContext(), "已保存图片到相册", Toast.LENGTH_SHORT).show();
         });
-        File appDir = new File(getApplicationContext().getFilesDir() + "");
-        if (!appDir.exists()) appDir.mkdir();
-        File file = new File(appDir, fileName);
-        try {
-            FileOutputStream fos = new FileOutputStream(file);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-            fos.flush();
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
-
 
     private void setSwappedFeeds(boolean isSwappedFeeds) {
         this.isSwappedFeeds = isSwappedFeeds;
@@ -458,20 +287,27 @@ public class CollectActivity extends AppCompatActivity {
         remoteRender.setTarget(isSwappedFeeds ? local_view : remote_view);
     }
 
-    VideoFileRenderer vfr = null;
-    VideoTrack localTrack = null;
+    static VideoFileRenderer vfr = null;
+    static VideoTrack localTrack = null;
+
+    private void sendId2Control(String id) {
+        TransferUtil.C2S_UserID(id);
+    }
 
     private void startCall() {
         manager = WebRTCManager.getInstance();
         manager.setCallback(new IViewCallback() {
             @Override
             public void onSetLocalStream(MediaStream stream, String socketId) {
+
                 if (stream.videoTracks.size() > 0) {
                     stream.videoTracks.get(0).addSink(localRender);
                     localTrack = stream.videoTracks.get(0);
 
                 }
-
+                RecordUtil.setMyId(socketId);
+                sendId2Control(socketId);
+                Log.d(TAG, "onSetLocalStream: send id");
                 if (videoEnable) {
                     stream.videoTracks.get(0).setEnabled(true);
                 }
@@ -484,7 +320,6 @@ public class CollectActivity extends AppCompatActivity {
                 }
                 if (videoEnable) {
                     stream.videoTracks.get(0).setEnabled(true);
-
                     runOnUiThread(() -> setSwappedFeeds(false));
                 }
             }
