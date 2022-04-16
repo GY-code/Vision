@@ -137,7 +137,7 @@ public class RecordUtil {
                     });
                     clearFile(localy4m);
                     if (isCollect && isSend) {
-                        TransferUtil.C2S_Video(remoteVideoPath + myId + ".mp4", context);
+                        TransferUtil.C2S_Video( localmp4, context);
                     }
                 }
 
