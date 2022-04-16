@@ -181,9 +181,9 @@ public class WifiServer extends Thread {
                 }
                 photoWL.remove(address);
             } else {
-                Log.e(TAG, "video all received! ");
                 videoWL.remove(address);
                 if (videoWL.isEmpty()) {
+                    Log.e(TAG, "video all received! ");
                     for (MyClient mc : clients) {
                         videoWL.add(mc.clientIP);
                     }
