@@ -22,6 +22,9 @@ import t20220049.sw_vision.transfer.model.FileTransfer;
 import t20220049.sw_vision.transfer.util.Md5Util;
 import t20220049.sw_vision.ui.ReceiveFileActivity;
 import t20220049.sw_vision.utils.RecordUtil;
+import t20220049.sw_vision.utils.VideoFragment;
+import t20220049.sw_vision.utils.VideoFragmentManager;
+import t20220049.sw_vision.utils.VideoHandleManager;
 
 public class WifiServer extends Thread {
     private static final String TAG = "WifiServer";
@@ -184,6 +187,22 @@ public class WifiServer extends Thread {
                 videoWL.remove(address);
                 if (videoWL.isEmpty()) {
                     Log.e(TAG, "video all received! ");
+
+                    if (!VideoFragmentManager.getInstance().isComplete()) {
+                        Log.e("zsy", "Fragment error occur");
+                        return;
+                    }
+                    ArrayList<VideoFragment> fragments = VideoFragmentManager.getInstance().getFragments();
+                    VideoFragmentManager.getInstance().clear();
+
+                    VideoHandleManager
+                            .getInstance()
+                            .cutVideosAndCombine(fragments,
+                                    "output.mp4",
+                                    RecordUtil.remoteVideoPath);
+
+
+
                     for (MyClient mc : clients) {
                         videoWL.add(mc.clientIP);
                     }

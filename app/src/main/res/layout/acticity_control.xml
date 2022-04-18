@@ -17,6 +17,13 @@
             android:layout_alignParentEnd="true"
             android:src="@mipmap/pattern">
         </ImageView>
+
+        <TextView
+            android:id="@+id/showText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="20dp"
+            android:textSize="24sp" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -32,7 +39,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="60dp" />
         </RelativeLayout>
-
     </RelativeLayout>
 
 
@@ -49,9 +55,4 @@
         <include layout="@layout/layout_bottom_sheet" />
     </RelativeLayout>
 
-    <Button
-        android:id="@+id/button6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="switch" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

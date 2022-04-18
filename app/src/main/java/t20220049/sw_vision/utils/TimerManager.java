@@ -22,12 +22,12 @@ public class TimerManager {
         return instance;
     }
 
-    public void restart() {
+    public synchronized void restart() {
         startTime = System.currentTimeMillis();
         recordTime = 0;
     }
 
-    public double[] cut() {
+    public synchronized double[] cut() {
         double endTime = System.currentTimeMillis();
         double durance = (endTime - startTime) / 1000;
 
