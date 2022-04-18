@@ -22,7 +22,7 @@ public class JointBitmap extends AppCompatActivity {
     private Bitmap[] bitmaps;
     Bitmap result;
 
-    void receiveFile(String[] dir, String[] name){
+    public void receiveFile(String[] dir, String[] name){
         picNum = dir.length;
         bitmaps = new Bitmap[picNum];
         for(int i = 0; i < dir.length; i++){
@@ -38,7 +38,7 @@ public class JointBitmap extends AppCompatActivity {
         }
     }
 
-    void jointPhoto(){
+    public void jointPhoto(){
         JointBitmapView view1 = new JointBitmapView(this);
         Bitmap temp = bitmaps[0];
         Bitmap temp2 = bitmaps[picNum-1];

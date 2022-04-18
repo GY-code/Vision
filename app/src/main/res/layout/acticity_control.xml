@@ -10,6 +10,16 @@
         android:layout_width="match_parent"
         android:layout_height="78dp">
 
+        <Chronometer
+            android:id="@+id/video_chronometer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:visibility="invisible">
+        </Chronometer>
+
         <ImageView
             android:id="@+id/pattern"
             android:layout_width="116dp"

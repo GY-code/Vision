@@ -57,6 +57,10 @@ public class RecordUtil {
         localmp4 = localPath + myId + ".mp4";
     }
 
+    public static String getMyId(){
+        return myId;
+    }
+
     private static String myId;
 
     public RecordUtil(Context c) {

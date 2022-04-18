@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -18,6 +19,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.Chronometer;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -95,6 +97,8 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     ImageView switch_hang_up;
     ImageView photoButton;
     ImageView videoButton;
+    private Chronometer mChronometer;
+    private int videoState = 0;
 
     // 上拉框显示
     RelativeLayout bottomSheet;
@@ -108,6 +112,9 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     private ServiceConnection conn;
     private CameraService cameraService;
     Intent serviceIntent;
+
+    public static int mode = 0;
+
 
     public class Device {
         String type;
@@ -323,6 +330,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         switch_hang_up = findViewById(R.id.switch_hang_up);
         videoButton = findViewById(R.id.video_button);
         photoButton = findViewById(R.id.photo_button);
+        mChronometer = (Chronometer) findViewById(R.id.video_chronometer);
 
         //底部抽屉栏展示地址
         bottomSheet = findViewById(R.id.bottom_sheet);
@@ -407,6 +415,20 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                 ru.terminateVideo(_vfrs.get(myId), _localVideoTrack, rootEglBase, ControlActivity.this,false,false);
                 activateVideo = false;
                 TransferUtil.S2C("stop");
+            }
+
+            if (videoState == 0) {
+                //setFormat设置用于显示的格式化字符串。
+                //替换字符串中第一个“%s”为当前"MM:SS"或 "H:MM:SS"格式的时间显示。
+                mChronometer.setBase(SystemClock.elapsedRealtime());
+                mChronometer.setFormat("%s");
+                mChronometer.setVisibility(View.VISIBLE);
+                mChronometer.start();
+                videoState = 1;
+            } else {
+                mChronometer.stop();
+                mChronometer.setVisibility(View.INVISIBLE);
+                videoState = 0;
             }
         });
     }

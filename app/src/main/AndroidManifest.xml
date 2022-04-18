@@ -50,7 +50,7 @@
         <!-- </intent-filter> -->
         <!-- </activity> -->
         <service
-            android:name=".service.CameraService"
+            android:name=".utils.CameraService"
             android:enabled="true"
             android:exported="true" />
 
