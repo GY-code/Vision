@@ -229,8 +229,8 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         setContentView(R.layout.acticity_control);
         showText = findViewById(R.id.showText);
 
-        userIdList.add("_all");
-        streamList.add(null);
+//        userIdList.add("_all");
+//        streamList.add(null);
 
         initView();
         initVar();
@@ -249,7 +249,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             cutRecordCapture();
             String preUserId = userIdList.get(currentIndex);
             currentIndex = userIdList.indexOf(s);
-            showText.setText("正在录制第" + currentIndex + "个视频");
+//            showText.setText("正在录制第" + currentIndex + "个视频");
             if (_textViews.get(preUserId) != null) {
                 _textViews.get(preUserId).setText("");
             }
@@ -311,7 +311,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         device.userId = "_all";
         device.ip = "";
 
-        mDevicesList.add(device);
+//        mDevicesList.add(device);
 
         deviceAdapter = new deviceAdapter(mDevicesList);
 
@@ -376,7 +376,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         videoButton.setOnClickListener(v -> {
             if (!activateVideo) {
                 TimerManager.getInstance().restart();
-                showText.setText("正在录制第" + currentIndex + "个视频");
+//                showText.setText("正在录制第" + currentIndex + "个视频");
                 ru.setVideoStart(_vfrs.get(myId), _localVideoTrack, rootEglBase);
                 activateVideo = true;
                 changeRecordCapture(userIdList.get(currentIndex));
@@ -421,7 +421,6 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         userIdList.add(userId);
         streamList.add(stream);
 
-        currentIndex = 1;
 
         Device device = new Device();
 
