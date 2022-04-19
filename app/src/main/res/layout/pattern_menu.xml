@@ -28,6 +28,17 @@
         android:textColor="#FFFFFF"
         android:textSize="14sp">
     </Button>
+    <!--原图-->
+    <Button
+        android:id="@+id/pattern_prime"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_marginRight="10dp"
+        android:background="@color/black"
+        android:text="原图模式"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp">
+    </Button>
 
 
 </LinearLayout>

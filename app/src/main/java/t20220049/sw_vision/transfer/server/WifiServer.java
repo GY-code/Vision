@@ -1,6 +1,7 @@
 package t20220049.sw_vision.transfer.server;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -181,14 +182,14 @@ public class WifiServer extends Thread {
             String[] alias = name.split("\\.", 2);
             String address = clientSocket.getInetAddress().getHostAddress();
             if (alias[1].equals("png")) {
-                String clientID="";
-                for (MyClient myClient:
-                     clients) {
-                    if (myClient.clientIP.equals(address)){
-                        clientID=myClient.clientUserID;
+                String clientID = "";
+                for (MyClient myClient :
+                        clients) {
+                    if (myClient.clientIP.equals(address)) {
+                        clientID = myClient.clientUserID;
                     }
                 }
-                Log.e(TAG, "receive photo from " + address+" "+clientID);
+                Log.e(TAG, "receive photo from " + address + " " + clientID);
                 photoWL.remove(address);
                 if (photoWL.isEmpty()) {
                     Log.e(TAG, "photo all received! ");
@@ -211,19 +212,19 @@ public class WifiServer extends Thread {
                         }
                         jointBitmap.receiveFile(photoPath, photoName);
                         jointBitmap.jointPhoto();
-                    } else if (ControlActivity.mode == 1){
+                    } else if (ControlActivity.mode == 1) {
                         Pano panorama = new Pano();
 
                         String[] mImagePath = new String[]{RecordUtil.remotePhotoPath + RecordUtil.getMyId() + ".png",
                                 RecordUtil.remotePhotoPath + clients.get(0).clientUserID + ".png"};
 
-                        panorama.mergeBitmap(mImagePath,new Pano.onStitchResultListener(){
+                        panorama.mergeBitmap(mImagePath, new Pano.onStitchResultListener() {
 
                             @Override
                             public void onSuccess(Bitmap bitmap) {
 //                                Toast.makeText(Pano.this,"图片拼接成功！",Toast.LENGTH_LONG).show();
                                 Log.e(TAG, "图片拼接成功！");
-                                RecordUtil recordUtil=new RecordUtil(ContextUtils.getApplicationContext());
+                                RecordUtil recordUtil = new RecordUtil(ContextUtils.getApplicationContext());
                                 recordUtil.savePhoto2Gallery(bitmap);
                             }
 
@@ -234,6 +235,20 @@ public class WifiServer extends Thread {
                                 System.out.println(errorMsg);
                             }
                         });
+
+                    } else if (ControlActivity.mode == -1) {
+                        String photoPath[] = new String[clients.size() + 1];
+                        String photoName[] = new String[clients.size() + 1];
+                        photoPath[0] = RecordUtil.remotePhotoPath;
+                        photoName[0] = RecordUtil.getMyId() + ".png";
+                        RecordUtil recordUtil = new RecordUtil(ContextUtils.getApplicationContext());
+                        recordUtil.savePhoto2Gallery(BitmapFactory.decodeFile(photoPath[0] + photoName[0]));
+                        for (int i = 1; i < (clients.size() + 1); i++) {
+                            photoPath[i] = RecordUtil.remotePhotoPath;
+                            photoName[i] = clients.get(i - 1).clientUserID + ".png";
+                            recordUtil.savePhoto2Gallery(BitmapFactory.decodeFile(photoPath[i] + photoName[i]));
+                        }
+
 
                     }
                 }
@@ -255,7 +270,6 @@ public class WifiServer extends Thread {
                             .cutVideosAndCombine(fragments,
                                     "output.mp4",
                                     RecordUtil.remoteVideoPath);
-
 
 
                     for (MyClient mc : clients) {

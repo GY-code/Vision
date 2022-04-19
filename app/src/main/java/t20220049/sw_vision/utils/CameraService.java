@@ -228,9 +228,9 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
                 bitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), m, true);
                 //存储文件，照片照的都先放在local
                 recordUtil = new RecordUtil(getApplicationContext());
-                recordUtil.savePhoto2Gallery(bitmap);
 
                 if (isCollect) {
+                    recordUtil.savePhoto2Gallery(bitmap);
                     recordUtil.savePhotoInLocal(bitmap);
                     if (isSend) {
                         TransferUtil.C2S_Photo(RecordUtil.localPhoto, getApplicationContext());

@@ -404,7 +404,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                 runOnUiThread(() -> {
                     Toast.makeText(getApplicationContext(), "finish capturing", Toast.LENGTH_SHORT).show();
                 });
-                ru.terminateVideo(_vfrs.get(myId), _localVideoTrack, rootEglBase, ControlActivity.this,false,false);
+                ru.terminateVideo(_vfrs.get(myId), _localVideoTrack, rootEglBase, ControlActivity.this, false, false);
                 activateVideo = false;
                 TransferUtil.S2C("stop");
             }
@@ -436,6 +436,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         View view = LayoutInflater.from(ControlActivity.this).inflate(R.layout.pattern_menu, null, false);
         Button btn_joint = (Button) view.findViewById(R.id.pattern_joint);
         Button btn_pano = (Button) view.findViewById(R.id.pattern_pano);
+        Button btn_prime = (Button) view.findViewById(R.id.pattern_prime);
         //1.构造一个PopupWindow，参数依次是加载的View，宽高
         final PopupWindow popWindow = new PopupWindow(view,
                 ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
@@ -477,6 +478,11 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                 Toast.makeText(ControlActivity.this, "当前为拼图模式", Toast.LENGTH_SHORT).show();
                 popWindow.dismiss();
             }
+        });
+        btn_prime.setOnClickListener(view1 -> {
+            mode = -1;
+            Toast.makeText(ControlActivity.this, "当前为拼图模式", Toast.LENGTH_SHORT).show();
+            popWindow.dismiss();
         });
     }
 
@@ -533,7 +539,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         Device device = new Device();
 
         device.type = userId.substring(0, 5);
-        device.name = "采集端" + Integer.toString(userIdList.size()-2);
+        device.name = "采集端" + Integer.toString(userIdList.size() - 2);
         device.userId = userId;
         device.ip = getIPFromUserId(userId);
 
