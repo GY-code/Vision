@@ -14,6 +14,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -25,6 +26,7 @@ import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -55,6 +57,7 @@ import t20220049.sw_vision.webRTC_utils.WebRTCManager;
 import t20220049.sw_vision.bean.MemberBean;
 import t20220049.sw_vision.utils.PermissionUtil;
 
+import org.w3c.dom.Text;
 import org.webrtc.EglBase;
 import org.webrtc.EglRenderer;
 import org.webrtc.MediaStream;
@@ -84,10 +87,10 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 
     private WebRTCManager manager;
     private Map<String, SurfaceViewRenderer> _videoViews = new HashMap<>();
+    private Map<String, LinearLayout> _outerViews = new HashMap<>();
     private Map<String, ProxyVideoSink> _sinks = new HashMap<>();
+    private Map<String, TextView> _textViews = new HashMap<>();
     private Map<String, VideoFileRenderer> _vfrs = new HashMap<>();
-    private Map<String, String> startVideoTimes = new HashMap<>();
-    private Map<String, String> endVideoTimes = new HashMap<>();
     private List<MemberBean> _infos = new ArrayList<>();
     private List<MediaStream> streamList = new ArrayList<>();
     private List<VideoFragment> fragmentList = new ArrayList<>();
@@ -256,8 +259,13 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     private void changeRecordCapture(String s) {
         if (userIdList.contains(s)) {
             cutRecordCapture();
+            String preUserId = userIdList.get(currentIndex);
             currentIndex = userIdList.indexOf(s);
             showText.setText("正在录制第" + currentIndex + "个视频");
+            if (_textViews.get(preUserId) != null) {
+                _textViews.get(preUserId).setText("");
+            }
+            _textViews.get(s).setText("正在录制");
         }
     }
 
@@ -385,6 +393,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                 showText.setText("正在录制第" + currentIndex + "个视频");
                 ru.setVideoStart(_vfrs.get(myId), _localVideoTrack, rootEglBase);
                 activateVideo = true;
+                changeRecordCapture(userIdList.get(currentIndex));
 
                 runOnUiThread(() -> {
                     Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
@@ -557,8 +566,6 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             removeView(userId);
         });
 
-
-
     }
 
 
@@ -578,28 +585,31 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         _videoViews.put(id, renderer);
         _sinks.put(id, sink);
         _infos.add(new MemberBean(id));
-//        wr_video_view.addView(renderer);  改动
-        wr_video_view.addView(renderer, 0);
-        int size = _infos.size();
-        for (int i = 0; i < size; i++) {
-            MemberBean memberBean = _infos.get(i);
-            SurfaceViewRenderer renderer1 = _videoViews.get(memberBean.getId());
-            if (renderer1 != null) {
-                FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-                layoutParams.height = getWidth(size);
-                layoutParams.width = getWidth(size);
-                layoutParams.leftMargin = getX(size, i);
-                layoutParams.topMargin = getY(size, i);
-                renderer1.setLayoutParams(layoutParams);
-            }
-        }
-    }
 
+//        wr_video_view.addView(renderer);  改动
+//        wr_video_view.addView(renderer, 0);
+        LinearLayout view = new LinearLayout(this);
+        view.setOrientation(LinearLayout.VERTICAL);
+
+        TextView text = new TextView(this);
+        text.setGravity(Gravity.CENTER_VERTICAL | Gravity.CENTER_HORIZONTAL);
+
+        text.setText("");
+
+        view.addView(text);
+        view.addView(renderer);
+
+        _outerViews.put(id, view);
+        _textViews.put(id, text);
+        wr_video_view.addView(view, 0);
+
+        regenerateView();
+    }
 
     private void removeView(String userId) {
         ProxyVideoSink sink = _sinks.get(userId);
         SurfaceViewRenderer renderer = _videoViews.get(userId);
+        LinearLayout outView = _outerViews.get(userId);
         VideoFileRenderer vfr = _vfrs.get(userId);
         if (sink != null) {
             sink.setTarget(null);
@@ -612,26 +622,31 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         }
         _sinks.remove(userId);
         _videoViews.remove(userId);
+        _textViews.remove(userId);
         _infos.remove(new MemberBean(userId));
-        wr_video_view.removeView(renderer);
+        wr_video_view.removeView(outView);
 
+        regenerateView();
 
+    }
+
+    private void regenerateView() {
         int size = _infos.size();
-        for (int i = 0; i < _infos.size(); i++) {
+        for (int i = 0; i < size; i++) {
             MemberBean memberBean = _infos.get(i);
-            SurfaceViewRenderer renderer1 = _videoViews.get(memberBean.getId());
-            if (renderer1 != null) {
+//            SurfaceViewRenderer renderer1 = _videoViews.get(memberBean.getId());
+            LinearLayout view = _outerViews.get(memberBean.getId());
+            if (view != null) {
                 FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
                 layoutParams.height = getWidth(size);
                 layoutParams.width = getWidth(size);
                 layoutParams.leftMargin = getX(size, i);
                 layoutParams.topMargin = getY(size, i);
-                renderer1.setLayoutParams(layoutParams);
+                view.setLayoutParams(layoutParams);
             }
 
         }
-
     }
 
     private int getWidth(int size) {
