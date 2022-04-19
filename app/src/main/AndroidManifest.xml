@@ -36,7 +36,8 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SWVision">
+        android:theme="@style/Theme.SWVision"
+        android:requestLegacyExternalStorage="true">
         <service
             android:name=".transfer.client.WifiClientService"
             android:exported="false"></service>
@@ -86,7 +87,7 @@
             android:name=".ui.SendFileActivity"
             android:exported="true" />
         <activity
-            android:name=".utils.Pano"
+            android:name=".utils.Panorama"
             android:exported="true" >
 <!--        <intent-filter>-->
 <!--            <action android:name="android.intent.action.MAIN" />-->

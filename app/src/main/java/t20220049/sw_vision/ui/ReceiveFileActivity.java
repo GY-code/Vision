@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.net.wifi.p2p.WifiP2pDevice;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
@@ -21,6 +22,8 @@ import androidx.core.app.ActivityCompat;
 
 import com.bumptech.glide.Glide;
 
+import org.webrtc.ContextUtils;
+
 import java.io.File;
 import java.util.Collection;
 
@@ -33,6 +36,7 @@ import t20220049.sw_vision.transfer.server.WifiServerService;
 
 import t20220049.sw_vision.R;
 import t20220049.sw_vision.utils.Pano;
+import t20220049.sw_vision.utils.RecordUtil;
 
 //控制端
 public class ReceiveFileActivity extends BaseActivity {
@@ -224,8 +228,26 @@ public class ReceiveFileActivity extends BaseActivity {
             WebrtcUtil.call(ReceiveFileActivity.this, "ws://106.13.236.207:3000", "123456");
         });
         findViewById(R.id.btnTest).setOnClickListener(v->{
-            Intent intent=new Intent(ReceiveFileActivity.this, Pano.class);
-            startActivity(intent);
+//            Intent intent=new Intent(ReceiveFileActivity.this, Pano.class);
+//            startActivity(intent);
+            Pano panorama = new Pano();
+            String[] mImagePath = new String[]{"/storage/emulated/0/Pictures/WeiXin/a.jpg","/storage/emulated/0/Pictures/WeiXin/b.jpg"};
+            panorama.mergeBitmap(mImagePath,new Pano.onStitchResultListener(){
+                @Override
+                public void onSuccess(Bitmap bitmap) {
+//                                Toast.makeText(Pano.this,"图片拼接成功！",Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "图片拼接成功！");
+                    RecordUtil recordUtil=new RecordUtil(ContextUtils.getApplicationContext());
+                    recordUtil.savePhoto2Gallery(bitmap);
+                }
+
+                @Override
+                public void onError(String errorMsg) {
+//                                Toast.makeText(Pano.this,"图片拼接失败！",Toast.LENGTH_LONG).show();
+                    Log.e(TAG, "图片拼接失败！");
+                    System.out.println(errorMsg);
+                }
+            });
         });
         cacheDir = getCacheDir();
 

@@ -1,10 +1,13 @@
 package t20220049.sw_vision.transfer.server;
 
+import android.graphics.Bitmap;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
+
+import org.webrtc.ContextUtils;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -23,6 +26,7 @@ import t20220049.sw_vision.transfer.util.Md5Util;
 import t20220049.sw_vision.ui.ControlActivity;
 import t20220049.sw_vision.ui.ReceiveFileActivity;
 import t20220049.sw_vision.utils.JointBitmap;
+import t20220049.sw_vision.utils.Pano;
 import t20220049.sw_vision.utils.RecordUtil;
 
 public class WifiServer extends Thread {
@@ -197,6 +201,30 @@ public class WifiServer extends Thread {
                         }
                         jointBitmap.receiveFile(photoPath, photoName);
                         jointBitmap.jointPhoto();
+                    } else if (ControlActivity.mode == 1){
+                        Pano panorama = new Pano();
+
+                        String[] mImagePath = new String[]{RecordUtil.remotePhotoPath + RecordUtil.getMyId() + ".png",
+                                RecordUtil.remotePhotoPath + clients.get(0).clientUserID + ".png"};
+
+                        panorama.mergeBitmap(mImagePath,new Pano.onStitchResultListener(){
+
+                            @Override
+                            public void onSuccess(Bitmap bitmap) {
+//                                Toast.makeText(Pano.this,"图片拼接成功！",Toast.LENGTH_LONG).show();
+                                Log.e(TAG, "图片拼接成功！");
+                                RecordUtil recordUtil=new RecordUtil(ContextUtils.getApplicationContext());
+                                recordUtil.savePhoto2Gallery(bitmap);
+                            }
+
+                            @Override
+                            public void onError(String errorMsg) {
+//                                Toast.makeText(Pano.this,"图片拼接失败！",Toast.LENGTH_LONG).show();
+                                Log.e(TAG, "图片拼接失败！");
+                                System.out.println(errorMsg);
+                            }
+                        });
+
                     }
                 }
                 photoWL.remove(address);
