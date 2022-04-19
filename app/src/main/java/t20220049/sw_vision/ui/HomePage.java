@@ -61,6 +61,7 @@ public class HomePage extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(HomePage.this, ReceiveFileActivity.class);
+//                Intent intent = new Intent(HomePage.this, ControlActivity.class);
                 startActivity(intent);
 //                WebrtcUtil.call(HomePage.this, "ws://106.13.236.207:3000", "123456");
             }

@@ -36,11 +36,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import io.microshow.rxffmpeg.RxFFmpegInvoke;
+import t20220049.sw_vision.transfer.server.WifiServer;
 import t20220049.sw_vision.utils.TimerManager;
 import t20220049.sw_vision.utils.TransferUtil;
 import t20220049.sw_vision.utils.VideoFragment;
 import t20220049.sw_vision.utils.CameraService;
 import t20220049.sw_vision.utils.RecordUtil;
+import t20220049.sw_vision.utils.VideoFragmentManager;
 import t20220049.sw_vision.webRTC_utils.IViewCallback;
 import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
 import t20220049.sw_vision.webRTC_utils.ProxyVideoSink;
@@ -88,6 +90,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     private List<String> userIdList = new ArrayList<>();
     private int currentIndex = 0;
     private VideoTrack _localVideoTrack;
+    private TextView showText;
 
     private int mScreenWidth;
     private String myId;
@@ -120,7 +123,9 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         String type;
         String name;
         String userId;
+        String ip;
     }
+
 
     public static void openActivity(Activity activity) {
         Intent intent = new Intent(activity, ControlActivity.class);
@@ -147,8 +152,8 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         @Override
         public void onBindViewHolder(@NonNull MyViewHolder holder, @SuppressLint("RecyclerView") int position) {
             Device device = this.deviceList.get(position);
-            holder.mType.setText(device.type);
-            holder.mName.setText(device.name);
+            holder.mType.setText(device.name);
+            holder.mName.setText(device.ip);
             holder.selectButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -175,6 +180,17 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             mName = itemView.findViewById(R.id.txt_mName);
             selectButton = itemView.findViewById(R.id.select_button);
         }
+    }
+
+    private String getIPFromUserId(String userId) {
+        for (int i = 0; i < WifiServer.clients.size(); i++) {
+            WifiServer.MyClient client = WifiServer.clients.get(i);
+            if (client.clientUserID != null && client.clientUserID.equals(userId)) {
+                return client.clientIP;
+            }
+        }
+
+        return "localhost";
     }
 
     private void initService() {
@@ -215,6 +231,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.wr_activity_chat_room);
         setContentView(R.layout.acticity_control);
+        showText = findViewById(R.id.showText);
 
         userIdList.add("_all");
         streamList.add(null);
@@ -228,59 +245,6 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         startCall();
         ru = new RecordUtil(getApplicationContext());
 
-        Button switchButton = findViewById(R.id.button6);
-
-        switchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-//                if (currentIndex == 0) {
-//                    for (int i = 0; i < userIdList.size(); i++) {
-//                        String tempId = userIdList.get(i);
-//                        if (!tempId.equals("_all")) {
-//                            runOnUiThread(() -> {
-//                                removeView(tempId);
-//                            });
-//                        }
-//                    }
-//                } else {
-//                    String tempId = userIdList.get(currentIndex);
-//                    runOnUiThread(() -> {
-//                        removeView(tempId);
-//                    });
-//                }
-
-                int size = userIdList.size();
-                currentIndex = (currentIndex + 1) % size;
-
-//                if (currentIndex == 0) {
-//                    for (int i = 0; i < userIdList.size(); i++) {
-//                        String tempId = userIdList.get(i);
-//                        MediaStream tempStream = streamList.get(i);
-//                        if (!tempId.equals("_all") && tempStream != null) {
-//                            runOnUiThread(() -> {
-//                                addView(tempId, tempStream);
-//                            });
-//                        }
-//                    }
-//                } else {
-//                    String tempId = userIdList.get(currentIndex);
-//                    MediaStream tempStream = streamList.get(currentIndex);
-//                    runOnUiThread(() -> {
-//                        addView(tempId, tempStream);
-//                    });
-//                }
-
-//                Toast.makeText(ControlActivity.this, "switch to " + userIdList.get(currentIndex), Toast.LENGTH_LONG).show();
-                double[] cuts = TimerManager.getInstance().cut();
-                double startTime = cuts[0];
-                double durance = cuts[1];
-                Toast.makeText(ControlActivity.this,
-                        "Start at: " + Double.toString(startTime) + "\nRecord: " + Double.toString(durance) + "seconds",
-                        Toast.LENGTH_LONG).show();
-            }
-        });
-
         RxFFmpegInvoke.getInstance().setDebug(true);
     }
 
@@ -288,11 +252,15 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         if (userIdList.contains(s)) {
             cutRecordCapture();
             currentIndex = userIdList.indexOf(s);
+            showText.setText("正在录制第" + currentIndex + "个视频");
         }
     }
 
     private void endRecordCapture() {
         cutRecordCapture();
+        VideoFragmentManager.getInstance().setFragments((ArrayList<VideoFragment>) fragmentList);
+//        Log.e("zsy", "fragmentList is complete ? " + VideoFragmentManager.getInstance().isComplete());
+        Log.e("zsy", "fragmentList already set");
     }
 
     private void cutRecordCapture() {
@@ -341,6 +309,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         device.type = "None";
         device.name = "查看全部";
         device.userId = "_all";
+        device.ip = "";
 
         mDevicesList.add(device);
 
@@ -387,6 +356,8 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         switch_hang_up.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+//                Toast.makeText(ControlActivity.this, "finish~", Toast.LENGTH_LONG).show();
+//                endRecordCapture();
                 hangUp();
             }
         });
@@ -405,13 +376,19 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         videoButton.setOnClickListener(v -> {
             if (!activateVideo) {
                 TimerManager.getInstance().restart();
+                showText.setText("正在录制第" + currentIndex + "个视频");
                 ru.setVideoStart(_vfrs.get(myId), _localVideoTrack, rootEglBase);
                 activateVideo = true;
+
                 runOnUiThread(() -> {
                     Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
                 });
                 TransferUtil.S2C("start");
             } else {
+                endRecordCapture();
+                runOnUiThread(() -> {
+                    Toast.makeText(getApplicationContext(), "finish capturing", Toast.LENGTH_SHORT).show();
+                });
                 ru.terminateVideo(_vfrs.get(myId), _localVideoTrack, rootEglBase, ControlActivity.this,false,false);
                 activateVideo = false;
                 TransferUtil.S2C("stop");
@@ -457,23 +434,25 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         userIdList.add(userId);
         streamList.add(stream);
 
+        currentIndex = 1;
+
         Device device = new Device();
 
         device.type = userId.substring(0, 5);
-        device.name = "你爹";
+        device.name = "控制端";
         device.userId = userId;
+        device.ip = getIPFromUserId(userId);
 
         mDevicesList.add(device);
         runOnUiThread(() -> {
             deviceAdapter.notifyDataSetChanged();
         });
 
+        runOnUiThread(() -> {
+            addView(userId, stream);
+        });
 
-        if (currentIndex == 0) {
-            runOnUiThread(() -> {
-                addView(userId, stream);
-            });
-        }
+
     }
 
     @Override
@@ -484,19 +463,18 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         Device device = new Device();
 
         device.type = userId.substring(0, 5);
-        device.name = "也是你爹";
+        device.name = "采集端" + Integer.toString(userIdList.size()-2);
         device.userId = userId;
+        device.ip = getIPFromUserId(userId);
 
         mDevicesList.add(device);
         runOnUiThread(() -> {
             deviceAdapter.notifyDataSetChanged();
         });
 
-        if (currentIndex == 0) {
-            runOnUiThread(() -> {
-                addView(userId, stream);
-            });
-        }
+        runOnUiThread(() -> {
+            addView(userId, stream);
+        });
 
     }
 
@@ -514,13 +492,10 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         runOnUiThread(() -> {
             deviceAdapter.notifyDataSetChanged();
         });
+        runOnUiThread(() -> {
+            removeView(userId);
+        });
 
-
-        if (currentIndex == 0) {
-            runOnUiThread(() -> {
-                removeView(userId);
-            });
-        }
 
 
     }
