@@ -57,17 +57,6 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/tv_tishi"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="15dp"
-        android:text="添加设备···"
-        android:textColor="@color/white"
-        android:layout_marginVertical="3dp"
-        android:textSize="20sp" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerview"
         android:layout_width="match_parent"

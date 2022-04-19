@@ -231,8 +231,7 @@ public class CollectActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 switchCamera();
-                if (cameraService != null)
-                    cameraService.switchCamera();
+
             }
         });
 
@@ -311,6 +310,7 @@ public class CollectActivity extends AppCompatActivity {
                 if (videoEnable) {
                     stream.videoTracks.get(0).setEnabled(true);
                 }
+                switchCamera();
             }
 
             @Override
@@ -367,6 +367,8 @@ public class CollectActivity extends AppCompatActivity {
         isMirror = !isMirror;
         remote_view.setMirror(isMirror);
         local_view.setMirror(isMirror);
+        if (cameraService != null)
+            cameraService.switchCamera();
     }
 
     // 挂断

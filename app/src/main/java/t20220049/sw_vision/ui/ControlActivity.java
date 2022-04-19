@@ -521,7 +521,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         runOnUiThread(() -> {
             addView(userId, stream);
         });
-
+        switchCamera();
 
     }
 
@@ -747,8 +747,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             cameraService.switchCamera();
         manager.switchCamera();
         isMirrror = !isMirrror;
-        for (String id :
-                _videoViews.keySet()) {
+        for (String id : _videoViews.keySet()) {
             _videoViews.get(id).setMirror(isMirrror);
         }
     }

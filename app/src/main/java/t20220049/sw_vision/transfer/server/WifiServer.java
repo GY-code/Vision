@@ -181,7 +181,14 @@ public class WifiServer extends Thread {
             String[] alias = name.split("\\.", 2);
             String address = clientSocket.getInetAddress().getHostAddress();
             if (alias[1].equals("png")) {
-                Log.e(TAG, "receive photo from " + address);
+                String clientID="";
+                for (MyClient myClient:
+                     clients) {
+                    if (myClient.clientIP.equals(address)){
+                        clientID=myClient.clientUserID;
+                    }
+                }
+                Log.e(TAG, "receive photo from " + address+" "+clientID);
                 photoWL.remove(address);
                 if (photoWL.isEmpty()) {
                     Log.e(TAG, "photo all received! ");
