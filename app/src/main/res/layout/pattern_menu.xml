@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="right">
+
+    <!--拼接-->
+    <Button
+        android:id="@+id/pattern_joint"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_marginRight="10dp"
+        android:background="@color/black"
+        android:text="拼接模式"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp">
+    </Button>
+
+    <!--全景-->
+    <Button
+        android:id="@+id/pattern_pano"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:layout_marginRight="10dp"
+        android:background="@color/black"
+        android:text="全景图片"
+        android:textColor="#FFFFFF"
+        android:textSize="14sp">
+    </Button>
+
+
+</LinearLayout>

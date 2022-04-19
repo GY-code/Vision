@@ -8,12 +8,15 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -22,6 +25,7 @@ import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -100,6 +104,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     ImageView switch_hang_up;
     ImageView photoButton;
     ImageView videoButton;
+    ImageView patternButton;
     private Chronometer mChronometer;
     private int videoState = 0;
 
@@ -116,7 +121,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     private CameraService cameraService;
     Intent serviceIntent;
 
-    public static int mode = 1;
+    public static int mode = 0;
 
 
     public class Device {
@@ -298,6 +303,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         switch_hang_up = findViewById(R.id.switch_hang_up);
         videoButton = findViewById(R.id.video_button);
         photoButton = findViewById(R.id.photo_button);
+        patternButton = findViewById(R.id.pattern);
         mChronometer = (Chronometer) findViewById(R.id.video_chronometer);
 
         //底部抽屉栏展示地址
@@ -406,6 +412,61 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                 mChronometer.stop();
                 mChronometer.setVisibility(View.INVISIBLE);
                 videoState = 0;
+            }
+        });
+
+        patternButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                initPopWindow(view);
+            }
+        });
+    }
+
+    private void initPopWindow(View v) {
+        View view = LayoutInflater.from(ControlActivity.this).inflate(R.layout.pattern_menu, null, false);
+        Button btn_joint = (Button) view.findViewById(R.id.pattern_joint);
+        Button btn_pano = (Button) view.findViewById(R.id.pattern_pano);
+        //1.构造一个PopupWindow，参数依次是加载的View，宽高
+        final PopupWindow popWindow = new PopupWindow(view,
+                ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT, true);
+
+//        popWindow.setAnimationStyle(R.anim.anim_pop);  //设置加载动画
+
+        //这些为了点击非PopupWindow区域，PopupWindow会消失的，如果没有下面的
+        //代码的话，你会发现，当你把PopupWindow显示出来了，无论你按多少次后退键
+        //PopupWindow并不会关闭，而且退不出程序，加上下述代码可以解决这个问题
+        popWindow.setTouchable(true);
+        popWindow.setTouchInterceptor(new View.OnTouchListener() {
+
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                return false;
+                // 这里如果返回true的话，touch事件将被拦截
+                // 拦截后 PopupWindow的onTouchEvent不被调用，这样点击外部区域无法dismiss
+            }
+        });
+        popWindow.setBackgroundDrawable(new ColorDrawable(0x00000000));    //要为popWindow设置一个背景才有效
+
+
+        //设置popupWindow显示的位置，参数依次是参照View，x轴的偏移量，y轴的偏移量
+        popWindow.showAsDropDown(v, 50, 0);
+
+        //设置popupWindow里的按钮的事件
+        btn_pano.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mode = 1;
+                Toast.makeText(ControlActivity.this, "当前为全景模式", Toast.LENGTH_SHORT).show();
+                popWindow.dismiss();
+            }
+        });
+        btn_joint.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mode = 0;
+                Toast.makeText(ControlActivity.this, "当前为拼图模式", Toast.LENGTH_SHORT).show();
+                popWindow.dismiss();
             }
         });
     }
