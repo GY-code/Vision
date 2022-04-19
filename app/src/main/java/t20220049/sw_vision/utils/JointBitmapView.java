@@ -10,14 +10,14 @@ import android.view.View;
  * @author yw-tony
  *
  */
-public class JointBitmapView extends View{
+public class JointBitmapView {
     private Bitmap bitmap;
 
-    public JointBitmapView(Context context){
-        super(context);
+    public JointBitmapView(){
+//        super(context);
     }
-    public JointBitmapView(Context context, Bitmap bit1, Bitmap bit2, int mode) {
-        super(context);
+    public JointBitmapView(Bitmap bit1, Bitmap bit2, int mode) {
+//        super(context);
         if(mode == 0){
             bitmap = newBitmapHorizontal(bit1,bit2);
         } else{
@@ -55,11 +55,11 @@ public class JointBitmapView extends View{
         canvas.drawBitmap(bit2, bit1.getWidth(), 0, null);
         return bitmap;
     }
-    @Override
+/*    @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawBitmap(bitmap, 0, 0, null);
         bitmap.recycle();
-    }
+    }*/
 
 }

@@ -32,60 +32,71 @@ cv::Mat finalMat;
 extern "C"
 JNIEXPORT jintArray
 Java_t20220049_sw_1vision_utils_Pano_stitchImages(JNIEnv *env, jclass type,
-                                                        jobjectArray paths) {
-    jstring jstr;
-    jsize len = env->GetArrayLength(paths);
-    std::vector<cv::Mat> mats;
-    for (int i = 0; i < len; i++) {
-        jstr = (jstring) env->GetObjectArrayElement(paths, i);
-        const char *path = (char *) env->GetStringUTFChars(jstr, 0);
-        LOGI("path %s", path);
-        cv::Mat mat = cv::imread(path);
+                                                  jobjectArray paths) {
+    try {
+        jstring jstr;
+        jsize len = env->GetArrayLength(paths);
+        std::vector<cv::Mat> mats;
+        for (int i = 0; i < len; i++) {
+            jstr = (jstring) env->GetObjectArrayElement(paths, i);
+            const char *path = (char *) env->GetStringUTFChars(jstr, 0);
+            LOGI("path %s", path);
+            cv::Mat mat = cv::imread(path);
 //        cvtColor(mat, mat, CV_RGBA2RGB);
-        mats.push_back(mat);
-    }
-    LOGI("开始拼接......");
-    cv::Stitcher stitcher = cv::Stitcher::createDefault(false);
-    LOGI("1");
-    //stitcher.setRegistrationResol(0.6);
-    // stitcher.setWaveCorrection(false);
-    /*=match_conf默认是0.65，我选0.8，选太大了就没特征点啦,0.8都失败了*/
-    detail::BestOf2NearestMatcher *matcher = new detail::BestOf2NearestMatcher(false, 0.5f);
-    stitcher.setFeaturesMatcher(matcher);
-    stitcher.setBundleAdjuster(new detail::BundleAdjusterRay());
-    stitcher.setSeamFinder(new detail::NoSeamFinder);
-    stitcher.setExposureCompensator(new detail::NoExposureCompensator());//曝光补偿
-    stitcher.setBlender(new detail::FeatherBlender());
-    Stitcher::Status state = stitcher.stitch(mats, finalMat);
-    LOGI("2");
-    //此时finalMat是bgr类型
-    LOGI("拼接结果: %d", state);
+            mats.push_back(mat);
+        }
+        LOGI("开始拼接......");
+        cv::Stitcher stitcher = cv::Stitcher::createDefault(false);
+        LOGI("1");
+        //stitcher.setRegistrationResol(0.6);
+        // stitcher.setWaveCorrection(false);
+        /*=match_conf默认是0.65，我选0.8，选太大了就没特征点啦,0.8都失败了*/
+        detail::BestOf2NearestMatcher *matcher = new detail::BestOf2NearestMatcher(false, 0.5f);
+        stitcher.setFeaturesMatcher(matcher);
+        stitcher.setBundleAdjuster(new detail::BundleAdjusterRay());
+        stitcher.setSeamFinder(new detail::NoSeamFinder);
+        stitcher.setExposureCompensator(new detail::NoExposureCompensator());//曝光补偿
+        stitcher.setBlender(new detail::FeatherBlender());
+        Stitcher::Status state = stitcher.stitch(mats, finalMat);
+        LOGI("2");
+        //此时finalMat是bgr类型
+        LOGI("拼接结果: %d", state);
 //        finalMat = clipping(finalMat);
-    jintArray jint_arr = env->NewIntArray(3);
-    jint *elems = env->GetIntArrayElements(jint_arr, NULL);
-    elems[0] = state;//状态码
-    elems[1] = finalMat.cols;//宽
-    elems[2] = finalMat.rows;//高
-    if (state == cv::Stitcher::OK){
-        LOGI("拼接成功: OK");
-    }else{
-        LOGI("拼接失败:fail code %d",state);
-    }
-    //同步
-    env->ReleaseIntArrayElements(jint_arr, elems, 0);
+        jintArray jint_arr = env->NewIntArray(3);
+        jint *elems = env->GetIntArrayElements(jint_arr, NULL);
+        elems[0] = state;//状态码
+        elems[1] = finalMat.cols;//宽
+        elems[2] = finalMat.rows;//高
+        if (state == cv::Stitcher::OK) {
+            LOGI("拼接成功: OK");
+        } else {
+            LOGI("拼接失败:fail code %d", state);
+        }
+        //同步
+        env->ReleaseIntArrayElements(jint_arr, elems, 0);
 //    bool isSave  = cv::imwrite(filepath1, finalMat);
 //    LOGI("是否存储成功:%d",isSave);
-    return jint_arr;
+        return jint_arr;
+    } catch (Exception &e) {
+        jclass je = env->FindClass("java/lang/Exception");
+        env->ThrowNew(je, e.what());
+    }
 }
 extern "C"
 JNIEXPORT void JNICALL
 Java_t20220049_sw_1vision_utils_Pano_getMat(JNIEnv *env, jclass type, jlong mat) {
-    LOGI("开始获取mat...");
-    Mat *res = (Mat *) mat;
-    res->create(finalMat.rows, finalMat.cols, finalMat.type());
-    memcpy(res->data, finalMat.data, finalMat.rows * finalMat.step);
-    LOGI("获取成功");
+    try {
+        LOGI("开始获取mat...");
+        Mat *res = (Mat *) mat;
+        res->create(finalMat.rows, finalMat.cols, finalMat.type());
+        memcpy(res->data, finalMat.data, finalMat.rows * finalMat.step);
+        LOGI("获取成功");
+    } catch (Exception &e) {
+        jclass je = env->FindClass("java/lang/Exception");
+        env->ThrowNew(je, e.what());
+    }
 }
+
 //将mat转化成bitmap
 void MatToBitmap(JNIEnv *env, Mat &mat, jobject &bitmap, jboolean needPremultiplyAlpha) {
     AndroidBitmapInfo info;
@@ -162,9 +173,14 @@ void MatToBitmap(JNIEnv *env, Mat &mat, jobject &bitmap, jboolean needPremultipl
 extern "C"
 JNIEXPORT jint JNICALL
 Java_t20220049_sw_1vision_utils_Pano_getBitmap(JNIEnv *env, jclass type, jobject bitmap) {
-    if (finalMat.dims != 2){
-        return -1;
+    try {
+        if (finalMat.dims != 2) {
+            return -1;
+        }
+        MatToBitmap(env, finalMat, bitmap, false);
+    } catch (Exception &e) {
+        jclass je = env->FindClass("java/lang/Exception");
+        env->ThrowNew(je, e.what());
     }
-    MatToBitmap(env,finalMat,bitmap,false);
     return 0;
 }

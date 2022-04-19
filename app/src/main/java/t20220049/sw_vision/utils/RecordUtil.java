@@ -37,6 +37,7 @@ import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
 public class RecordUtil {
     //0表示采集端  1 表示控制端
     Context context;
+    static Context backupContext;
     String filePath;
     static String localPath;
     String remotePath;
@@ -56,15 +57,16 @@ public class RecordUtil {
         localPhoto = localPath + myId + ".png";
         localmp4 = localPath + myId + ".mp4";
     }
-
-    public static String getMyId(){
+        public static String getMyId() {
         return myId;
     }
 
     private static String myId;
 
+
     public RecordUtil(Context c) {
         context = c;
+        backupContext=c;
         filePath = context.getFilesDir().getAbsolutePath() + "/";
         localPath = filePath + "local/";
         remotePath = filePath + "remote/";

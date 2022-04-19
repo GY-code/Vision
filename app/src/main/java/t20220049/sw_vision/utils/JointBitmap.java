@@ -15,8 +15,8 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
-
-public class JointBitmap extends AppCompatActivity {
+import org.webrtc.ContextUtils;
+public class JointBitmap {
     private JointBitmapView view;
     int picNum = 0;
     private Bitmap[] bitmaps;
@@ -39,7 +39,7 @@ public class JointBitmap extends AppCompatActivity {
     }
 
     public void jointPhoto(){
-        JointBitmapView view1 = new JointBitmapView(this);
+        JointBitmapView view1 = new JointBitmapView();
         Bitmap temp = bitmaps[0];
         Bitmap temp2 = bitmaps[picNum-1];
 
@@ -51,14 +51,14 @@ public class JointBitmap extends AppCompatActivity {
                 temp3 = view1.newBitmapHorizontal(temp3, bitmaps[i+4]);
             }
             Bitmap temp4 = view1.newBitmapVertical(temp, temp2);
-            view = new JointBitmapView(this, temp4, temp3,1);
+            view = new JointBitmapView( temp4, temp3,1);
             result = view1.newBitmapVertical(temp4, temp3);
         } else if(picNum == 3) {
             temp = view1.newBitmapHorizontal(bitmaps[0], bitmaps[1]);
-            view = new JointBitmapView(this, temp, bitmaps[2],0);
+            view = new JointBitmapView(temp, bitmaps[2],0);
             result = view1.newBitmapHorizontal(temp, bitmaps[2]);
         } else if(picNum == 2){
-            view = new JointBitmapView(this, bitmaps[0], bitmaps[1],0);
+            view = new JointBitmapView(bitmaps[0], bitmaps[1],0);
             result = view1.newBitmapHorizontal(bitmaps[0], bitmaps[1]);
         } else if(picNum == 1){
             Log.e("error", "error");
@@ -70,13 +70,14 @@ public class JointBitmap extends AppCompatActivity {
             for(int j = 0; j < ((picNum / 2) - 1); j++){
                 temp2 = view1.newBitmapHorizontal(bitmaps[picNum-j-2], temp2);
             }
-            view = new JointBitmapView(this, temp, temp2,1);
+            view = new JointBitmapView( temp, temp2,1);
             result = view1.newBitmapVertical(temp, temp2);
         }
-        savePhoto(result);
+        RecordUtil recordUtil=new RecordUtil(ContextUtils.getApplicationContext());
+        recordUtil.savePhoto2Gallery(result);
     }
 
-    private void savePhoto(Bitmap bitmap) {
+  /*  private void savePhoto(Bitmap bitmap) {
         long curTime = new Date().getTime();
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
 //        contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, "record_photo "+sdf.format(curTime));
@@ -97,5 +98,5 @@ public class JointBitmap extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 }

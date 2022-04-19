@@ -32,6 +32,8 @@ import t20220049.sw_vision.transfer.server.WifiServer;
 import t20220049.sw_vision.transfer.server.WifiServerService;
 
 import t20220049.sw_vision.R;
+import t20220049.sw_vision.utils.Pano;
+
 //控制端
 public class ReceiveFileActivity extends BaseActivity {
 
@@ -220,6 +222,10 @@ public class ReceiveFileActivity extends BaseActivity {
         });
         findViewById(R.id.btnControl).setOnClickListener(v->{
             WebrtcUtil.call(ReceiveFileActivity.this, "ws://106.13.236.207:3000", "123456");
+        });
+        findViewById(R.id.btnTest).setOnClickListener(v->{
+            Intent intent=new Intent(ReceiveFileActivity.this, Pano.class);
+            startActivity(intent);
         });
         cacheDir = getCacheDir();
 

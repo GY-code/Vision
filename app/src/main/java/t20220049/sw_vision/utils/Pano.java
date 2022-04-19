@@ -1,5 +1,7 @@
 package t20220049.sw_vision.utils;
+
 import t20220049.sw_vision.R;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -101,7 +103,7 @@ public class Pano extends AppCompatActivity {
     /**
      * 存储待拼接的图像集合
      */
-    private String[] mImagePath = new String[]{"abc","abc"};
+    private String[] mImagePath = new String[]{"abc", "abc"};
 
     /**
      * 存储待拼接的图像集合的索引
@@ -109,8 +111,9 @@ public class Pano extends AppCompatActivity {
     private static int i = 0;
 
     // 引用native方法
+
     static {
-        System.loadLibrary("native-lib");
+        MyLog.MLog.getLog();
     }
 
     @Override
@@ -119,6 +122,11 @@ public class Pano extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_panorama);
 
+        try {
+            System.loadLibrary("native-lib");
+        } catch (Exception e) {
+            e.getMessage();
+        }
         // 初始化控件实例
         mBtnSelect = findViewById(R.id.btn_select);
         mBtnSelect2 = findViewById(R.id.btn_select2);
@@ -130,9 +138,9 @@ public class Pano extends AppCompatActivity {
         mBtnSelect.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(ContextCompat.checkSelfPermission(Pano.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-                    ActivityCompat.requestPermissions(Pano.this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
-                }else{
+                if (ContextCompat.checkSelfPermission(Pano.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(Pano.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                } else {
                     DISPLAY_IMAGE = 1;
                     openAlbum();
                 }
@@ -143,9 +151,9 @@ public class Pano extends AppCompatActivity {
         mBtnSelect2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(ContextCompat.checkSelfPermission(Pano.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
-                    ActivityCompat.requestPermissions(Pano.this,new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},1);
-                }else{
+                if (ContextCompat.checkSelfPermission(Pano.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(Pano.this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                } else {
                     DISPLAY_IMAGE = 2;
                     openAlbum();
                 }
@@ -156,18 +164,18 @@ public class Pano extends AppCompatActivity {
         mMerge.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(Pano.this,mImagePath[0],Toast.LENGTH_LONG).show();
-                mergeBitmap(mImagePath,new onStitchResultListener(){
+                Toast.makeText(Pano.this, mImagePath[0], Toast.LENGTH_LONG).show();
+                mergeBitmap(mImagePath, new onStitchResultListener() {
 
                     @Override
                     public void onSuccess(Bitmap bitmap) {
-                        Toast.makeText(Pano.this,"图片拼接成功！",Toast.LENGTH_LONG).show();
+                        Toast.makeText(Pano.this, "图片拼接成功！", Toast.LENGTH_LONG).show();
                         replaceImage(bitmap);
                     }
 
                     @Override
                     public void onError(String errorMsg) {
-                        Toast.makeText(Pano.this,"图片拼接失败！",Toast.LENGTH_LONG).show();
+                        Toast.makeText(Pano.this, "图片拼接失败！", Toast.LENGTH_LONG).show();
                         System.out.println(errorMsg);
                     }
                 });
@@ -183,12 +191,13 @@ public class Pano extends AppCompatActivity {
 
     /**
      * 动态申请权限的处理方法
+     *
      * @param requestCode
      * @param permissions
      * @param grantResults
      */
     @Override
-    public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
             case 1:
@@ -207,10 +216,10 @@ public class Pano extends AppCompatActivity {
     /**
      * 打开相册
      */
-    private void openAlbum(){
+    private void openAlbum() {
         Intent intent = new Intent("android.intent.action.GET_CONTENT");
         intent.setType("image/*");
-        startActivityForResult(intent,CHOOSE_PHOTO);
+        startActivityForResult(intent, CHOOSE_PHOTO);
     }
 
     /* OpenCV的测试方法
@@ -229,16 +238,17 @@ public class Pano extends AppCompatActivity {
 
     /**
      * Activity的回调处理
+     *
      * @param requestCode 请求参数
-     * @param resultCode 结果参数
-     * @param data 数据
+     * @param resultCode  结果参数
+     * @param data        数据
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case CHOOSE_PHOTO:
-                if (resultCode  == RESULT_OK) {
+                if (resultCode == RESULT_OK) {
                     if (Build.VERSION.SDK_INT >= 19) {
                         handleImageOnKitKat(data); /* 4.4及以上系统使用这个方法处理图片 */
                     } else {
@@ -253,25 +263,26 @@ public class Pano extends AppCompatActivity {
 
     /**
      * 4.4及以上系统处理图片的方法
+     *
      * @param data 数据
      */
     @TargetApi(19)
-    private void handleImageOnKitKat(Intent data){
+    private void handleImageOnKitKat(Intent data) {
         String imagePath = null;
         Uri uri = data.getData();
-        if(DocumentsContract.isDocumentUri(this,uri)){
+        if (DocumentsContract.isDocumentUri(this, uri)) {
             String docId = DocumentsContract.getDocumentId(uri);
-            if("com.android.providers.media.documents".equals(uri.getAuthority())){
+            if ("com.android.providers.media.documents".equals(uri.getAuthority())) {
                 String id = docId.split(":")[1];
                 String selection = MediaStore.Images.Media._ID + "=" + id;
-                imagePath = getImagePath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,selection);
-            }else if ("com.android.provideres.downloads.documents".equals(uri.getAuthority())){
-                Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"),Long.valueOf(docId));
-                imagePath = getImagePath(contentUri,null);
+                imagePath = getImagePath(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, selection);
+            } else if ("com.android.provideres.downloads.documents".equals(uri.getAuthority())) {
+                Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(docId));
+                imagePath = getImagePath(contentUri, null);
             }
-        }else if ("content".equalsIgnoreCase(uri.getScheme())){
-            imagePath = getImagePath(uri,null);
-        }else if ("file".equalsIgnoreCase(uri.getScheme())){
+        } else if ("content".equalsIgnoreCase(uri.getScheme())) {
+            imagePath = getImagePath(uri, null);
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
             imagePath = uri.getPath();
         }
         displayImage(imagePath);
@@ -279,25 +290,27 @@ public class Pano extends AppCompatActivity {
 
     /**
      * 4.4以下系统处理图片的方法
+     *
      * @param data 数据
      */
-    private void handleImageBeforeKitKat(Intent data){
+    private void handleImageBeforeKitKat(Intent data) {
         Uri uri = data.getData();
-        String imagePath = getImagePath(uri,null);
+        String imagePath = getImagePath(uri, null);
         displayImage(imagePath);
     }
 
     /**
      * 获取图片路径
-     * @param uri 图片Url
+     *
+     * @param uri       图片Url
      * @param selection 默认为空值
      * @return
      */
-    private String getImagePath(Uri uri,String selection){
+    private String getImagePath(Uri uri, String selection) {
         String path = null;
-        Cursor cursor = getContentResolver().query(uri,null,selection,null,null);
-        if(cursor != null){
-            if(cursor.moveToFirst()){
+        Cursor cursor = getContentResolver().query(uri, null, selection, null, null);
+        if (cursor != null) {
+            if (cursor.moveToFirst()) {
                 path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA));
             }
             cursor.close();
@@ -308,10 +321,11 @@ public class Pano extends AppCompatActivity {
 
     /**
      * 图片显示的方法
+     *
      * @param imagePath 图片路径
      */
-    private void displayImage(String imagePath){
-        if(imagePath != null){
+    private void displayImage(String imagePath) {
+        if (imagePath != null) {
             Log.i("1", "1");
 //            Bitmap bitmap = BitmapFactory.decodeFile(imagePath);
 
@@ -320,27 +334,27 @@ public class Pano extends AppCompatActivity {
             try {
                 FileInputStream fis = new FileInputStream(file);
                 bitmap = BitmapFactory.decodeStream(fis);
-            } catch (IOException e){
+            } catch (IOException e) {
                 e.printStackTrace();
             }
-            
+
             Log.i("2", "2");
-            if (DISPLAY_IMAGE == 1){
+            if (DISPLAY_IMAGE == 1) {
                 mImageView.setImageBitmap(bitmap);
                 mBitmap = bitmap;
-            }
-            else {
+            } else {
                 mImageView2.setImageBitmap(bitmap);
                 mBitmap2 = bitmap;
             }
-        }else{
-            Toast.makeText(this,"获取图片失败",Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "获取图片失败", Toast.LENGTH_SHORT).show();
         }
     }
 
     /**
      * 拼接图片的方法
-     * @param paths 图像URL的集合
+     *
+     * @param paths    图像URL的集合
      * @param listener 监听器回调
      * @return
      */
@@ -356,9 +370,9 @@ public class Pano extends AppCompatActivity {
             case OK: {
                 Bitmap bitmap = Bitmap.createBitmap(wh[1], wh[2], Bitmap.Config.ARGB_8888);
                 int result = getBitmap(bitmap);
-                if (result == OK && bitmap != null){
+                if (result == OK && bitmap != null) {
                     listener.onSuccess(bitmap);
-                }else{
+                } else {
                     listener.onError("图片合成失败");
                 }
             }
@@ -390,6 +404,7 @@ public class Pano extends AppCompatActivity {
 
     /**
      * 替换图片的方法
+     *
      * @param bitmap 拼接后的图像
      */
     private void replaceImage(Bitmap bitmap) {
@@ -402,6 +417,7 @@ public class Pano extends AppCompatActivity {
 
     /**
      * 调用底层的JNI方法（示例）
+     *
      * @return
      */
     // public native String stringFromJNI();

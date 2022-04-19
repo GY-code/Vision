@@ -183,15 +183,15 @@ public class WifiServer extends Thread {
                     }
 
                     Log.e(TAG, String.valueOf(ControlActivity.mode));
-                    if(ControlActivity.mode == 0){
+                    if (ControlActivity.mode == 0) {
                         JointBitmap jointBitmap = new JointBitmap();
                         String photoPath[] = new String[clients.size() + 1];
                         String photoName[] = new String[clients.size() + 1];
                         photoPath[0] = RecordUtil.remotePhotoPath;
                         photoName[0] = RecordUtil.getMyId() + ".png";
-                        for(int i = 1; i < (clients.size() + 1); i++){
+                        for (int i = 1; i < (clients.size() + 1); i++) {
                             photoPath[i] = RecordUtil.remotePhotoPath;
-                            photoName[i] = clients.get(i).clientUserID + ".png";
+                            photoName[i] = clients.get(i - 1).clientUserID + ".png";
                             Log.e(TAG, photoPath[i]);
                             Log.e(TAG, photoName[i]);
                         }

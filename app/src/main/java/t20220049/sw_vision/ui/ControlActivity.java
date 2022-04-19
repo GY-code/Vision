@@ -557,10 +557,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                 layoutParams.topMargin = getY(size, i);
                 renderer1.setLayoutParams(layoutParams);
             }
-
         }
-
-
     }
 
 
