@@ -116,7 +116,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     private CameraService cameraService;
     Intent serviceIntent;
 
-    public static int mode = 0;
+    public static int mode = 1;
 
 
     public class Device {

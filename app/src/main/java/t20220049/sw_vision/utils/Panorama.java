@@ -100,7 +100,8 @@ public class Panorama extends AppCompatActivity {
     /**
      * 存储待拼接的图像集合
      */
-    private String[] mImagePath = new String[]{"/storage/emulated/0/Pictures/WeiXin/a.jpg","/storage/emulated/0/Pictures/WeiXin/b.jpg"};
+//    private String[] mImagePath = new String[]{"/storage/emulated/0/Pictures/WeiXin/a.jpg","/storage/emulated/0/Pictures/WeiXin/b.jpg"};
+    private String[] mImagePath = new String[]{"123","123"};
 
     /**
      * 存储待拼接的图像集合的索引
@@ -108,9 +109,9 @@ public class Panorama extends AppCompatActivity {
     private static int i = 0;
 
     // 引用native方法
-//    static {
-//        System.loadLibrary("native-lib");
-//    }
+    static {
+        System.loadLibrary("native-lib");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,11 +120,11 @@ public class Panorama extends AppCompatActivity {
         setContentView(R.layout.activity_panorama);
 
         // 初始化控件实例
-        mBtnSelect = findViewById(R.id.btn_select);
-        mBtnSelect2 = findViewById(R.id.btn_select2);
-        mMerge = findViewById(R.id.btn_merge);
-        mImageView = findViewById(R.id.imageView);
-        mImageView2 = findViewById(R.id.imageView2);
+//        mBtnSelect = findViewById(R.id.btn_select);
+//        mBtnSelect2 = findViewById(R.id.btn_select2);
+//        mMerge = findViewById(R.id.btn_merge);
+//        mImageView = findViewById(R.id.imageView);
+//        mImageView2 = findViewById(R.id.imageView2);
 
         displayImage(mImagePath[0]);
 
