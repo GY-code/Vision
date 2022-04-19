@@ -25,7 +25,8 @@
             android:layout_width="116dp"
             android:layout_height="match_parent"
             android:layout_alignParentEnd="true"
-            android:src="@mipmap/pattern"></ImageView>
+            android:src="@mipmap/pattern">
+        </ImageView>
     </RelativeLayout>
 
     <RelativeLayout
