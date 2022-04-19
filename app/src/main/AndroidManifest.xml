@@ -40,7 +40,7 @@
         android:requestLegacyExternalStorage="true">
         <service
             android:name=".transfer.client.WifiClientService"
-            android:exported="false"></service>
+            android:exported="false" />
         <!-- <activity -->
         <!-- android:name=".VideoView" -->
         <!-- android:exported="true"> -->
