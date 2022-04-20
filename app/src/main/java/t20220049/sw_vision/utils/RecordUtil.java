@@ -95,6 +95,7 @@ public class RecordUtil {
         File file = new File(path);
         if (file.isFile() && file.exists()) {
             file.delete();
+            Log.e(TAG, "terminateVideo: release0" );
         }
     }
 
@@ -114,6 +115,7 @@ public class RecordUtil {
         if (vfr != null) {
             localTrack.removeSink(vfr);
             vfr.release();
+            Log.e(TAG, "terminateVideo: release1" );
         }
         activity.runOnUiThread(() -> {
             Toast.makeText(context, "结束录制", Toast.LENGTH_SHORT).show();
