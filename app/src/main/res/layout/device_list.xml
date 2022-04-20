@@ -48,7 +48,7 @@
             android:layout_height="80dp"
             android:layout_alignParentRight="true"
             android:layout_gravity="center_vertical"
-            android:src="@mipmap/setting"></ImageView>
+            android:src="@drawable/ic_caiji"></ImageView>
     </RelativeLayout>
 
 
