@@ -295,6 +295,10 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 
     private void endRecordCapture() {
         cutRecordCapture();
+        mDevicesList.get(currentIndex).stat = 2;
+        runOnUiThread(() -> {
+            deviceAdapter.notifyDataSetChanged();
+        });
         VideoFragmentManager.getInstance().setFragments((ArrayList<VideoFragment>) fragmentList);
 //        Log.e("zsy", "fragmentList is complete ? " + VideoFragmentManager.getInstance().isComplete());
         Log.e("zsy", "fragmentList already set");
@@ -306,9 +310,9 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         double durance = cuts[1];
         String filename = userIdList.get(currentIndex) + ".mp4";
         fragmentList.add(new VideoFragment(startTime, durance, filename));
-        Toast.makeText(ControlActivity.this,
-                userIdList.get(currentIndex) + " Start at: " + Double.toString(startTime) + "\nRecord: " + Double.toString(durance) + "seconds",
-                Toast.LENGTH_LONG).show();
+//        Toast.makeText(ControlActivity.this,
+//                userIdList.get(currentIndex) + " Start at: " + Double.toString(startTime) + "\nRecord: " + Double.toString(durance) + "seconds",
+//                Toast.LENGTH_LONG).show();
     }
 
     protected void havePhoto() {
@@ -465,7 +469,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         device.name = "控制端";
         device.userId = userId;
         device.ip = getIPFromUserId(userId);
-        device.stat = 1;
+        device.stat = 2;
 
         mDevicesList.add(device);
         runOnUiThread(() -> {

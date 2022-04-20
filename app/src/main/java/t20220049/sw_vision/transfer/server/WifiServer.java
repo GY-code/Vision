@@ -6,6 +6,8 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
+import org.webrtc.ContextUtils;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -200,6 +202,10 @@ public class WifiServer extends Thread {
                             .cutVideosAndCombine(fragments,
                                     "output.mp4",
                                     RecordUtil.remoteVideoPath);
+
+                    RecordUtil util = new RecordUtil(ContextUtils.getApplicationContext());
+                    util.saveVideo2Gallery(RecordUtil.remoteVideoPath + "output.mp4", ContextUtils.getApplicationContext());
+
 
 
 
