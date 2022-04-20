@@ -9,6 +9,7 @@ import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -34,6 +35,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -132,6 +134,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         String name;
         String userId;
         String ip;
+        int stat; // 1 collect, 2 collectReady, 3 collecting
     }
 
 
@@ -162,9 +165,29 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             Device device = this.deviceList.get(position);
             holder.mType.setText(device.name);
             holder.mName.setText(device.ip);
+            String collectUrl = "@drawable/caiji";
+            String collectReadyUrl = "@drawable/caijizhong";
+            String collectingUrl = "@drawable/caijizhunbei";
+
+
+            Drawable collect = getResources().getDrawable(R.drawable.ic_caiji);
+            Drawable collectReady = getResources().getDrawable(R.drawable.ic_caijizhunbei);
+            Drawable collecting = getResources().getDrawable(R.drawable.ic_caijizhong);
+
+            if (device.stat == 1) holder.selectButton.setImageDrawable(collect);
+            else if (device.stat == 2) holder.selectButton.setImageDrawable(collectReady);
+            else holder.selectButton.setImageDrawable(collecting);
+
             holder.selectButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+//                    for (int i = 0; i < deviceList.size(); i++) {
+//                        deviceList.get(i).stat = 1;
+//                    }
+//
+//                    if (!activateVideo) device.stat = 2;
+//                    else device.stat = 3;
+
                     changeRecordCapture(deviceList.get(position).userId);
                 }
             });
@@ -188,6 +211,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             mName = itemView.findViewById(R.id.txt_mName);
             selectButton = itemView.findViewById(R.id.select_button);
         }
+
     }
 
     private String getIPFromUserId(String userId) {
@@ -241,8 +265,8 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         setContentView(R.layout.acticity_control);
         showText = findViewById(R.id.showText);
 
-        userIdList.add("_all");
-        streamList.add(null);
+//        userIdList.add("_all");
+//        streamList.add(null);
 
         initView();
         initVar();
@@ -260,12 +284,24 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         if (userIdList.contains(s)) {
             cutRecordCapture();
             String preUserId = userIdList.get(currentIndex);
+            int preIndex = currentIndex;
             currentIndex = userIdList.indexOf(s);
-            showText.setText("正在录制第" + currentIndex + "个视频");
+
+            mDevicesList.get(preIndex).stat = 1;
+            if (!activateVideo)
+                mDevicesList.get(currentIndex).stat = 2;
+            else
+                mDevicesList.get(currentIndex).stat = 3;
+            runOnUiThread(() -> {
+                deviceAdapter.notifyDataSetChanged();
+            });
+//            showText.setText("正在录制第" + currentIndex + "个视频");
             if (_textViews.get(preUserId) != null) {
                 _textViews.get(preUserId).setText("");
             }
-            _textViews.get(s).setText("正在录制");
+            if (activateVideo) {
+                _textViews.get(s).setText("正在录制");
+            }
         }
     }
 
@@ -324,8 +360,9 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         device.name = "查看全部";
         device.userId = "_all";
         device.ip = "";
+        device.stat = 1;
 
-        mDevicesList.add(device);
+//        mDevicesList.add(device);
 
         deviceAdapter = new deviceAdapter(mDevicesList);
 
@@ -390,7 +427,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         videoButton.setOnClickListener(v -> {
             if (!activateVideo) {
                 TimerManager.getInstance().restart();
-                showText.setText("正在录制第" + currentIndex + "个视频");
+//                showText.setText("正在录制第" + currentIndex + "个视频");
                 ru.setVideoStart(_vfrs.get(myId), _localVideoTrack, rootEglBase);
                 activateVideo = true;
                 changeRecordCapture(userIdList.get(currentIndex));
@@ -518,6 +555,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         device.name = "控制端";
         device.userId = userId;
         device.ip = getIPFromUserId(userId);
+        device.stat = 1;
 
         mDevicesList.add(device);
         runOnUiThread(() -> {
@@ -542,6 +580,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         device.name = "采集端" + Integer.toString(userIdList.size() - 2);
         device.userId = userId;
         device.ip = getIPFromUserId(userId);
+        device.stat = 1;
 
         mDevicesList.add(device);
         runOnUiThread(() -> {
