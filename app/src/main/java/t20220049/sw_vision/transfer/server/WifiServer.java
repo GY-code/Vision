@@ -271,6 +271,10 @@ public class WifiServer extends Thread {
                                     "output.mp4",
                                     RecordUtil.remoteVideoPath);
 
+                    RecordUtil util = new RecordUtil(ContextUtils.getApplicationContext());
+                    util.saveVideo2Gallery(RecordUtil.remoteVideoPath + "output.mp4", ContextUtils.getApplicationContext());
+
+
 
                     for (MyClient mc : clients) {
                         videoWL.add(mc.clientIP);
