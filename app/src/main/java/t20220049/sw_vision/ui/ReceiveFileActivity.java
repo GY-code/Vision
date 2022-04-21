@@ -8,10 +8,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.wifi.p2p.WifiP2pDevice;
+import android.net.wifi.p2p.WifiP2pDeviceList;
 import android.net.wifi.p2p.WifiP2pInfo;
 import android.net.wifi.p2p.WifiP2pManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
@@ -21,11 +22,14 @@ import android.widget.TextView;
 import androidx.core.app.ActivityCompat;
 
 import com.bumptech.glide.Glide;
+import com.skyfishjy.library.RippleBackground;
 
-import org.webrtc.ContextUtils;
+import org.w3c.dom.Text;
 
 import java.io.File;
 import java.util.Collection;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import t20220049.sw_vision.entrance.WebrtcUtil;
 import t20220049.sw_vision.transfer.broadcast.DirectBroadcastReceiver;
@@ -35,11 +39,14 @@ import t20220049.sw_vision.transfer.server.WifiServer;
 import t20220049.sw_vision.transfer.server.WifiServerService;
 
 import t20220049.sw_vision.R;
-import t20220049.sw_vision.utils.Pano;
+import t20220049.sw_vision.transfer.util.WifiP2pUtils;
 import t20220049.sw_vision.utils.RecordUtil;
 
 //控制端
 public class ReceiveFileActivity extends BaseActivity {
+
+    private TextView dvNameTv;
+    private TextView dvStatusTv;
 
     public static Context context;
 
@@ -115,6 +122,8 @@ public class ReceiveFileActivity extends BaseActivity {
 
         @Override
         public void onSelfDeviceAvailable(WifiP2pDevice wifiP2pDevice) {
+            dvNameTv.setText("设备名称： " + wifiP2pDevice.deviceName);
+            dvStatusTv.setText("设备状态: " + WifiP2pUtils.getDeviceStatus(wifiP2pDevice.status));
             log("onSelfDeviceAvailable");
             log(wifiP2pDevice.toString());
         }
@@ -123,9 +132,14 @@ public class ReceiveFileActivity extends BaseActivity {
         public void onPeersAvailable(Collection<WifiP2pDevice> dl) {
             wifiP2pDeviceList = dl;
             log("onPeersAvailable,size:" + dl.size());
-            for (WifiP2pDevice wifiP2pDevice : dl) {
-                log(wifiP2pDevice.toString());
-            }
+//            tv_log.setText("");
+//            for (WifiP2pDevice wifiP2pDevice : dl) {
+//                tv_log.append("设备名称： " + wifiP2pDevice.deviceName + "\n");
+//                tv_log.append("设备地址： " + wifiP2pDevice.deviceAddress + "\n");
+//                tv_log.append("设备状态： " + WifiP2pUtils.getDeviceStatus(wifiP2pDevice.status) + "\n");
+//                tv_log.append("\n");
+////                log(wifiP2pDevice.toString());
+//            }
         }
 
         @Override
@@ -135,8 +149,7 @@ public class ReceiveFileActivity extends BaseActivity {
     };
 
     //进度条变化
-    private final WifiServerService.OnProgressChangListener progressChangListener = new WifiServerService.OnProgressChangListener()
-    {
+    private final WifiServerService.OnProgressChangListener progressChangListener = new WifiServerService.OnProgressChangListener() {
 
         //不断更新进度条，
         @Override
@@ -163,8 +176,22 @@ public class ReceiveFileActivity extends BaseActivity {
     public final WifiServer.FileReceiveListener fileReceiveListener = new WifiServer.FileReceiveListener() {
         @Override
         public void onFileReceiveFinished() {
-            runOnUiThread(()->{
+            runOnUiThread(() -> {
                 showToast("接收文件成功");
+            });
+        }
+
+        @Override
+        public void onFileReceiveFailed(String s) {
+            runOnUiThread(() -> {
+                showToast(s);
+            });
+        }
+
+        @Override
+        public void logMessage(String s) {
+            runOnUiThread(() -> {
+                log(s);
             });
         }
     };
@@ -185,6 +212,7 @@ public class ReceiveFileActivity extends BaseActivity {
         if (ActivityCompat.checkSelfPermission(ReceiveFileActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+        removeGroup();
         //建立群组
         wifiP2pManager.createGroup(channel, new WifiP2pManager.ActionListener() {
             @Override
@@ -204,65 +232,85 @@ public class ReceiveFileActivity extends BaseActivity {
         broadcastReceiver = new DirectBroadcastReceiver(wifiP2pManager, channel, directActionListener);
         registerReceiver(broadcastReceiver, DirectBroadcastReceiver.getIntentFilter());
 
-        Log.i(TAG,"flag1");
+        Log.i(TAG, "flag1");
         bindService();//start WifiServerService
 
 //        if (wifiServerService != null) {
-            log("start service");
-            startService(WifiServerService.class);
+        log("start service");
+        startService(WifiServerService.class);
 //        }
 
-        findViewById(R.id.btnSendMsg).setOnClickListener(view -> {
-            Log.i(TAG,"HELLO MM");
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    for(WifiServer.MyClient client:WifiServer.clients){
-                        WifiServer.sendInstruction("instruction",client.clientIP);
-                    }
-                }
-            }).start();
-
-        });
-        findViewById(R.id.btnControl).setOnClickListener(v->{
+//        findViewById(R.id.btnSendMsg).setOnClickListener(view -> {
+//            Log.i(TAG,"HELLO MM");
+//            new Thread(new Runnable() {
+//                @Override
+//                public void run() {
+//                    for(WifiServer.MyClient client:WifiServer.clients){
+//                        WifiServer.sendInstruction("instruction",client.clientIP);
+//                    }
+//                }
+//            }).start();
+//
+//        });
+        findViewById(R.id.cPlayLayout).setOnClickListener(v -> {
             WebrtcUtil.call(ReceiveFileActivity.this, "ws://106.13.236.207:3000", "123456");
         });
-        findViewById(R.id.btnTest).setOnClickListener(v->{
-//            Intent intent=new Intent(ReceiveFileActivity.this, Pano.class);
-//            startActivity(intent);
-            Pano panorama = new Pano();
-            String[] mImagePath = new String[]{"/storage/emulated/0/Pictures/WeiXin/a.jpg","/storage/emulated/0/Pictures/WeiXin/b.jpg"};
-            panorama.mergeBitmap(mImagePath,new Pano.onStitchResultListener(){
-                @Override
-                public void onSuccess(Bitmap bitmap) {
-//                                Toast.makeText(Pano.this,"图片拼接成功！",Toast.LENGTH_LONG).show();
-                    Log.e(TAG, "图片拼接成功！");
-                    RecordUtil recordUtil=new RecordUtil(ContextUtils.getApplicationContext());
-                    recordUtil.savePhoto2Gallery(bitmap);
-                }
 
-                @Override
-                public void onError(String errorMsg) {
-//                                Toast.makeText(Pano.this,"图片拼接失败！",Toast.LENGTH_LONG).show();
-                    Log.e(TAG, "图片拼接失败！");
-                    System.out.println(errorMsg);
-                }
-            });
-        });
+        final RippleBackground rippleBackground = (RippleBackground) findViewById(R.id.content0);
+        rippleBackground.startRippleAnimation();
+
+        dvNameTv = (TextView) findViewById(R.id.deviceNameText);
+        dvStatusTv = (TextView) findViewById(R.id.deviceStateText);
+//        tv.append(Build.DEVICE);
         cacheDir = getCacheDir();
 
+        findViewById(R.id.content0).setOnClickListener(view -> {
+            removeGroup();
+        });
+
         context = this;
+        new RecordUtil(context);
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+                    //    ActivityCompat#requestPermissions
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    return;
+                }
+                wifiP2pManager.requestPeers(channel, new WifiP2pManager.PeerListListener() {
+                    @Override
+                    public void onPeersAvailable(WifiP2pDeviceList wifiP2pDeviceList) {
+                        tv_log.setText("");
+                        for (WifiP2pDevice wifiP2pDevice : wifiP2pDeviceList.getDeviceList()) {
+                            tv_log.append("设备名称： " + wifiP2pDevice.deviceName + "\n");
+                            tv_log.append("设备地址： " + wifiP2pDevice.deviceAddress + "\n");
+                            tv_log.append("设备状态： " + WifiP2pUtils.getDeviceStatus(wifiP2pDevice.status) + "\n");
+                            tv_log.append("\n");
+                        }
+                    }
+                });
+            }
+        },500,1500);
+
     }
 
     private void initView() {
         setTitle("接收文件");
         iv_image = findViewById(R.id.iv_image);
         tv_log = findViewById(R.id.tv_log);
-//        新建群组
-        findViewById(R.id.btnCreateGroup).setOnClickListener(v -> {
+//      刷新，先移除再创建
+        findViewById(R.id.refreshButton).setOnClickListener(v -> {
             if (ActivityCompat.checkSelfPermission(ReceiveFileActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 return;
             }
+            removeGroup();
             wifiP2pManager.createGroup(channel, new WifiP2pManager.ActionListener() {
                 @Override
                 public void onSuccess() {
@@ -280,7 +328,7 @@ public class ReceiveFileActivity extends BaseActivity {
             });
         });
 //        移除群组
-        findViewById(R.id.btnRemoveGroup).setOnClickListener(v -> removeGroup());
+//        findViewById(R.id.btnRemoveGroup).setOnClickListener(v -> removeGroup());
         progressDialog = new ProgressDialog(this);
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressDialog.setCancelable(false);
@@ -319,9 +367,10 @@ public class ReceiveFileActivity extends BaseActivity {
         });
     }
 
-    private void log(String log) {
-        tv_log.append(log + "\n");
-        tv_log.append("----------" + "\n");
+    public void log(String log) {
+//        tv_log.append(log + "\n");
+//        tv_log.append("----------" + "\n");
+        return;
     }
 
     private void bindService() {

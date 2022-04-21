@@ -48,7 +48,7 @@
                 android:textStyle="bold" />
 
             <ImageView
-                android:id="@+id/playButton"
+                android:id="@+id/refreshButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
 

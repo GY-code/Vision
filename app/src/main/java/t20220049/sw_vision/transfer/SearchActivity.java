@@ -33,7 +33,7 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private void initView() {
-        ImageView playButton=findViewById(R.id.playButton);
+        ImageView playButton=findViewById(R.id.refreshButton);
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

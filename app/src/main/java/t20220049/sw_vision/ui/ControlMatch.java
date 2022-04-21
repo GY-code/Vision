@@ -16,7 +16,7 @@ public class ControlMatch extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_control_match);
 //        开始按钮初始化
-        ImageView playButton=findViewById(R.id.playButton);
+        ImageView playButton=findViewById(R.id.refreshButton);
         playButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {

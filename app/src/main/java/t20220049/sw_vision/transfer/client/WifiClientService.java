@@ -69,14 +69,19 @@ public class WifiClientService extends IntentService {
 //                    if(serverIn.)
                     serverIn = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     String instruction = serverIn.readLine();
-                    if (instruction.equals("photo")) {
-                        CollectActivityWeakRef.get().CallTakePicture(true, true);
+                    if(instruction==null){
+                        continue;
                     }
-                    if (instruction.equals("start")) {
-                        CollectActivityWeakRef.get().CallSetVideoStart();
-                    }
-                    if (instruction.equals("stop")) {
-                        CollectActivityWeakRef.get().CallSetVideoEnd(true,true);
+                    switch (instruction) {
+                        case "photo":
+                            CollectActivityWeakRef.get().CallTakePicture(true, true);
+                            break;
+                        case "start":
+                            CollectActivityWeakRef.get().CallSetVideoStart();
+                            break;
+                        case "stop":
+                            CollectActivityWeakRef.get().CallSetVideoEnd(true, true);
+                            break;
                     }
 
                 }

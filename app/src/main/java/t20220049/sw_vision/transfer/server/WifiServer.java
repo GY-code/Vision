@@ -17,11 +17,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
+import t20220049.sw_vision.transfer.client.WifiClientService;
 import t20220049.sw_vision.transfer.model.FileTransfer;
 import t20220049.sw_vision.transfer.util.Md5Util;
 import t20220049.sw_vision.ui.ControlActivity;
@@ -48,6 +57,13 @@ public class WifiServer extends Thread {
     private ArrayList<String> photoWL = new ArrayList<>();
     private ArrayList<String> videoWL = new ArrayList<>();
 
+    ObjectInputStream objectInputStream;
+    FileOutputStream fileOutputStream;
+    BufferedReader in;
+    PrintWriter out;
+    InputStream inputStream;
+    OutputStream outputStream;
+
     public class MyClient {
         public Socket client = null;
         public String clientIP = "default ip";
@@ -71,19 +87,20 @@ public class WifiServer extends Thread {
 
     public void run() {
         Looper.prepare();
-        BufferedReader in = null;
-        PrintWriter out = null;
         String inputLine;
         try {
             for (MyClient mc : clients) {
                 photoWL.add(mc.clientIP);
                 videoWL.add(mc.clientIP);
             }
+            inputStream = clientSocket.getInputStream();
+            outputStream = clientSocket.getOutputStream();
 
             //获取客户端输入流
-            in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            out = new PrintWriter(clientSocket.getOutputStream());
+            in = new BufferedReader(new InputStreamReader(inputStream));
+            out = new PrintWriter(outputStream);
             //不断监听客户端输入
+            label:
             while (true) { //(inputLine = in.readLine())!=null
 //                if(in==null)
                 in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -93,24 +110,43 @@ public class WifiServer extends Thread {
                 if (inputLine == null) {
                     continue;
                 }
-                if (inputLine.equals("sendPhoto")) {
-                    Log.e(TAG, "request send photo");
-                    receiveFile("photo");
-                } else if (inputLine.equals("sendVideo")) {
-                    receiveFile("video");
-                } else if (inputLine.equals("sendFile")) {
-                    receiveFile("file");
-                } else if (inputLine.equals("userID")) {
-                    Log.e(TAG, "receive user id");
-                    mClient.clientUserID = in.readLine();
-                    Log.d(TAG, "收到userId: " + mClient.clientUserID);
-                } else if (inputLine.equals("quit")) {
-                    break;
+                switch (inputLine) {
+                    case "sendPhoto":
+                        Log.e(TAG, "request send photo");
+                        fileReceiveListener.logMessage("request send photo");
+//                    String ss = in.readLine();
+//                    fileReceiveListener.logMessage(ss);
+//                    Log.e(TAG,ss);
+//                    if(!in.readLine().equals("continue")){
+//                        continue;
+//                    }
+//                    Thread.sleep(800);
+                        Log.e(TAG, "MyFlag");
+                        fileReceiveListener.logMessage("MyFlag");
+                        receiveFile("photo");
+                        fileReceiveListener.logMessage("eend");
+                        Log.e(TAG, "eend");
+                        break;
+                    case "sendVideo":
+                        receiveFile("video");
+                        break;
+                    case "sendFile":
+                        receiveFile("file");
+                        break;
+                    case "userID":
+                        Log.e(TAG, "receive user id");
+                        mClient.clientUserID = in.readLine();
+                        Log.d(TAG, "收到userId: " + mClient.clientUserID);
+                        break;
+                    case "quit":
+                        break label;
                 }
+
             }
 //            in.close();
 //            clientSocket.close();
         } catch (IOException e) {
+            fileReceiveListener.logMessage(e.getMessage());
             e.printStackTrace();
             clientsNum--;
             clients.remove(mClient);
@@ -120,6 +156,10 @@ public class WifiServer extends Thread {
 
     public interface FileReceiveListener {
         void onFileReceiveFinished();
+
+        void onFileReceiveFailed(String s);
+
+        void logMessage(String s);
     }
 
     public void setListener(FileReceiveListener fileReceiveListener) {
@@ -129,11 +169,11 @@ public class WifiServer extends Thread {
     private void receiveFile(String type) {
         File file = null;
         try {
-            InputStream inputStream;
-            ObjectInputStream objectInputStream;
-            FileOutputStream fileOutputStream;
+//            InputStream inputStream;
+//            ObjectInputStream objectInputStream;
+//            FileOutputStream fileOutputStream;
             Log.e(TAG, "客户端IP地址 : " + clientSocket.getInetAddress().getHostAddress());
-            inputStream = clientSocket.getInputStream();
+//            inputStream = clientSocket.getInputStream();
             Log.e(TAG, "HJKLL");
             objectInputStream = new ObjectInputStream(inputStream);
             Log.e(TAG, "HJKLL");
@@ -169,6 +209,7 @@ public class WifiServer extends Thread {
                 if (progress == 100)
                     break;
             }
+            fileOutputStream.close();
 
 //            serverSocket.close();
 //            inputStream.close();
@@ -294,6 +335,7 @@ public class WifiServer extends Thread {
 //            Toast.makeText(ReceiveFileActivity.context.getApplicationContext(),"接收文件成功",Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             e.printStackTrace();
+            fileReceiveListener.logMessage(e.getMessage());
             Log.e(TAG, "文件接收 Exception: " + e.getMessage());
         }
 //        } finally {

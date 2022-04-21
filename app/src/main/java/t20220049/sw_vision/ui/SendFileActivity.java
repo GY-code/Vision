@@ -20,11 +20,14 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.skyfishjy.library.RippleBackground;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -79,15 +82,15 @@ public class SendFileActivity extends BaseActivity {
 
     private TextView tv_myDeviceName;
 
-    private TextView tv_myDeviceAddress;
+//    private TextView tv_myDeviceAddress;
 
     private TextView tv_myDeviceStatus;
 
     private TextView tv_status;
 
-    private Button btn_disconnect;
-
-    private Button btn_chooseFile;
+//    private Button btn_disconnect;
+//
+//    private Button btn_chooseFile;
 
     private LoadingDialog loadingDialog;
 
@@ -127,16 +130,16 @@ public class SendFileActivity extends BaseActivity {
             dismissLoadingDialog();
             wifiP2pDeviceList.clear();
             deviceAdapter.notifyDataSetChanged();
-            btn_disconnect.setEnabled(true);
-            btn_chooseFile.setEnabled(true);
+//            btn_disconnect.setEnabled(true);
+//            btn_chooseFile.setEnabled(true);
             Log.e(TAG, "onConnectionInfoAvailable");
             Log.e(TAG, "onConnectionInfoAvailable groupFormed: " + wifiP2pInfo.groupFormed);
             Log.e(TAG, "onConnectionInfoAvailable isGroupOwner: " + wifiP2pInfo.isGroupOwner);
             Log.e(TAG, "onConnectionInfoAvailable getHostAddress: " + wifiP2pInfo.groupOwnerAddress.getHostAddress());
             StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder.append("本设备-是否群主：");
-            stringBuilder.append(wifiP2pInfo.isGroupOwner ? "是群主" : "非群主");
-            stringBuilder.append("\n");
+//            stringBuilder.append("本设备-是否群主：");
+//            stringBuilder.append(wifiP2pInfo.isGroupOwner ? "是群主" : "非群主");
+//            stringBuilder.append("\n");
             stringBuilder.append("\n");
             stringBuilder.append("连接设备-IP地址：");//连接设备就是群主
             stringBuilder.append(wifiP2pInfo.groupOwnerAddress.getHostAddress());
@@ -167,8 +170,8 @@ public class SendFileActivity extends BaseActivity {
         @Override
         public void onDisconnection() {
             Log.e(TAG, "onDisconnection");
-            btn_disconnect.setEnabled(false);
-            btn_chooseFile.setEnabled(false);
+//            btn_disconnect.setEnabled(false);
+//            btn_chooseFile.setEnabled(false);
             showToast("处于非连接状态");
             wifiP2pDeviceList.clear();
             deviceAdapter.notifyDataSetChanged();
@@ -189,7 +192,7 @@ public class SendFileActivity extends BaseActivity {
             Log.e(TAG, "Status: " + wifiP2pDevice.status);
             selfDeviceName = wifiP2pDevice.deviceName;
             tv_myDeviceName.setText("本设备-设备名称：" + wifiP2pDevice.deviceName);
-            tv_myDeviceAddress.setText("本设备-物理地址：" + wifiP2pDevice.deviceAddress);
+//            tv_myDeviceAddress.setText("本设备-物理地址：" + wifiP2pDevice.deviceAddress);
             tv_myDeviceStatus.setText("本设备-连接状态：" + WifiP2pUtils.getDeviceStatus(wifiP2pDevice.status));
         }
 
@@ -232,23 +235,23 @@ public class SendFileActivity extends BaseActivity {
     }
 
     private void initView() {
-        View.OnClickListener clickListener = v -> {
-            long id = v.getId();
-            if (id == R.id.btn_disconnect) {
-                disconnect(); //断开连接
-            } else if (id == R.id.btn_chooseFile) {
-                navToChosePicture(); //打开文件选择
-            }
-        };
+//        View.OnClickListener clickListener = v -> {
+//            long id = v.getId();
+//            if (id == R.id.btn_disconnect) {
+//                disconnect(); //断开连接
+//            } else if (id == R.id.btn_chooseFile) {
+//                navToChosePicture(); //打开文件选择
+//            }
+//        };
         setTitle("发送文件");
         tv_myDeviceName = findViewById(R.id.tv_myDeviceName);
-        tv_myDeviceAddress = findViewById(R.id.tv_myDeviceAddress);
+//        tv_myDeviceAddress = findViewById(R.id.tv_myDeviceAddress);
         tv_myDeviceStatus = findViewById(R.id.tv_myDeviceStatus);
         tv_status = findViewById(R.id.tv_status);
-        btn_disconnect = findViewById(R.id.btn_disconnect);
-        btn_chooseFile = findViewById(R.id.btn_chooseFile);
-        btn_disconnect.setOnClickListener(clickListener);
-        btn_chooseFile.setOnClickListener(clickListener);
+//        btn_disconnect = findViewById(R.id.btn_disconnect);
+//        btn_chooseFile = findViewById(R.id.btn_chooseFile);
+//        btn_disconnect.setOnClickListener(clickListener);
+//        btn_chooseFile.setOnClickListener(clickListener);
         loadingDialog = new LoadingDialog(this);
         RecyclerView rv_deviceList = findViewById(R.id.rv_deviceList);
         wifiP2pDeviceList = new ArrayList<>();
@@ -262,14 +265,16 @@ public class SendFileActivity extends BaseActivity {
         rv_deviceList.setAdapter(deviceAdapter);
         rv_deviceList.setLayoutManager(new LinearLayoutManager(this));
 
-        findViewById(R.id.btnWifiList).setOnClickListener(view -> {
-            if (wifiP2pManager != null && channel != null) {
-                startActivity(new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS));
-            } else {
-                showToast("当前设备不支持Wifi Direct");
-            }
-        });
-        findViewById(R.id.btnSearch).setOnClickListener(view -> {
+//        findViewById(R.id.btnWifiList).setOnClickListener(view -> {
+//            if (wifiP2pManager != null && channel != null) {
+//                startActivity(new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS));
+//            } else {
+//                showToast("当前设备不支持Wifi Direct");
+//            }
+//        });
+        findViewById(R.id.clientIcon).setOnClickListener(view -> {
+            disconnect();
+
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 showToast("请先授予位置权限");
             }
@@ -293,9 +298,13 @@ public class SendFileActivity extends BaseActivity {
                 }
             });
         });
-        findViewById(R.id.btnCollect).setOnClickListener(v->{
+        findViewById(R.id.playLayout).setOnClickListener(v->{
             WebrtcUtil.callSingle(SendFileActivity.this, "ws://106.13.236.207:3000","123456", true);
         });
+
+        final RippleBackground rippleBackground=(RippleBackground)findViewById(R.id.content);
+        ImageView imageView=(ImageView)findViewById(R.id.clientIcon);
+        rippleBackground.startRippleAnimation();
     }
 
     @Override
@@ -317,7 +326,7 @@ public class SendFileActivity extends BaseActivity {
                 Log.e(TAG, "文件路径：" + fileUri);
                 if (wifiP2pInfo != null) {
                     if (WifiClientService.socket != null)
-                        new WifiClientTask(this).execute(fileUri);
+                        new WifiClientTask(this).execute(fileUri,"photo");
 //                    new WifiClientTask(this).execute(wifiP2pInfo.groupOwnerAddress.getHostAddress(), fileUri);
                 }
             }
@@ -361,8 +370,8 @@ public class SendFileActivity extends BaseActivity {
             public void onSuccess() {
                 Log.e(TAG, "disconnect onSuccess");
                 tv_status.setText(null);
-                btn_disconnect.setEnabled(false);
-                btn_chooseFile.setEnabled(false);
+//                btn_disconnect.setEnabled(false);
+//                btn_chooseFile.setEnabled(false);
             }
         });
     }

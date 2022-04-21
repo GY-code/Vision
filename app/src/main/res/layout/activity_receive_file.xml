@@ -1,39 +1,160 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#000000">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btnCreateGroup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            android:text="Create Group" />
+        <com.skyfishjy.library.RippleBackground
+            android:id="@+id/content0"
+            android:layout_width="wrap_content"
+            android:layout_height="334dp"
+            app:rb_color="#F66C7C"
+            app:rb_duration="3500"
+            app:rb_radius="35dp"
+            app:rb_rippleAmount="9"
+            app:rb_scale="4">
 
-        <Button
-            android:id="@+id/btnRemoveGroup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            android:text="Remove Group" />
+            <ImageView
+                android:id="@+id/controllerIcon"
+                android:layout_width="match_parent"
+                android:layout_height="86dp"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="121dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.498"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.384"
+                app:srcCompat="@drawable/ic_server" />
+        </com.skyfishjy.library.RippleBackground>
 
-        <Button
-            android:id="@+id/btnSendMsg"
+
+        <TextView
+            android:id="@+id/deviceNameText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            android:text="Send Message" />
-        <Button
-            android:id="@+id/btnControl"
+            android:layout_marginTop="20dp"
+            android:gravity="center"
+            android:text="设备名称："
+            android:textColor="@color/white"
+            android:textSize="17sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/clienticon" />
+
+        <TextView
+            android:id="@+id/deviceStateText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            android:text="进入控制端画面" />
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:text="设备状态："
+            android:textColor="@color/white"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:visibility="invisible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/deviceNameText" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="50dp"
+            android:layout_marginBottom="30dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <ImageView
+                android:id="@+id/imageViewWait"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:srcCompat="@drawable/ic_waittext" />
+
+            <ImageView
+                android:id="@+id/refreshButton"
+                android:layout_width="58dp"
+                android:layout_height="39dp"
+
+                app:srcCompat="@drawable/refresh"
+                tools:ignore="DuplicateIds" />
+        </LinearLayout>
+
+        <!--        <Button-->
+<!--            android:id="@+id/btnCreateGroup"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_margin="20dp"-->
+<!--            android:text="Create Group" />-->
+
+<!--        <Button-->
+<!--            android:id="@+id/btnRemoveGroup"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_margin="20dp"-->
+<!--            android:text="Remove Group" />-->
+
+<!--        <Button-->
+<!--            android:id="@+id/btnSendMsg"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_margin="20dp"-->
+<!--            android:text="Send Message" />-->
+
+<!--        <Button-->
+<!--            android:id="@+id/btnControl"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_margin="20dp"-->
+<!--            android:text="进入控制端画面" />-->
+
+        <LinearLayout
+            android:id="@+id/cPlayLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dp"
+            android:layout_marginBottom="30dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="5dp"
+                android:gravity="center"
+                android:text="开始会话"
+                android:textColor="#3BC638"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/cBeginButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_marginStart="5dp"
+                app:srcCompat="@drawable/ic_play" />
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/btnTest"
@@ -53,7 +174,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginStart="20dp"
+            android:layout_marginTop="20dp"
             android:text="设备列表"
+            android:textColor="#FFFFFF"
             android:textSize="20sp"
             android:textStyle="bold" />
 
@@ -61,7 +184,8 @@
             android:id="@+id/tv_log"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="20dp" />
+            android:layout_margin="20dp"
+            android:textColor="#FFFFFF" />
 
     </LinearLayout>
 

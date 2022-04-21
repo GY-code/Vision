@@ -18,6 +18,16 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Random;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 
 import t20220049.sw_vision.transfer.common.Constants;
 import t20220049.sw_vision.transfer.model.FileTransfer;
@@ -77,6 +87,7 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
         return outputFilePath;
     }
 
+
     @Override
     protected Boolean doInBackground(Object... params) {
 
@@ -87,6 +98,8 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
         ObjectOutputStream objectOutputStream = null;
         InputStream inputStream = null;
         try {
+//            String hostAddress = params[0].toString();
+
             if (params[1] != null && params[1].toString().equals("photo")) {
                 WifiClientService.serverOut.println("sendPhoto");
             } else if (params[1] != null && params[1].toString().equals("video")) {
@@ -95,7 +108,6 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
                 WifiClientService.serverOut.println("sendFile");
             }
             WifiClientService.serverOut.flush();
-//            String hostAddress = params[0].toString();
 
             //获取文件
             String outputFilePath;
@@ -121,8 +133,11 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
             //inputStream负责读文件，outputStream负责向服务器传输文件流
             outputStream = socket.getOutputStream();
             objectOutputStream = new ObjectOutputStream(outputStream);
+            objectOutputStream.flush();
+            Log.e(TAG,"already sended");
             objectOutputStream.writeObject(fileTransfer);
             inputStream = new FileInputStream(outputFile);
+
             long fileSize = fileTransfer.getFileLength();
             long total = 0;
             byte[] buf = new byte[1024];
@@ -135,7 +150,7 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
                 Log.e(TAG, "文件发送进度：" + progress);
             }
 //            socket.close();
-//            inputStream.close();
+            inputStream.close();
 //            outputStream.close();
 //            objectOutputStream.close();
 //            socket = null;
