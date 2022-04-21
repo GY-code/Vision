@@ -422,15 +422,15 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                 activateVideo = true;
                 changeRecordCapture(userIdList.get(currentIndex));
 
-                runOnUiThread(() -> {
-                    Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
-                });
+//                runOnUiThread(() -> {
+//                    Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
+//                });
                 TransferUtil.S2C("start");
             } else {
                 endRecordCapture();
-                runOnUiThread(() -> {
-                    Toast.makeText(getApplicationContext(), "finish capturing", Toast.LENGTH_SHORT).show();
-                });
+//                runOnUiThread(() -> {
+//                    Toast.makeText(getApplicationContext(), "finish capturing", Toast.LENGTH_SHORT).show();
+//                });
                 ru.terminateVideo(_vfrs.get(myId), _localVideoTrack, rootEglBase, ControlActivity.this,false,false);
                 activateVideo = false;
                 TransferUtil.S2C("stop");
