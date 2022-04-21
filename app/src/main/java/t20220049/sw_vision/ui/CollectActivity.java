@@ -168,18 +168,30 @@ public class CollectActivity extends AppCompatActivity {
         mChronometer = (Chronometer) findViewById(R.id.record_chronometer);
     }
 
-    public void CallTakePicture(boolean isCollect,boolean isSend) {
+    public void CallTakePicture(boolean isCollect, boolean isSend) {
+        runOnUiThread(() -> {
+            Toast.makeText(getApplicationContext(), "准备拍照", Toast.LENGTH_SHORT).show();
+        });
         cameraService.takePicture(isCollect, isSend);
     }
 
-    public void CallSetVideoStart(){
-        runOnUiThread(()->{
-        Toast.makeText(getApplicationContext(),"开始录制",Toast.LENGTH_SHORT).show();
+    public void CallSetVideoStart() {
+        runOnUiThread(() -> {
+            Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
+            mChronometer.setBase(SystemClock.elapsedRealtime());
+            mChronometer.setFormat("%s");
+            mChronometer.setVisibility(View.VISIBLE);
+            mChronometer.start();
         });
-        ru.setVideoStart(vfr,localTrack,rootEglBase);
+        ru.setVideoStart(vfr, localTrack, rootEglBase);
     }
-    public void CallSetVideoEnd(boolean isCollect,boolean isSend){
-        ru.terminateVideo(vfr,localTrack,rootEglBase,CollectActivity.this,isCollect,isSend);
+
+    public void CallSetVideoEnd(boolean isCollect, boolean isSend) {
+        ru.terminateVideo(vfr, localTrack, rootEglBase, CollectActivity.this, isCollect, isSend);
+        runOnUiThread(()->{
+            mChronometer.stop();
+            mChronometer.setVisibility(View.INVISIBLE);
+        });
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -259,7 +271,7 @@ public class CollectActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
                 });
             } else {
-                ru.terminateVideo(vfr, localTrack, rootEglBase, CollectActivity.this,true,false);
+                ru.terminateVideo(vfr, localTrack, rootEglBase, CollectActivity.this, true, false);
                 activateVideo = false;
             }
             if (videoState == 0) {

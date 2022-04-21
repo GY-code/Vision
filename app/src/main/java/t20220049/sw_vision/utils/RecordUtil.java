@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -31,6 +32,7 @@ import io.microshow.rxffmpeg.RxFFmpegInvoke;
 import okio.BufferedSource;
 import okio.Okio;
 import okio.Sink;
+import t20220049.sw_vision.ui.ControlActivity;
 import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
 
 
@@ -51,6 +53,12 @@ public class RecordUtil {
     private long stime;
     private long ltime;
     public static boolean isFullDefinition = true;
+
+    public static WeakReference<ControlActivity> ControlActivityWeakRef;
+
+    public static void setControlActivityWeakRef(ControlActivity activity) {
+        ControlActivityWeakRef = new WeakReference<>(activity);
+    }
 
     public static void setMyId(String myId) {
         RecordUtil.myId = myId;

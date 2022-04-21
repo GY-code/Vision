@@ -261,6 +261,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                 | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         super.onCreate(savedInstanceState);
+        RecordUtil.setControlActivityWeakRef(ControlActivity.this);
 //        setContentView(R.layout.wr_activity_chat_room);
         setContentView(R.layout.acticity_control);
         showText = findViewById(R.id.showText);
@@ -311,6 +312,13 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         runOnUiThread(() -> {
             deviceAdapter.notifyDataSetChanged();
         });
+        for (String id : _textViews.keySet()) {
+            TextView tw=_textViews.get(id);
+            if (tw!=null){
+                tw.setText("");
+            }
+        }
+
         VideoFragmentManager.getInstance().setFragments((ArrayList<VideoFragment>) fragmentList);
 //        Log.e("zsy", "fragmentList is complete ? " + VideoFragmentManager.getInstance().isComplete());
         Log.e("zsy", "fragmentList already set");
@@ -442,9 +450,10 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                 TransferUtil.S2C("start");
             } else {
                 endRecordCapture();
-                runOnUiThread(() -> {
-                    Toast.makeText(getApplicationContext(), "finish capturing", Toast.LENGTH_SHORT).show();
-                });
+//                runOnUiThread(() -> {
+//                    Toast.makeText(getApplicationContext(), "finish capturing", Toast.LENGTH_SHORT).show();
+//                });
+
                 ru.terminateVideo(_vfrs.get(myId), _localVideoTrack, rootEglBase, ControlActivity.this, false, false);
                 activateVideo = false;
                 TransferUtil.S2C("stop");
@@ -522,7 +531,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         });
         btn_prime.setOnClickListener(view1 -> {
             mode = -1;
-            Toast.makeText(ControlActivity.this, "当前为拼图模式", Toast.LENGTH_SHORT).show();
+            Toast.makeText(ControlActivity.this, "当前为原图模式", Toast.LENGTH_SHORT).show();
             popWindow.dismiss();
         });
     }
@@ -581,7 +590,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         Device device = new Device();
 
         device.type = userId.substring(0, 5);
-        device.name = "采集端" + Integer.toString(userIdList.size() - 2);
+        device.name = "采集端" + Integer.toString(userIdList.size() - 1);
         device.userId = userId;
         device.ip = getIPFromUserId(userId);
         device.stat = 1;
@@ -622,7 +631,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         SurfaceViewRenderer renderer = new SurfaceViewRenderer(ControlActivity.this);
         renderer.init(rootEglBase.getEglBaseContext(), null);
         renderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
-        renderer.setMirror(true);
+//        renderer.setMirror(true);
         // set render
         ProxyVideoSink sink = new ProxyVideoSink();
         sink.setTarget(renderer);

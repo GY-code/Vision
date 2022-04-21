@@ -212,6 +212,9 @@ public class WifiServer extends Thread {
                         }
                         jointBitmap.receiveFile(photoPath, photoName);
                         jointBitmap.jointPhoto();
+                        RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
+                            Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"已将拼接照片存储在相册",Toast.LENGTH_SHORT).show();
+                        });
                     } else if (ControlActivity.mode == 1) {
                         Pano panorama = new Pano();
 
@@ -235,6 +238,9 @@ public class WifiServer extends Thread {
                                 System.out.println(errorMsg);
                             }
                         });
+                        RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
+                            Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"已将融合照片存储在相册",Toast.LENGTH_SHORT).show();
+                        });
 
                     } else if (ControlActivity.mode == -1) {
                         String photoPath[] = new String[clients.size() + 1];
@@ -248,6 +254,9 @@ public class WifiServer extends Thread {
                             photoName[i] = clients.get(i - 1).clientUserID + ".png";
                             recordUtil.savePhoto2Gallery(BitmapFactory.decodeFile(photoPath[i] + photoName[i]));
                         }
+                        RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
+                            Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"已将原图照片存储在相册",Toast.LENGTH_SHORT).show();
+                        });
 
 
                     }
@@ -273,8 +282,9 @@ public class WifiServer extends Thread {
 
                     RecordUtil util = new RecordUtil(ContextUtils.getApplicationContext());
                     util.saveVideo2Gallery(RecordUtil.remoteVideoPath + "output.mp4", ContextUtils.getApplicationContext());
-
-
+                    RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
+                        Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"已将融合视频存储在相册",Toast.LENGTH_SHORT).show();
+                    });
 
                     for (MyClient mc : clients) {
                         videoWL.add(mc.clientIP);

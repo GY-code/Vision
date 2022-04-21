@@ -1,12 +1,10 @@
 package t20220049.sw_vision.transfer.client;
 
-import android.app.Activity;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -21,7 +19,6 @@ import java.net.Socket;
 import t20220049.sw_vision.transfer.common.Constants;
 import t20220049.sw_vision.ui.CollectActivity;
 import t20220049.sw_vision.ui.SendFileActivity;
-import t20220049.sw_vision.utils.CameraService;
 import t20220049.sw_vision.utils.RecordUtil;
 
 //对应采集端，发送文件
