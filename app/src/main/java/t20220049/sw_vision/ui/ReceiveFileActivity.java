@@ -316,14 +316,14 @@ public class ReceiveFileActivity extends BaseActivity {
                 public void onSuccess() {
                     log("createGroup onSuccess");
                     dismissLoadingDialog();
-                    showToast("onSuccess");
+//                    showToast("onSuccess");
                 }
 
                 @Override
                 public void onFailure(int reason) {
                     log("createGroup onFailure: " + reason);
                     dismissLoadingDialog();
-                    showToast("onFailure");
+//                    showToast("onFailure");
                 }
             });
         });
@@ -356,13 +356,13 @@ public class ReceiveFileActivity extends BaseActivity {
             @Override
             public void onSuccess() {
                 log("removeGroup onSuccess");
-                showToast("onSuccess");
+//                showToast("onSuccess");
             }
 
             @Override
             public void onFailure(int reason) {
                 log("removeGroup onFailure");
-                showToast("onFailure");
+//                showToast("onFailure");
             }
         });
     }

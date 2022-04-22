@@ -292,12 +292,12 @@ public class SendFileActivity extends BaseActivity {
             wifiP2pManager.discoverPeers(channel, new WifiP2pManager.ActionListener() {
                 @Override
                 public void onSuccess() {
-                    showToast("Success");
+//                    showToast("Success");
                 }
 
                 @Override
                 public void onFailure(int reasonCode) {
-                    showToast("Failure");
+//                    showToast("Failure");
                     loadingDialog.cancel();
                 }
             });
