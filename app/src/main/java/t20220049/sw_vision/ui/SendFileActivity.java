@@ -21,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
@@ -57,6 +58,8 @@ import t20220049.sw_vision.R;
 
 //客户端
 public class SendFileActivity extends BaseActivity {
+
+    private LinearLayout startLayout;
 
     private static final String TAG = "SendFileActivity";
 
@@ -165,6 +168,7 @@ public class SendFileActivity extends BaseActivity {
 
             startService(WifiClientService.class);
             Log.i(TAG, "sFlag");
+            startLayout.setVisibility(View.VISIBLE);
         }
 
         @Override
@@ -305,6 +309,9 @@ public class SendFileActivity extends BaseActivity {
         final RippleBackground rippleBackground=(RippleBackground)findViewById(R.id.content);
         ImageView imageView=(ImageView)findViewById(R.id.clientIcon);
         rippleBackground.startRippleAnimation();
+
+        startLayout = findViewById(R.id.playLayout);
+        startLayout.setVisibility(View.INVISIBLE);
     }
 
     @Override
