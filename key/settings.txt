@@ -1,0 +1,2 @@
+keytool -genkey -alias apk_key -keyalg RSA -validity 20000 -keystore t20220049
+口令：apk_key

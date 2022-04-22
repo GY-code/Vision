@@ -297,8 +297,7 @@ public class ReceiveFileActivity extends BaseActivity {
                     }
                 });
             }
-        },500,1500);
-
+        }, 500, 1500);
     }
 
     private void initView() {
@@ -376,7 +375,7 @@ public class ReceiveFileActivity extends BaseActivity {
     private void bindService() {
         Intent intent = new Intent(ReceiveFileActivity.this, WifiServerService.class);
         bindService(intent, serviceConnection, BIND_AUTO_CREATE);
-        Log.i(TAG,"flag2");
+        Log.i(TAG, "flag2");
     }
 
 }

@@ -266,6 +266,9 @@ public class SendFileActivity extends BaseActivity {
             showToast(mWifiP2pDevice.deviceName);
             connect();
         });
+        runOnUiThread(()->{
+            showToast("点击上方按钮搜索设备");
+        });
         rv_deviceList.setAdapter(deviceAdapter);
         rv_deviceList.setLayoutManager(new LinearLayoutManager(this));
 
