@@ -27,7 +27,7 @@
 #define LOGF(...)  __android_log_print(ANDROID_LOG_FATAL,LOG_TAG, __VA_ARGS__)
 using namespace cv;
 using namespace std;
-char filepath1[100] = "/storage/emulated/0/panorama_stitched.jpg";
+//char filepath1[100] = "/storage/emulated/0/panorama_stitched.jpg";
 cv::Mat finalMat;
 extern "C"
 JNIEXPORT jintArray
@@ -51,12 +51,12 @@ Java_t20220049_sw_1vision_utils_Pano_stitchImages(JNIEnv *env, jclass type,
         //stitcher.setRegistrationResol(0.6);
         // stitcher.setWaveCorrection(false);
         /*=match_conf默认是0.65，我选0.8，选太大了就没特征点啦,0.8都失败了*/
-        detail::BestOf2NearestMatcher *matcher = new detail::BestOf2NearestMatcher(false, 0.5f);
-        stitcher.setFeaturesMatcher(matcher);
-        stitcher.setBundleAdjuster(new detail::BundleAdjusterRay());
-        stitcher.setSeamFinder(new detail::NoSeamFinder);
-        stitcher.setExposureCompensator(new detail::NoExposureCompensator());//曝光补偿
-        stitcher.setBlender(new detail::FeatherBlender());
+//        detail::BestOf2NearestMatcher *matcher = new detail::BestOf2NearestMatcher(false, 0.5f);
+//        stitcher.setFeaturesMatcher(matcher);
+//        stitcher.setBundleAdjuster(new detail::BundleAdjusterRay());
+//        stitcher.setSeamFinder(new detail::NoSeamFinder);
+//        stitcher.setExposureCompensator(new detail::NoExposureCompensator());//曝光补偿
+//        stitcher.setBlender(new detail::FeatherBlender());
         Stitcher::Status state = stitcher.stitch(mats, finalMat);
         LOGI("2");
         //此时finalMat是bgr类型
@@ -184,3 +184,6 @@ Java_t20220049_sw_1vision_utils_Pano_getBitmap(JNIEnv *env, jclass type, jobject
     }
     return 0;
 }
+
+
+

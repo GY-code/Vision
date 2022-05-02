@@ -16,8 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerVertical="true"
-            android:src="@drawable/ic_left">
-        </ImageView>
+            android:src="@drawable/ic_left"></ImageView>
 
     </RelativeLayout>
 
