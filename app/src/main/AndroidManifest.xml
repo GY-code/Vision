@@ -85,7 +85,9 @@
             android:exported="true" />
         <activity
             android:name=".ui.SendFileActivity"
-            android:exported="true" />
+            android:exported="true">
+
+        </activity>
         <activity
             android:name=".utils.Panorama"
             android:exported="true" >

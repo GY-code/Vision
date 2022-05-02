@@ -88,7 +88,6 @@ public class ControlVideo extends AppCompatActivity implements IViewCallback {
 
 //        bottomSheet.getBackground().setAlpha(60);
         behavior = BottomSheetBehavior.from(bottomSheet);
-        v1 = findViewById(R.id.recyclerview);
 
         for (int i = 0; i < 20; i++) {
             Device device = new Device();

@@ -34,8 +34,7 @@ public class PermissionUtil {
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.READ_PHONE_STATE,
-                Manifest.permission.FOREGROUND_SERVICE);
+                Manifest.permission.READ_PHONE_STATE);
         // Manifest.permission.SYSTEM_ALERT_WINDOW
     }
 

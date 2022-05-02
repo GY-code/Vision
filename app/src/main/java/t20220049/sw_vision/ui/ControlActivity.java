@@ -105,7 +105,6 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     private String myId;
     private EglBase rootEglBase;
 
-    ImageView switch_camera;
     ImageView switch_hang_up;
     ImageView photoButton;
     ImageView videoButton;
@@ -116,7 +115,6 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     // 上拉框显示
     RelativeLayout bottomSheet;
     BottomSheetBehavior behavior;
-    RecyclerView v1;
     deviceAdapter deviceAdapter;
     List<Device> mDevicesList = new ArrayList<>();
     boolean isMirrror = true;
@@ -255,11 +253,6 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
-        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
-                | WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD
-                | WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED
-                | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         super.onCreate(savedInstanceState);
         RecordUtil.setControlActivityWeakRef(ControlActivity.this);
 //        setContentView(R.layout.wr_activity_chat_room);
@@ -272,7 +265,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         initView();
         initVar();
         initListner();
-        initService();
+//        initService();
 //        ChatRoomFragment chatRoomFragment = new ChatRoomFragment();
 //        replaceFragment(chatRoomFragment);
         startCall();
@@ -313,8 +306,8 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             deviceAdapter.notifyDataSetChanged();
         });
         for (String id : _textViews.keySet()) {
-            TextView tw=_textViews.get(id);
-            if (tw!=null){
+            TextView tw = _textViews.get(id);
+            if (tw != null) {
                 tw.setText("");
             }
         }
@@ -355,7 +348,6 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     private void initView() {
         wr_video_view = findViewById(R.id.wr_video_view);
 
-        switch_camera = findViewById(R.id.switch_camera);
         switch_hang_up = findViewById(R.id.switch_hang_up);
         videoButton = findViewById(R.id.video_button);
         photoButton = findViewById(R.id.photo_button);
@@ -365,7 +357,6 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         //底部抽屉栏展示地址
         bottomSheet = findViewById(R.id.bottom_sheet);
         behavior = BottomSheetBehavior.from(bottomSheet);
-        v1 = findViewById(R.id.recyclerview);
 
         Device device = new Device();
         device.type = "None";
@@ -378,9 +369,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 
         deviceAdapter = new deviceAdapter(mDevicesList);
 
-        v1.setAdapter(deviceAdapter);
         LinearLayoutManager layoutManager = new LinearLayoutManager(ControlActivity.this);
-        v1.setLayoutManager(layoutManager);
         behavior.addBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, @BottomSheetBehavior.State int newState) {
@@ -408,12 +397,6 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 
     private void initListner() {
         // 转换摄像头
-        switch_camera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                switchCamera();
-            }
-        });
 
         // 挂断
         switch_hang_up.setOnClickListener(new View.OnClickListener() {
@@ -579,6 +562,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             addView(userId, stream);
         });
         switchCamera();
+        toggleMic(false);
 
     }
 
@@ -697,10 +681,10 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             if (view != null) {
                 FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-                layoutParams.height = getWidth(size);
-                layoutParams.width = getWidth(size);
-                layoutParams.leftMargin = getX(size, i);
-                layoutParams.topMargin = getY(size, i);
+                layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
+                layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT ;
+                layoutParams.setMargins(10,10,10,10);
+                layoutParams.gravity=1;
                 view.setLayoutParams(layoutParams);
             }
 

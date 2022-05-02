@@ -24,6 +24,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -89,8 +90,6 @@ public class SendFileActivity extends BaseActivity {
 
     private TextView tv_myDeviceStatus;
 
-    private TextView tv_status;
-
 //    private Button btn_disconnect;
 //
 //    private Button btn_chooseFile;
@@ -100,6 +99,22 @@ public class SendFileActivity extends BaseActivity {
     private BroadcastReceiver broadcastReceiver;
 
     private WifiP2pDevice mWifiP2pDevice;
+    private static final int CODE_REQ_PERMISSIONS = 665;
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == CODE_REQ_PERMISSIONS) {
+            for (int i = 0; i < grantResults.length; i++) {
+                if (grantResults[i] != PackageManager.PERMISSION_GRANTED) {
+                    showToast("缺少权限，请先授予权限: " + permissions[i]);
+                    return;
+                }
+            }
+            showToast("已获得权限");
+        }
+    }
+
 
     private final ServiceConnection serviceConnection = new ServiceConnection() {
 
@@ -154,7 +169,6 @@ public class SendFileActivity extends BaseActivity {
                 stringBuilder.append("连接设备-物理地址：");
                 stringBuilder.append(mWifiP2pDevice.deviceAddress);
             }
-            tv_status.setText(stringBuilder);
             if (wifiP2pInfo.groupFormed && !wifiP2pInfo.isGroupOwner) {
                 SendFileActivity.this.wifiP2pInfo = wifiP2pInfo;
             }
@@ -179,7 +193,6 @@ public class SendFileActivity extends BaseActivity {
             showToast("处于非连接状态");
             wifiP2pDeviceList.clear();
             deviceAdapter.notifyDataSetChanged();
-            tv_status.setText(null);
             SendFileActivity.this.wifiP2pInfo = null;
 
             if (wifiClientService != null) {
@@ -218,11 +231,22 @@ public class SendFileActivity extends BaseActivity {
         }
 
     };
+    private void requestPermissions(){
+        ActivityCompat.requestPermissions(SendFileActivity.this,
+                new String[]{Manifest.permission.CHANGE_NETWORK_STATE,
+                        Manifest.permission.ACCESS_NETWORK_STATE,
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.ACCESS_WIFI_STATE,
+                        Manifest.permission.CHANGE_WIFI_STATE,
+                        Manifest.permission.ACCESS_FINE_LOCATION}, CODE_REQ_PERMISSIONS);
 
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_send_file);
+        requestPermissions();
         initView();
         initEvent();
     }
@@ -251,7 +275,6 @@ public class SendFileActivity extends BaseActivity {
         tv_myDeviceName = findViewById(R.id.tv_myDeviceName);
 //        tv_myDeviceAddress = findViewById(R.id.tv_myDeviceAddress);
         tv_myDeviceStatus = findViewById(R.id.tv_myDeviceStatus);
-        tv_status = findViewById(R.id.tv_status);
 //        btn_disconnect = findViewById(R.id.btn_disconnect);
 //        btn_chooseFile = findViewById(R.id.btn_chooseFile);
 //        btn_disconnect.setOnClickListener(clickListener);
@@ -320,6 +343,7 @@ public class SendFileActivity extends BaseActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (broadcastReceiver!=null)
         unregisterReceiver(broadcastReceiver);
         if (wifiClientService != null) {
             unbindService(serviceConnection);
@@ -379,7 +403,6 @@ public class SendFileActivity extends BaseActivity {
             @Override
             public void onSuccess() {
                 Log.e(TAG, "disconnect onSuccess");
-                tv_status.setText(null);
 //                btn_disconnect.setEnabled(false);
 //                btn_chooseFile.setEnabled(false);
             }

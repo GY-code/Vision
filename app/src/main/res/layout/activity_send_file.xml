@@ -72,7 +72,7 @@
     <com.skyfishjy.library.RippleBackground
         android:id="@+id/content"
         android:layout_width="wrap_content"
-        android:layout_height="334dp"
+        android:layout_height="129dp"
         app:rb_color="#F488FB"
         app:rb_duration="3500"
         app:rb_radius="35dp"
@@ -84,7 +84,7 @@
             android:layout_width="match_parent"
             android:layout_height="86dp"
             android:layout_alignParentTop="true"
-            android:layout_marginTop="121dp"
+            android:layout_marginTop="24dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.498"
@@ -127,15 +127,6 @@
         android:visibility="visible"
         tools:text="连接状态" />
 
-    <TextView
-        android:id="@+id/tv_status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:gravity="center"
-        android:textColor="@android:color/black"
-        android:textSize="18sp" />
-
     <LinearLayout
         android:id="@+id/playLayout"
         android:layout_width="match_parent"
@@ -170,15 +161,6 @@
             app:srcCompat="@drawable/ic_play" />
 
     </LinearLayout>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="可连接控制端设备列表"
-        android:textColor="@android:color/black"
-        android:textSize="18sp"
-        android:textStyle="bold" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_deviceList"

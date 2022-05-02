@@ -17,7 +17,6 @@ import t20220049.sw_vision.entrance.WebrtcUtil;
 import t20220049.sw_vision.transfer.SearchActivity;
 
 public class HomePage extends AppCompatActivity {
-    ImageView controlButton;
     ImageView collectButton;
 
     private static final int CODE_REQ_PERMISSIONS = 665;
@@ -44,8 +43,6 @@ public class HomePage extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home_page);
-
-        controlButton = findViewById(R.id.controlButton);
         collectButton = findViewById(R.id.collectButton);
 
         ActivityCompat.requestPermissions(HomePage.this,
@@ -57,21 +54,13 @@ public class HomePage extends AppCompatActivity {
                         Manifest.permission.CHANGE_WIFI_STATE,
                         Manifest.permission.ACCESS_FINE_LOCATION}, CODE_REQ_PERMISSIONS);
 
-        controlButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(HomePage.this, ReceiveFileActivity.class);
-//                Intent intent = new Intent(HomePage.this, ControlActivity.class);
-                startActivity(intent);
-//                WebrtcUtil.call(HomePage.this, "ws://106.13.236.207:3000", "123456");
-            }
-        });
-
         collectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(HomePage.this, SendFileActivity.class);
-                startActivity(intent);
+//                Intent intent = new Intent(HomePage.this, SendFileActivity.class);
+//                startActivity(intent);
+                WebrtcUtil.call(HomePage.this, "ws://106.13.236.207:3000", "123456");
+
 //                Intent intent = new Intent(HomePage.this, CollectMatch.class);
 //                Intent intent = new Intent(HomePage.this, NodejsActivity.class);
 //                startActivity(intent);

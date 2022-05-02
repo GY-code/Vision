@@ -10,6 +10,12 @@
         <entry key="..\:/Android Project/sw_Vision/app/src/main/res/layout/activity_connection.xml" value="0.19972826086956522" />
         <entry key="..\:/Android Project/sw_Vision/app/src/main/res/layout/activity_panorama.xml" value="0.19972826086956522" />
         <entry key="..\:/Android/sw_Vision/app/src/main/res/layout/activity_video_view.xml" value="0.22826086956521738" />
+        <entry key="..\:/Code/Android/sw-vision-watch/app/src/main/res/layout/acticity_control.xml" value="0.31666666666666665" />
+        <entry key="..\:/Code/Android/sw-vision-watch/app/src/main/res/layout/activity_control_match.xml" value="0.31666666666666665" />
+        <entry key="..\:/Code/Android/sw-vision-watch/app/src/main/res/layout/activity_home_page.xml" value="0.31666666666666665" />
+        <entry key="..\:/Code/Android/sw-vision-watch/app/src/main/res/layout/activity_receive_file.xml" value="0.31666666666666665" />
+        <entry key="..\:/Code/Android/sw-vision-watch/app/src/main/res/layout/activity_send_file.xml" value="0.35208333333333336" />
+        <entry key="..\:/Code/Android/sw-vision-watch/app/src/main/res/layout/layout_bottom_sheet.xml" value="0.31666666666666665" />
         <entry key="..\:/Code/Android/sw-vision/app/src/main/res/drawable/ic_caiji.xml" value="0.26" />
         <entry key="..\:/Code/Android/sw-vision/app/src/main/res/drawable/ic_caijizhong.xml" value="0.26" />
         <entry key="..\:/Code/Android/sw-vision/app/src/main/res/drawable/ic_caijizhunbei.xml" value="0.26" />
@@ -36,7 +42,7 @@
     </option>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_X" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

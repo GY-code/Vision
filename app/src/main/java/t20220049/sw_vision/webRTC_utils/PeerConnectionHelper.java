@@ -138,9 +138,6 @@ public class PeerConnectionHelper {
             if (_factory == null) {
                 _factory = createConnectionFactory();
             }
-            if (_localStream == null) {
-                createLocalStream();
-            }
 
             createPeerConnections();
             addStreams();
@@ -151,12 +148,9 @@ public class PeerConnectionHelper {
 
     public void onRemoteJoinToRoom(String socketId) {
         executor.execute(() -> {
-            if (_localStream == null) {
-                createLocalStream();
-            }
             try {
                 Peer mPeer = new Peer(socketId);
-                mPeer.pc.addStream(_localStream);
+//                mPeer.pc.addStream(_localStream);
                 _connectionIdArray.add(socketId);
                 _connectionPeerDic.put(socketId, mPeer);
             } catch (Exception e) {
@@ -294,18 +288,6 @@ public class PeerConnectionHelper {
 
     // 为所有连接添加流
     private void addStreams() {
-        Log.v(TAG, "为所有连接添加流");
-        for (Map.Entry<String, Peer> entry : _connectionPeerDic.entrySet()) {
-            if (_localStream == null) {
-                createLocalStream();
-            }
-            try {
-                entry.getValue().pc.addStream(_localStream);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
     }
 
     // 为所有连接创建offer
