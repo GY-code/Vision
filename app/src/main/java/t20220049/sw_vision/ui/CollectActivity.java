@@ -323,6 +323,7 @@ public class CollectActivity extends AppCompatActivity {
                     stream.videoTracks.get(0).setEnabled(true);
                 }
                 switchCamera();
+                toggleMic(false);
             }
 
             @Override

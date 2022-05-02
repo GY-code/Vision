@@ -579,6 +579,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             addView(userId, stream);
         });
         switchCamera();
+        toggleMic(false);
 
     }
 
