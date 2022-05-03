@@ -12,8 +12,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.SystemClock;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.KeyEvent;
@@ -21,7 +21,6 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Chronometer;
@@ -35,22 +34,27 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.alibaba.fastjson.JSONObject;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import io.microshow.rxffmpeg.RxFFmpegInvoke;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import t20220049.sw_vision.transfer.server.WifiServer;
 import t20220049.sw_vision.utils.TimerManager;
-import t20220049.sw_vision.utils.TransferUtil;
 import t20220049.sw_vision.utils.VideoFragment;
 import t20220049.sw_vision.utils.CameraService;
 import t20220049.sw_vision.utils.RecordUtil;
 import t20220049.sw_vision.utils.VideoFragmentManager;
+import t20220049.sw_vision.utils.WatchUtils;
 import t20220049.sw_vision.webRTC_utils.IViewCallback;
 import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
 import t20220049.sw_vision.webRTC_utils.ProxyVideoSink;
@@ -59,7 +63,6 @@ import t20220049.sw_vision.webRTC_utils.WebRTCManager;
 import t20220049.sw_vision.bean.MemberBean;
 import t20220049.sw_vision.utils.PermissionUtil;
 
-import org.w3c.dom.Text;
 import org.webrtc.EglBase;
 import org.webrtc.EglRenderer;
 import org.webrtc.MediaStream;
@@ -68,15 +71,10 @@ import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoFileRenderer;
 import org.webrtc.VideoTrack;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -210,6 +208,51 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             selectButton = itemView.findViewById(R.id.select_button);
         }
 
+    }
+
+    boolean isVideo = false;
+
+    void requestCollect(String ins) {
+        JSONObject jsonParam = new JSONObject();
+        jsonParam.put("ins", ins);
+        String json = jsonParam.toJSONString();
+        MediaType mediaType = MediaType.Companion.parse("application/json;charset=utf-8");
+        RequestBody requestBody = RequestBody.Companion.create(json, mediaType);
+        WatchUtils.sendOkHttpResponse("http://192.168.3.45:8000/server/ins/", requestBody, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.e(TAG, "onFailure: ");
+                e.getStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final String data = response.body().string();
+                System.out.println(data);
+                //服务器返回信息做对应处理
+                if (data.equals("success")) {
+                    Looper.prepare();
+                    if (ins.equals("photo")) {
+                        Log.e(TAG, "onResponse: 已拍照");
+                        Toast.makeText(ControlActivity.this, "已拍照", Toast.LENGTH_SHORT).show();
+                    }
+                    if (ins.equals("video")) {
+                        if (!isVideo) {
+                            Toast.makeText(ControlActivity.this, "已开始录像", Toast.LENGTH_SHORT).show();
+                            isVideo = true;
+                        } else {
+                            Toast.makeText(ControlActivity.this, "已结束录像", Toast.LENGTH_SHORT).show();
+                            isVideo = false;
+                        }
+                    }
+                    Looper.loop();
+                } else if (data.equals("fail")) {
+                    Looper.prepare();
+                    Toast.makeText(ControlActivity.this, "采集端未连接", Toast.LENGTH_SHORT).show();
+                    Looper.loop();
+                }
+            }
+        });
     }
 
     private String getIPFromUserId(String userId) {
@@ -409,38 +452,10 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         });
 
         photoButton.setOnClickListener(v -> {
-            if (RecordUtil.isFullDefinition) {
-                if (cameraService != null) {
-                    Toast.makeText(getBaseContext(), "控制所有端拍照", Toast.LENGTH_SHORT).show();
-                    cameraService.takePicture(false, false);
-                    TransferUtil.S2C("photo");
-                }
-            } else {
-                ru.catchPhoto(ControlActivity.this, _videoViews.get(myId));
-            }
+            requestCollect("photo");
         });
         videoButton.setOnClickListener(v -> {
-            if (!activateVideo) {
-                TimerManager.getInstance().restart();
-//                showText.setText("正在录制第" + currentIndex + "个视频");
-                ru.setVideoStart(_vfrs.get(myId), _localVideoTrack, rootEglBase);
-                activateVideo = true;
-                changeRecordCapture(userIdList.get(currentIndex));
-
-                runOnUiThread(() -> {
-                    Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
-                });
-                TransferUtil.S2C("start");
-            } else {
-                endRecordCapture();
-//                runOnUiThread(() -> {
-//                    Toast.makeText(getApplicationContext(), "finish capturing", Toast.LENGTH_SHORT).show();
-//                });
-
-                ru.terminateVideo(_vfrs.get(myId), _localVideoTrack, rootEglBase, ControlActivity.this, false, false);
-                activateVideo = false;
-                TransferUtil.S2C("stop");
-            }
+            requestCollect("video");
 
             if (videoState == 0) {
                 //setFormat设置用于显示的格式化字符串。
@@ -682,9 +697,9 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                 FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
                 layoutParams.height = ViewGroup.LayoutParams.MATCH_PARENT;
-                layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT ;
-                layoutParams.setMargins(10,10,10,10);
-                layoutParams.gravity=1;
+                layoutParams.width = ViewGroup.LayoutParams.MATCH_PARENT;
+                layoutParams.setMargins(10, 10, 10, 10);
+                layoutParams.gravity = 1;
                 view.setLayoutParams(layoutParams);
             }
 
