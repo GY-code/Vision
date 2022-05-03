@@ -14,11 +14,11 @@ import androidx.core.app.ActivityCompat;
 
 import t20220049.sw_vision.R;
 import t20220049.sw_vision.entrance.WebrtcUtil;
-import t20220049.sw_vision.transfer.SearchActivity;
 
 public class HomePage extends AppCompatActivity {
     ImageView controlButton;
     ImageView collectButton;
+    ImageView watchModeButton;
 
     private static final int CODE_REQ_PERMISSIONS = 665;
 
@@ -47,6 +47,7 @@ public class HomePage extends AppCompatActivity {
 
         controlButton = findViewById(R.id.controlButton);
         collectButton = findViewById(R.id.collectButton);
+        watchModeButton =findViewById(R.id.watchModeButton);
 
         ActivityCompat.requestPermissions(HomePage.this,
                 new String[]{Manifest.permission.CHANGE_NETWORK_STATE,
@@ -64,6 +65,12 @@ public class HomePage extends AppCompatActivity {
 //                Intent intent = new Intent(HomePage.this, ControlActivity.class);
                 startActivity(intent);
 //                WebrtcUtil.call(HomePage.this, "ws://106.13.236.207:3000", "123456");
+            }
+        });
+        watchModeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                WebrtcUtil.callSingle(HomePage.this, "ws://106.13.236.207:3000","123456", true,true);
             }
         });
 

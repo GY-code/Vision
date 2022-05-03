@@ -37,7 +37,8 @@
         android:roundIcon="@drawable/vision"
         android:supportsRtl="true"
         android:theme="@style/Theme.SWVision"
-        android:requestLegacyExternalStorage="true">
+        android:requestLegacyExternalStorage="true"
+        android:usesCleartextTraffic="true">
         <service
             android:name=".transfer.client.WifiClientService"
             android:exported="false" />

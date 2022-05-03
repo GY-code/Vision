@@ -37,14 +37,14 @@ public class WebrtcUtil {
      private static String WSS = "ws://106.13.236.207:3000";
 
     // one to one
-    public static void callSingle(Activity activity, String wss, String roomId, boolean videoEnable) {
+    public static void callSingle(Activity activity, String wss, String roomId, boolean videoEnable,boolean watchMode) {
         if (TextUtils.isEmpty(wss)) {
             wss = WSS;
         }
         WebRTCManager.getInstance().init(wss, iceServers, new IConnectEvent() {
             @Override
             public void onSuccess() {
-                CollectActivity.openActivity(activity, videoEnable);
+                CollectActivity.openActivity(activity, videoEnable,watchMode);
             }
 
             @Override

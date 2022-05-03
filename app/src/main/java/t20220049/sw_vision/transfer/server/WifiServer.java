@@ -267,6 +267,9 @@ public class WifiServer extends Thread {
                             @Override
                             public void onSuccess(Bitmap bitmap) {
 //                                Toast.makeText(Pano.this,"图片拼接成功！",Toast.LENGTH_LONG).show();
+                                RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
+                                    Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"已将融合照片存储在相册",Toast.LENGTH_SHORT).show();
+                                });
                                 Log.e(TAG, "图片拼接成功！");
                                 RecordUtil recordUtil = new RecordUtil(ContextUtils.getApplicationContext());
                                 recordUtil.savePhoto2Gallery(bitmap);
@@ -275,13 +278,14 @@ public class WifiServer extends Thread {
                             @Override
                             public void onError(String errorMsg) {
 //                                Toast.makeText(Pano.this,"图片拼接失败！",Toast.LENGTH_LONG).show();
+                                RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
+                                    Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"请重新选取角度拍摄全景",Toast.LENGTH_SHORT).show();
+                                });
                                 Log.e(TAG, "图片拼接失败！");
                                 System.out.println(errorMsg);
                             }
                         });
-                        RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
-                            Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"已将融合照片存储在相册",Toast.LENGTH_SHORT).show();
-                        });
+
 
                     } else if (ControlActivity.mode == -1) {
                         String photoPath[] = new String[clients.size() + 1];

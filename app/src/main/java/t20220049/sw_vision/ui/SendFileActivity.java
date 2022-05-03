@@ -306,7 +306,7 @@ public class SendFileActivity extends BaseActivity {
             });
         });
         findViewById(R.id.playLayout).setOnClickListener(v->{
-            WebrtcUtil.callSingle(SendFileActivity.this, "ws://106.13.236.207:3000","123456", true);
+            WebrtcUtil.callSingle(SendFileActivity.this, "ws://106.13.236.207:3000","123456", true,false);
         });
 
         final RippleBackground rippleBackground=(RippleBackground)findViewById(R.id.content);

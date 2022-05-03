@@ -42,7 +42,7 @@ public class NodejsActivity extends AppCompatActivity {
 //                et_room.getText().toString().trim(),
 //                true);
         WebrtcUtil.callSingle(this, "ws://106.13.236.207:3000",
-                "123456", true);
+                "123456", true, false);
 
     }
 

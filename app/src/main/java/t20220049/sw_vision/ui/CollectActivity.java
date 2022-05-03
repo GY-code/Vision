@@ -26,6 +26,7 @@ import t20220049.sw_vision.transfer.client.WifiClientService;
 import t20220049.sw_vision.utils.CameraService;
 import t20220049.sw_vision.utils.RecordUtil;
 import t20220049.sw_vision.utils.TransferUtil;
+import t20220049.sw_vision.utils.ReceiveWatchUtils;
 import t20220049.sw_vision.webRTC_utils.IViewCallback;
 import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
 import t20220049.sw_vision.webRTC_utils.ProxyVideoSink;
@@ -56,6 +57,7 @@ public class CollectActivity extends AppCompatActivity {
     private boolean videoEnable;
     private boolean isSwappedFeeds;
     private boolean isMirror = true;
+    static boolean watchMode = false;
 
     private static EglBase rootEglBase;
     private Chronometer mChronometer;
@@ -64,18 +66,20 @@ public class CollectActivity extends AppCompatActivity {
     private ImageView switch_hang_up;
     private ImageView photoButton;
     private ImageView videoButton;
+    private ImageView watchButton;
     private int videoState = 0;
 
     private ServiceConnection conn;
     public CameraService cameraService;
     private static RecordUtil ru;
-    boolean activateVideo = false;
+    public static boolean activateVideo = false;
     private static final String TAG = "ChatSingleActivity";
 
-    public static void openActivity(Activity activity, boolean videoEnable) {
+    public static void openActivity(Activity activity, boolean videoEnable, boolean watchMode) {
         Intent intent = new Intent(activity, CollectActivity.class);
         intent.putExtra("videoEnable", videoEnable);
         activity.startActivity(intent);
+        CollectActivity.watchMode = watchMode;
     }
 
     String srcPath;
@@ -95,6 +99,11 @@ public class CollectActivity extends AppCompatActivity {
         initService();
         ru = new RecordUtil(getApplicationContext());
         WifiClientService.setBaseActivityWeakRef(this);
+        ReceiveWatchUtils.setBaseActivityWeakRef(this);
+        if(watchMode){
+            ReceiveWatchUtils.activeWatch();
+            watchButton.setVisibility(View.VISIBLE);
+        }
     }
 
 
@@ -164,15 +173,22 @@ public class CollectActivity extends AppCompatActivity {
         switch_hang_up = findViewById(R.id.switch_hang_up);
         photoButton = findViewById(R.id.shoot);
         videoButton = findViewById(R.id.video);
+        watchButton = findViewById(R.id.watchButton);
         back = findViewById(R.id.back);
         mChronometer = (Chronometer) findViewById(R.id.record_chronometer);
     }
 
     public void CallTakePicture(boolean isCollect, boolean isSend) {
         runOnUiThread(() -> {
-            Toast.makeText(getApplicationContext(), "准备拍照", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "已拍照", Toast.LENGTH_SHORT).show();
         });
-        cameraService.takePicture(isCollect, isSend);
+        if (RecordUtil.isFullDefinition) {
+            if (cameraService != null) {
+                cameraService.takePicture(isCollect, isSend);
+            }
+        } else {
+            ru.catchPhoto(CollectActivity.this, local_view);
+        }
     }
 
     public void CallSetVideoStart() {
@@ -188,7 +204,7 @@ public class CollectActivity extends AppCompatActivity {
 
     public void CallSetVideoEnd(boolean isCollect, boolean isSend) {
         ru.terminateVideo(vfr, localTrack, rootEglBase, CollectActivity.this, isCollect, isSend);
-        runOnUiThread(()->{
+        runOnUiThread(() -> {
             mChronometer.stop();
             mChronometer.setVisibility(View.INVISIBLE);
         });
@@ -254,40 +270,16 @@ public class CollectActivity extends AppCompatActivity {
             }
         });
         photoButton.setOnClickListener(v -> {
-            if (RecordUtil.isFullDefinition) {
-                if (cameraService != null) {
-                    Toast.makeText(getBaseContext(), "拍照", Toast.LENGTH_SHORT).show();
-                    cameraService.takePicture(true, false);
-                }
-            } else {
-                ru.catchPhoto(CollectActivity.this, local_view);
-            }
+            CallTakePicture(true, false);
         });
         videoButton.setOnClickListener(v -> {
             if (!activateVideo) {
-                ru.setVideoStart(vfr, localTrack, rootEglBase);
+                CallSetVideoStart();
                 activateVideo = true;
-                runOnUiThread(() -> {
-                    Toast.makeText(getApplicationContext(), "开始录制", Toast.LENGTH_SHORT).show();
-                });
             } else {
-                ru.terminateVideo(vfr, localTrack, rootEglBase, CollectActivity.this, true, false);
+                CallSetVideoEnd(true, false);
                 activateVideo = false;
             }
-            if (videoState == 0) {
-                //setFormat设置用于显示的格式化字符串。
-                //替换字符串中第一个“%s”为当前"MM:SS"或 "H:MM:SS"格式的时间显示。
-                mChronometer.setBase(SystemClock.elapsedRealtime());
-                mChronometer.setFormat("%s");
-                mChronometer.setVisibility(View.VISIBLE);
-                mChronometer.start();
-                videoState = 1;
-            } else {
-                mChronometer.stop();
-                mChronometer.setVisibility(View.INVISIBLE);
-                videoState = 0;
-            }
-
         });
     }
 
@@ -302,7 +294,8 @@ public class CollectActivity extends AppCompatActivity {
     static VideoTrack localTrack = null;
 
     private void sendId2Control(String id) {
-        TransferUtil.C2S_UserID(id);
+        if (!watchMode)
+            TransferUtil.C2S_UserID(id);
     }
 
     private void startCall() {
@@ -317,7 +310,11 @@ public class CollectActivity extends AppCompatActivity {
 
                 }
                 RecordUtil.setMyId(socketId);
-                sendId2Control(socketId);
+                try {
+                    sendId2Control(socketId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 Log.d(TAG, "onSetLocalStream: send id");
                 if (videoEnable) {
                     stream.videoTracks.get(0).setEnabled(true);
@@ -398,7 +395,6 @@ public class CollectActivity extends AppCompatActivity {
     // 扬声器
     public void toggleSpeaker(boolean enable) {
         manager.toggleSpeaker(enable);
-
     }
 
     @Override
@@ -409,8 +405,9 @@ public class CollectActivity extends AppCompatActivity {
             unbindService(conn);
 //            stopService(serviceIntent);
         }
-        super.onDestroy();
 
+        ReceiveWatchUtils.inactiveWatch();
+        super.onDestroy();
     }
 
     private void disConnect() {
