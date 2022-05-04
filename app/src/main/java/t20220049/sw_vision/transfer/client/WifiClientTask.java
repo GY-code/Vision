@@ -95,7 +95,7 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
         Log.e(TAG, "backGround");
         Socket socket = WifiClientService.socket;
         OutputStream outputStream = null;
-        ObjectOutputStream objectOutputStream = null;
+//        ObjectOutputStream objectOutputStream = null;
         InputStream inputStream = null;
         try {
 //            String hostAddress = params[0].toString();
@@ -132,7 +132,7 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
 
             //inputStream负责读文件，outputStream负责向服务器传输文件流
             outputStream = socket.getOutputStream();
-            objectOutputStream = new ObjectOutputStream(outputStream);
+            ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
             objectOutputStream.flush();
             Log.e(TAG,"already sended");
             objectOutputStream.writeObject(fileTransfer);

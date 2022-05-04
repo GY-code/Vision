@@ -175,7 +175,11 @@ public class WifiServer extends Thread {
             Log.e(TAG, "客户端IP地址 : " + clientSocket.getInetAddress().getHostAddress());
 //            inputStream = clientSocket.getInputStream();
             Log.e(TAG, "HJKLL");
+
+
             objectInputStream = new ObjectInputStream(inputStream);
+
+
             Log.e(TAG, "HJKLL");
             FileTransfer fileTransfer = (FileTransfer) objectInputStream.readObject();
             Log.e(TAG, "待接收的文件: " + fileTransfer);
