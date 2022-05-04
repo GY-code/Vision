@@ -218,7 +218,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         String json = jsonParam.toJSONString();
         MediaType mediaType = MediaType.Companion.parse("application/json;charset=utf-8");
         RequestBody requestBody = RequestBody.Companion.create(json, mediaType);
-        WatchUtils.sendOkHttpResponse("http://192.168.3.45:8000/server/ins/", requestBody, new Callback() {
+        WatchUtils.sendOkHttpResponse("http://106.13.236.207:8000/server/ins/", requestBody, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 Log.e(TAG, "onFailure: ");
