@@ -247,6 +247,12 @@ public class SendFileActivity extends BaseActivity {
 //                navToChosePicture(); //打开文件选择
 //            }
 //        };
+//        findViewById(R.id.button6).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                navToChosePicture();
+//            }
+//        });
         setTitle("发送文件");
         tv_myDeviceName = findViewById(R.id.tv_myDeviceName);
 //        tv_myDeviceAddress = findViewById(R.id.tv_myDeviceAddress);
