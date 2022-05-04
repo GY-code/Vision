@@ -67,7 +67,7 @@ public class ReceiveWatchUtils {
         String json = jsonParam.toJSONString();
         MediaType mediaType = MediaType.Companion.parse("application/json;charset=utf-8");
         RequestBody requestBody = RequestBody.Companion.create(json, mediaType);
-        sendOkHttpResponse("http://192.168.3.45:8000/server/polling/", requestBody, new Callback() {
+        sendOkHttpResponse("http://106.13.236.207:8000/server/polling/", requestBody, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 Log.e(TAG, "onFailure ");
