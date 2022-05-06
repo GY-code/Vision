@@ -26,7 +26,7 @@ import android.widget.TextView;
 import androidx.core.app.ActivityCompat;
 
 import t20220049.sw_vision.R;
-import t20220049.sw_vision.arm_controller.BluetoothActivity;
+//import t20220049.sw_vision.arm_controller.BluetoothActivity;
 import t20220049.sw_vision.arm_controller.uitls.BluetoothUtils;
 import t20220049.sw_vision.arm_controller.uitls.LogUtil;
 

@@ -1,202 +1,236 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="10dp">
-
-
-    <!--    <LinearLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="horizontal">-->
-
-<!--        <Button-->
-<!--            android:id="@+id/btnWifiList"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginEnd="10dp"-->
-<!--            android:layout_weight="1"-->
-<!--            android:text="WIFI列表" />-->
-
-<!--        <Button-->
-<!--            android:id="@+id/btnSearch"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginStart="10dp"-->
-<!--            android:layout_weight="1"-->
-<!--            android:text="开始搜索" />-->
-<!--    </LinearLayout>-->
-
-<!--    <LinearLayout-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:orientation="horizontal">-->
-
-<!--        <Button-->
-<!--            android:id="@+id/btn_disconnect"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginEnd="10dp"-->
-<!--            android:layout_weight="1"-->
-<!--            android:text="断开连接" />-->
-
-<!--        <Button-->
-<!--            android:id="@+id/btn_chooseFile"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginStart="10dp"-->
-<!--            android:layout_weight="1"-->
-<!--            android:text="选择文件" />-->
-<!--        <Button-->
-<!--            android:id="@+id/btnCollect"-->
-<!--            android:layout_width="0dp"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:layout_marginStart="10dp"-->
-<!--            android:layout_weight="1"-->
-<!--            android:text="进入采集端" />-->
-
-<!--    </LinearLayout>-->
-
-<!--    <TextView-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginTop="6dp"-->
-<!--        android:text="本设备信息"-->
-<!--        android:textColor="@android:color/black"-->
-<!--        android:textSize="18sp"-->
-<!--        android:textStyle="bold" />-->
-
-    <ImageButton
-        android:id="@+id/bluetooth_btn"
-        style="@style/middle_btn"
-        android:layout_marginTop="20dp"
-        android:background="@android:color/transparent"
-        android:onClick="onClick"
-        android:src="@drawable/bluetooth_disconnected" />
-
-    <com.skyfishjy.library.RippleBackground
-        android:id="@+id/content"
-        android:layout_width="wrap_content"
-        android:layout_height="334dp"
-        app:rb_color="#F488FB"
-        app:rb_duration="3500"
-        app:rb_radius="35dp"
-        app:rb_rippleAmount="9"
-        app:rb_scale="4">
-
-        <ImageView
-            android:id="@+id/clientIcon"
-            android:layout_width="match_parent"
-            android:layout_height="86dp"
-            android:layout_alignParentTop="true"
-            android:layout_marginTop="121dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.498"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="0.384"
-            app:srcCompat="@drawable/ic_client" />
-    </com.skyfishjy.library.RippleBackground>
-
-    <TextView
-        android:id="@+id/tv_myDeviceName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:gravity="center"
-        android:textColor="@android:color/black"
-        android:textSize="18sp"
-        tools:layout_marginTop="30dp"
-        tools:text="设备名称" />
-
-<!--    <TextView-->
-<!--        android:id="@+id/tv_myDeviceAddress"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginTop="6dp"-->
-<!--        android:gravity="center"-->
-<!--        android:textColor="@android:color/black"-->
-<!--        android:textSize="18sp"-->
-<!--        android:visibility="invisible"-->
-<!--        tools:text="MAC地址" />-->
-
-    <TextView
-        android:id="@+id/tv_myDeviceStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:gravity="center"
-        android:textColor="@android:color/black"
-        android:textSize="18sp"
-        android:visibility="visible"
-        tools:text="连接状态" />
-
-    <TextView
-        android:id="@+id/tv_status"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:gravity="center"
-        android:textColor="@android:color/black"
-        android:textSize="18sp" />
-
+    android:layout_height="wrap_content"
+    >
     <LinearLayout
-        android:id="@+id/playLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="20dp"
-        android:gravity="center"
-        android:orientation="horizontal"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="10dp">
+        <!--    <LinearLayout-->
+        <!--        android:layout_width="match_parent"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:orientation="horizontal">-->
+
+        <!--        <Button-->
+        <!--            android:id="@+id/btnWifiList"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginEnd="10dp"-->
+        <!--            android:layout_weight="1"-->
+        <!--            android:text="WIFI列表" />-->
+
+        <!--        <Button-->
+        <!--            android:id="@+id/btnSearch"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginStart="10dp"-->
+        <!--            android:layout_weight="1"-->
+        <!--            android:text="开始搜索" />-->
+        <!--    </LinearLayout>-->
+
+        <!--    <LinearLayout-->
+        <!--        android:layout_width="match_parent"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:orientation="horizontal">-->
+
+        <!--        <Button-->
+        <!--            android:id="@+id/btn_disconnect"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginEnd="10dp"-->
+        <!--            android:layout_weight="1"-->
+        <!--            android:text="断开连接" />-->
+
+        <!--        <Button-->
+        <!--            android:id="@+id/btn_chooseFile"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginStart="10dp"-->
+        <!--            android:layout_weight="1"-->
+        <!--            android:text="选择文件" />-->
+        <!--        <Button-->
+        <!--            android:id="@+id/btnCollect"-->
+        <!--            android:layout_width="0dp"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginStart="10dp"-->
+        <!--            android:layout_weight="1"-->
+        <!--            android:text="进入采集端" />-->
+
+        <!--    </LinearLayout>-->
+
+        <!--    <TextView-->
+        <!--        android:layout_width="match_parent"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:layout_marginTop="6dp"-->
+        <!--        android:text="本设备信息"-->
+        <!--        android:textColor="@android:color/black"-->
+        <!--        android:textSize="18sp"-->
+        <!--        android:textStyle="bold" />-->
+
+        <ImageButton
+            android:id="@+id/bluetooth_btn"
+            style="@style/middle_btn"
+            android:layout_marginTop="20dp"
+            android:background="@android:color/transparent"
+            android:onClick="onClick"
+            android:src="@drawable/bluetooth_disconnected" />
+
+        <com.skyfishjy.library.RippleBackground
+            android:id="@+id/content"
+            android:layout_width="wrap_content"
+            android:layout_height="334dp"
+            app:rb_color="#F488FB"
+            app:rb_duration="3500"
+            app:rb_radius="35dp"
+            app:rb_rippleAmount="9"
+            app:rb_scale="4">
+
+            <ImageView
+                android:id="@+id/clientIcon"
+                android:layout_width="match_parent"
+                android:layout_height="86dp"
+                android:layout_alignParentTop="true"
+                android:layout_marginTop="121dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.498"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.384"
+                app:srcCompat="@drawable/ic_client" />
+        </com.skyfishjy.library.RippleBackground>
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginEnd="5dp"
+            android:id="@+id/tv_myDeviceName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
             android:gravity="center"
-            android:text="开始会话"
-            android:textColor="#3BC638"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            tools:layout_marginTop="30dp"
+            tools:text="设备名称" />
+
+        <!--    <TextView-->
+        <!--        android:id="@+id/tv_myDeviceAddress"-->
+        <!--        android:layout_width="match_parent"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:layout_marginTop="6dp"-->
+        <!--        android:gravity="center"-->
+        <!--        android:textColor="@android:color/black"-->
+        <!--        android:textSize="18sp"-->
+        <!--        android:visibility="invisible"-->
+        <!--        tools:text="MAC地址" />-->
+
+        <TextView
+            android:id="@+id/tv_myDeviceStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:textColor="@android:color/black"
+            android:textSize="18sp"
+            android:visibility="visible"
+            tools:text="连接状态" />
+
+        <TextView
+            android:id="@+id/tv_status"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:textColor="@android:color/black"
+            android:textSize="18sp" />
+
+        <LinearLayout
+            android:id="@+id/playLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="5dp"
+                android:gravity="center"
+                android:text="开始会话"
+                android:textColor="#3BC638"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ImageView
+                android:id="@+id/beginButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_marginStart="5dp"
+                app:srcCompat="@drawable/ic_play" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/sendDebug"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="debug" />
+
+            <Button
+                android:id="@+id/action1_btn"
+                android:layout_width="67dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="1" />
+
+            <Button
+                android:id="@+id/action2_btn"
+                android:layout_width="64dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="2" />
+
+            <Button
+                android:id="@+id/action3_btn"
+                android:layout_width="71dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:text="3" />
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="可连接控制端设备列表"
+            android:textColor="@android:color/black"
             android:textSize="18sp"
             android:textStyle="bold" />
 
-        <ImageView
-            android:id="@+id/beginButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-
-            android:layout_marginStart="5dp"
-            app:srcCompat="@drawable/ic_play" />
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_deviceList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
 
     </LinearLayout>
-
-    <Button
-        android:id="@+id/sendDebug"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Send" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:text="可连接控制端设备列表"
-        android:textColor="@android:color/black"
-        android:textSize="18sp"
-        android:textStyle="bold" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_deviceList"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-</LinearLayout>
+</ScrollView>

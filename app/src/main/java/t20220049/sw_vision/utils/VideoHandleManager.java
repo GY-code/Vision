@@ -10,7 +10,7 @@ import java.util.ArrayList;
 
 import io.microshow.rxffmpeg.RxFFmpegInvoke;
 import io.microshow.rxffmpeg.RxFFmpegSubscriber;
-import t20220049.sw_vision.view.VideoTestView;
+//import t20220049.sw_vision.view.VideoTestView;
 
 public class VideoHandleManager {
     private static VideoHandleManager instance;

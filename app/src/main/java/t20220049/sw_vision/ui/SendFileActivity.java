@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import t20220049.sw_vision.arm_controller.BluetoothActivity;
+//import t20220049.sw_vision.arm_controller.BluetoothActivity;
 import t20220049.sw_vision.arm_controller.commen.Constants;
 import t20220049.sw_vision.arm_controller.connect.BLEManager;
 import t20220049.sw_vision.arm_controller.connect.BLEService;
@@ -384,6 +384,25 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
                 navToChosePicture();
             }
         });
+        findViewById(R.id.action1_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sendActionCmd(1);
+            }
+        });
+        findViewById(R.id.action2_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sendActionCmd(2);
+            }
+        });
+        findViewById(R.id.action3_btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                sendActionCmd(3);
+            }
+        });
+
         setTitle("发送文件");
         tv_myDeviceName = findViewById(R.id.tv_myDeviceName);
 //        tv_myDeviceAddress = findViewById(R.id.tv_myDeviceAddress);
@@ -555,37 +574,26 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
                     startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
                 }
                 break;
-            case R.id.set_btn:
-                break;
+//            case R.id.set_btn:
+//                break;
 
-            case R.id.action1_btn:
-                sendActionCmd(1);
-                break;
-
-            case R.id.action2_btn:
-                sendActionCmd(2);
-                break;
-
-            case R.id.action3_btn:
-                sendActionCmd(3);
-                break;
-
-            case R.id.action4_btn:
-                sendActionCmd(4);
-                break;
-
-            case R.id.action5_btn:
-                sendActionCmd(5);
-                break;
-
-            case R.id.action6_btn:
-                sendActionCmd(6);
-                break;
+//            case R.id.action4_btn:
+//                sendActionCmd(4);
+//                break;
+//
+//            case R.id.action5_btn:
+//                sendActionCmd(5);
+//                break;
+//
+//            case R.id.action6_btn:
+//                sendActionCmd(6);
+//                break;
         }
     }
 
     private void sendActionCmd(int index)//发送动作组命令
     {
+        Log.e(TAG,"cmd: "+index);
         //帧头     length  type  num         timeLo timeHi id          posLo  posHi
         byte[] byteArray1 = {0x55, 0x55, 0x08, 0x03, 0x01, (byte) 0xe8, 0x03, 0x01, (byte) 0xf4, 0x01};       //500
         byte[] byteArray2 = {0x55, 0x55, 0x08, 0x03, 0x01, (byte) 0xd0, 0x07, 0x01, (byte) 0xdc, 0x05};       //1500
