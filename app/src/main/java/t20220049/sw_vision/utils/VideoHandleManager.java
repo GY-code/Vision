@@ -1,16 +1,12 @@
 package t20220049.sw_vision.utils;
 
-import android.content.Context;
 import android.util.Log;
-
-import org.webrtc.EglBase;
 
 import java.io.File;
 import java.util.ArrayList;
 
 import io.microshow.rxffmpeg.RxFFmpegInvoke;
 import io.microshow.rxffmpeg.RxFFmpegSubscriber;
-import t20220049.sw_vision.view.VideoTestView;
 
 public class VideoHandleManager {
     private static VideoHandleManager instance;
@@ -109,7 +105,7 @@ public class VideoHandleManager {
 
         @Override
         public void onProgress(int progress, long progressTime) {
-
+            Log.d("zsy", "onProgress: " + progress);
         }
 
         @Override

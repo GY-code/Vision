@@ -21,3 +21,5 @@ dependencyResolutionManagement {
 rootProject.name = "SW-Vision"
 include ':app'
 include ':libwebrtc'
+//include ':opencvlibs:opencv'
+include ':opencv'
