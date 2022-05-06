@@ -1,7 +1,7 @@
 package t20220049.sw_vision.bean;
 
 /**
- * Created by dds on 2019/5/3.
+ * Created by GuYi on 2022/5/3.
  * android_shuai@163.com
  */
 public class MediaType {

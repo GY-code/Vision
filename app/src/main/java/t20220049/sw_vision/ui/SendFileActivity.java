@@ -19,7 +19,6 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -30,27 +29,17 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.skyfishjy.library.RippleBackground;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import t20220049.sw_vision.arm_controller.BluetoothActivity;
 import t20220049.sw_vision.entrance.WebrtcUtil;
 import t20220049.sw_vision.transfer.adapter.DeviceAdapter;
 import t20220049.sw_vision.transfer.broadcast.DirectBroadcastReceiver;
 import t20220049.sw_vision.transfer.callback.DirectActionListener;
 import t20220049.sw_vision.transfer.client.WifiClientService;
-import t20220049.sw_vision.transfer.common.Constants;
 import t20220049.sw_vision.transfer.client.WifiClientTask;
-import t20220049.sw_vision.transfer.server.WifiServer;
-import t20220049.sw_vision.transfer.server.WifiServerService;
 import t20220049.sw_vision.transfer.util.WifiP2pUtils;
 import t20220049.sw_vision.transfer.widget.LoadingDialog;
 
@@ -247,12 +236,20 @@ public class SendFileActivity extends BaseActivity {
 //                navToChosePicture(); //打开文件选择
 //            }
 //        };
-        findViewById(R.id.button6).setOnClickListener(new View.OnClickListener() {
+        findViewById(R.id.sendDebug).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 navToChosePicture();
             }
         });
+        findViewById(R.id.bluetooth).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(SendFileActivity.this, BluetoothActivity.class);
+                startActivity(intent);
+            }
+        });
+
         setTitle("发送文件");
         tv_myDeviceName = findViewById(R.id.tv_myDeviceName);
 //        tv_myDeviceAddress = findViewById(R.id.tv_myDeviceAddress);

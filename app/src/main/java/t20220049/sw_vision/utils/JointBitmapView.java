@@ -8,7 +8,6 @@ import android.view.View;
 
 /**
  * 将多张图片拼接在一起
- * @author yw-tony
  *
  */
 public class JointBitmapView {

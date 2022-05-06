@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 /**
- * Created by dds on 2019/1/9.
+ * Created by GuYi on 2022/1/9.
  * android_shuai@163.com
  */
 public class MyIceServer implements Parcelable {

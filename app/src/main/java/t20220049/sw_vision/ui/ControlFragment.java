@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment;
 
 /**
  * 视频会议控制界面
- * Created by dds on 2019/1/2.
+ * Created by GuYi on 2022/1/2.
  * android_shuai@163.com
  */
 public class ControlFragment extends Fragment {

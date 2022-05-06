@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="t20220049.sw_vision">
 
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
@@ -22,6 +24,12 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <!--操作文件系统的权限-->
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEM"/>
@@ -54,6 +62,13 @@
             android:name=".utils.CameraService"
             android:enabled="true"
             android:exported="true" />
+
+        <service
+            android:name="t20220049.sw_vision.arm_controller.connect.BLEService"
+            android:enabled="true" />
+
+        <activity android:name=".arm_controller.BluetoothActivity">
+        </activity>
 
         <activity
             android:name=".ui.CollectMatch"

@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * 控制信令和各种操作
- * Created by dds on 2019/4/5.
+ * Created by GuYi on 2022/4/5.
  * android_shuai@163.com
  */
 public class WebRTCManager implements ISignalingEvents {

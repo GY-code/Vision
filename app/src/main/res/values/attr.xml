@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="HandShake">
+        <!-- 轨迹球图片 -->
+        <attr name="ball_src" format="reference" />
+        <attr name="ball_bg" format="reference" />
+        <!-- 圆环宽度 -->
+        <attr name="ring_width" format="dimension" />
+        <attr name="ring_color" format="color|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="SwitchControl">
+        <attr name="control_src" format="reference" />
+        <attr name="frame_width" format="dimension" />
+        <attr name="frame_color" format="color|reference" />
+        <attr name="switch_text_size" format="dimension" />
+        <attr name="left_text" format="string" />
+        <attr name="right_text" format="string" />
+        <attr name="left_text_color" format="color|reference" />
+        <attr name="right_text_color" format="color|reference" />
+    </declare-styleable>
+    <declare-styleable name="Theme">
+        <attr format="reference" name="selectableItemBackgroundBorderless"/>
+    </declare-styleable>
+    <declare-styleable name="SwerveControl">
+        <attr name="line_width" format="dimension"/>
+        <attr name="line_color" format="color|reference"/>
+        <attr name="sv_ring_width" format="dimension"/>
+        <attr name="sv_ball_padding" format="dimension"/>
+        <attr name="arc_radius" format="dimension"/>
+        <attr name="arc_angle" format="integer"/>
+        <attr name="sv_ball_src" format="reference"/>
+    </declare-styleable>
+
+    <declare-styleable name="CircularProgressView">
+        <attr name="cpv_progress" format="float" />
+        <attr name="cpv_maxProgress" format="float" />
+        <!-- 周期 -->
+        <attr name="cpv_animDuration" format="integer" />
+        <!-- 颜色 -->
+        <attr name="cpv_color" format="color" />
+        <!-- 圆环宽度 -->
+        <attr name="cpv_thickness" format="dimension" />
+        <attr name="cpv_indeterminate" format="boolean" />
+        <!-- 自动开始 -->
+        <attr name="cpv_animAutostart" format="boolean" />
+        <!-- 圆弧扫过的角度等级 -->
+        <attr name="cpv_animSteps" format="integer" />
+    </declare-styleable>
+</resources>

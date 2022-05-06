@@ -1,4 +1,29 @@
 <resources>
     <string name="app_name">视界</string>
     <string name="ttt">TTT</string>
+
+    <string name="exit_remind">再点击一次退出</string>
+    <string name="open_bluetooth_title">开启蓝牙</string>
+    <string name="open_bluetooth_content">是否开启蓝牙开关？</string>
+    <string name="open_bluetooth_unsupported">您的设备不支持蓝牙</string>
+    <string name="send_tips_no_connected">请先连接蓝牙</string>
+    <string name="disconnect_tips_title">断开</string>
+    <string name="disconnect_tips_connect">是否断开蓝牙？</string>
+    <string name="disconnect_tips_succeed">蓝牙已断开</string>
+    <string name="exit_tips_title">提示</string>
+    <string name="exit_tips_content">断开蓝牙并退出？</string>
+    <string name="tips_bluetooth_not_support">蓝牙不可用</string>
+    <string name="tips_open_bluetooth">请先开启蓝牙</string>
+    <string name="dialog_yes">确定</string>
+    <string name="dialog_cancel">取消</string>
+    <string name="dialog_searching">正在搜索</string>
+    <string name="dialog_search_finished">搜索结束</string>
+    <string name="dialog_search_restart">重新搜索</string>
+    <string name="dialog_search_stop">停止搜索</string>
+    <string name="dialog_search_item_bonded">%1$s  （已配对）</string>
+    <string name="bluetooth_state_connected">蓝牙已连接</string>
+    <string name="bluetooth_state_connecting">正在连接蓝牙</string>
+    <string name="bluetooth_state_connect_failure">蓝牙连接失败</string>
+    <string name="bluetooth_state_disconnected">蓝牙已断开</string>
+
 </resources>

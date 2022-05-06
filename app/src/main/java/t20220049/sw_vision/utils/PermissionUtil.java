@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by dds on 2019/1/2.
+ * Created by GuYi on 2022/1/2.
  * android_shuai@163.com
  */
 public class PermissionUtil {
@@ -30,6 +30,8 @@ public class PermissionUtil {
             return false;
         }
         return isNeedRequestPermission(activity,
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BLUETOOTH_ADMIN,
                 Manifest.permission.CAMERA,
                 Manifest.permission.RECORD_AUDIO,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,

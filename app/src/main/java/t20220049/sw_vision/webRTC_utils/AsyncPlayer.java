@@ -11,7 +11,7 @@ import java.io.IOException;
 import java.util.LinkedList;
 
 /**
- * Created by dds on 2019/7/25.
+ * Created by GuYi on 2022/7/25.
  * android_shuai@163.com
  */
 public class AsyncPlayer {

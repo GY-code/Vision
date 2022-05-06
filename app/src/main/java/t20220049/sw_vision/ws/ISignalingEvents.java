@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by dds on 2019/1/3.
+ * Created by GuYi on 2022/1/3.
  * android_shuai@163.com
  */
 public interface ISignalingEvents {
