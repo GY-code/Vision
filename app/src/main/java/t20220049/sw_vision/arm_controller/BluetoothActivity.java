@@ -65,14 +65,12 @@ public class BluetoothActivity extends Activity implements SearchDialog.OnDevice
     public static boolean isConnected;
 
     private ServiceConnection mConnection = new ServiceConnection() {
-
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             LogUtil.i(TAG, "BLE Service connected");
             BLEService bleService = ((BLEService.BLEBinder) service).getService();
             BLEManager.getInstance().init(bleService);
         }
-
         @Override
         public void onServiceDisconnected(ComponentName name) {
             LogUtil.w(TAG, "BLE Service disconnected");
@@ -83,7 +81,7 @@ public class BluetoothActivity extends Activity implements SearchDialog.OnDevice
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_lsc6);
+//        setContentView(R.layout.activity_lsc6);
         if (!BluetoothUtils.isSupport(BluetoothAdapter.getDefaultAdapter())) {
             Toast.makeText(this, "Bluetooth is not available", Toast.LENGTH_LONG).show();
             finish();
@@ -149,7 +147,6 @@ public class BluetoothActivity extends Activity implements SearchDialog.OnDevice
                 Toast.makeText(this, R.string.exit_remind, Toast.LENGTH_SHORT).show();
                 Timer timer = new Timer();
                 timer.schedule(new TimerTask() {
-
                     @Override
                     public void run() {
                         confirm = false;
@@ -209,7 +206,6 @@ public class BluetoothActivity extends Activity implements SearchDialog.OnDevice
                     startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
                 }
                 break;
-
             case R.id.set_btn:
                 break;
 
