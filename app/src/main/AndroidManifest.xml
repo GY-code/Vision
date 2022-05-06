@@ -19,7 +19,6 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
@@ -34,8 +33,8 @@
     <!--操作文件系统的权限-->
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEM"/>
 
-    <uses-feature android:name="android.hardware.camera" />
-    <uses-feature android:name="android.hardware.camera.autofocus" />
+    <uses-feature android:name="android.hardware.camera" android:required="true" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="true" />
 
     <application
         android:name=".transfer.MyApplication"
@@ -103,12 +102,22 @@
             android:name=".ui.SendFileActivity"
             android:exported="true" />
         <activity
+            android:name=".ui.CVActivity"
+            android:exported="true">
+<!--             <intent-filter>-->
+<!--                 <action android:name="android.intent.action.MAIN" />-->
+<!--                 <category android:name="android.intent.category.LAUNCHER" />-->
+<!--             </intent-filter>-->
+        </activity>
+        <activity
             android:name=".utils.Panorama"
-            android:exported="true" >
-<!--        <intent-filter>-->
-<!--            <action android:name="android.intent.action.MAIN" />-->
-<!--            <category android:name="android.intent.category.LAUNCHER" />-->
-<!--        </intent-filter>-->
+            android:exported="true">
+
+
+            <!-- <intent-filter> -->
+            <!-- <action android:name="android.intent.action.MAIN" /> -->
+            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
+            <!-- </intent-filter> -->
         </activity>
         <activity
             android:name=".ui.ControlActivity"

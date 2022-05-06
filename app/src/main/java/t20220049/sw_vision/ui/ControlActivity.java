@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Service;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
@@ -264,7 +265,6 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         RecordUtil.setControlActivityWeakRef(ControlActivity.this);
 //        setContentView(R.layout.wr_activity_chat_room);
         setContentView(R.layout.acticity_control);
-        showText = findViewById(R.id.showText);
 
 //        userIdList.add("_all");
 //        streamList.add(null);
