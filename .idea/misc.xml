@@ -33,7 +33,8 @@
         <entry key="..\:/Code/Android/sw-vision/app/src/main/res/layout/view_comment_circleimageview.xml" value="0.2546875" />
         <entry key="..\:/Code/Android/sw-vision/app/src/main/res/layout/wr_activity_chat_single.xml" value="0.2546875" />
         <entry key="..\:/Code/Android/sw-vision/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.3105" />
-        <entry key="..\:/Users/Lucas/Desktop/SW-Contest/sw_Vision/app/src/main/res/layout/activity_lsc6.xml" value="0.1" />
+        <entry key="..\:/Users/Lucas/Desktop/SW-Contest/sw_Vision/app/src/main/res/layout/activity_lsc6.xml" value="0.33" />
+        <entry key="..\:/Users/Lucas/Desktop/SW-Contest/sw_Vision/app/src/main/res/layout/activity_receive_file.xml" value="0.36614583333333334" />
         <entry key="..\:/Users/Lucas/Desktop/SW-Contest/sw_Vision/app/src/main/res/layout/activity_send_file.xml" value="0.36614583333333334" />
         <entry key="..\:/Users/Lucas/Desktop/SW-Contest/sw_Vision/app/src/main/res/layout/item_search_device.xml" value="0.1" />
         <entry key="..\:/Users/Lucas/Desktop/SW-Contest/sw_Vision/app/src/main/res/layout/layout_dialog.xml" value="0.13240740740740742" />
@@ -42,7 +43,7 @@
     </option>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_X" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

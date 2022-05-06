@@ -69,6 +69,14 @@
 <!--        android:textSize="18sp"-->
 <!--        android:textStyle="bold" />-->
 
+    <ImageButton
+        android:id="@+id/bluetooth_btn"
+        style="@style/middle_btn"
+        android:layout_marginTop="20dp"
+        android:background="@android:color/transparent"
+        android:onClick="onClick"
+        android:src="@drawable/bluetooth_disconnected" />
+
     <com.skyfishjy.library.RippleBackground
         android:id="@+id/content"
         android:layout_width="wrap_content"
@@ -176,12 +184,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Send" />
-
-    <Button
-        android:id="@+id/bluetooth"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Bluetooth" />
 
     <TextView
         android:layout_width="match_parent"
