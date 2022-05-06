@@ -11,16 +11,22 @@ import android.widget.Toast;
 import org.webrtc.ContextUtils;
 
 import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -31,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import t20220049.sw_vision.transfer.client.WifiClientService;
+import t20220049.sw_vision.transfer.common.Constants;
 import t20220049.sw_vision.transfer.model.FileTransfer;
 import t20220049.sw_vision.transfer.util.Md5Util;
 import t20220049.sw_vision.ui.ControlActivity;
@@ -64,6 +71,8 @@ public class WifiServer extends Thread {
     InputStream inputStream;
     OutputStream outputStream;
 
+    int send_state = Constants.SEND_FAIL;
+
     public class MyClient {
         public Socket client = null;
         public String clientIP = "default ip";
@@ -88,6 +97,48 @@ public class WifiServer extends Thread {
     public void run() {
         Looper.prepare();
         String inputLine;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    DatagramSocket socket = new DatagramSocket(Constants.UDP_PORT);
+
+                    while (true){
+                        //1.读取请求，服务器一般不知道客户端啥时候发来请求
+                        //receive()参数DatagramPacket是一个输出型参数，socket中读到的数据会设置到这个参数的对象中
+                        //DatagramPacket在构造的时候需要一个缓冲区（实际上是一段内存空间, 通常使用byte[]）
+                        DatagramPacket requestPacket = new DatagramPacket(new byte[4096], 4096);
+                        socket.receive(requestPacket); //收到请求之前，receive()操作在阻塞等待！
+
+                        //把requestPacket中的内容取出来,作为一个字符串
+                        String request = new String(requestPacket.getData(), 0, requestPacket.getLength());
+
+                        Log.i(TAG,"look out: "+request);
+                        String response = "";
+
+                        //2.根据请求计算响应
+                        if(send_state==Constants.SEND_SUC){
+                            response = "SEND_SUC";
+                        } else {
+                            response = "SEND_FAIL";
+                        }
+
+                        //3.构造responsePacket响应
+                        //此处设置的参数长度 必须是 字节的长度个数！response.getBytes().length
+                        //如果直接取response.length,则是字符串的长度，也就是字符串的个数
+                        //当前的responsePacket在构造时，需要指定这个包要发给谁；发送给的目标即发来请求的一方
+                        DatagramPacket responsePacket = new DatagramPacket(response.getBytes(),response.getBytes().length,requestPacket.getSocketAddress());
+
+                        //4.发送响应到客户端
+                        socket.send(responsePacket);
+                    }
+                } catch (SocketException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         try {
             for (MyClient mc : clients) {
                 photoWL.add(mc.clientIP);
@@ -169,6 +220,7 @@ public class WifiServer extends Thread {
     private void receiveFile(String type) {
         File file = null;
         try {
+            send_state = Constants.SEND_FAIL;
 //            InputStream inputStream;
 //            ObjectInputStream objectInputStream;
 //            FileOutputStream fileOutputStream;
@@ -176,9 +228,7 @@ public class WifiServer extends Thread {
 //            inputStream = clientSocket.getInputStream();
             Log.e(TAG, "HJKLL");
 
-
-            objectInputStream = new ObjectInputStream(inputStream);
-
+            ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
 
             Log.e(TAG, "HJKLL");
             FileTransfer fileTransfer = (FileTransfer) objectInputStream.readObject();
@@ -220,6 +270,19 @@ public class WifiServer extends Thread {
 //            objectInputStream.close();
 //            fileOutputStream.close();
 //            serverSocket = null;
+//            out = new PrintWriter(outputStream);
+//            out.println("sendSuc");
+//            out.flush();
+//            DataOutputStream out = new DataOutputStream(outputStream);
+//            try {
+//                out.writeInt(Constants.SEND_SUC);
+//                out.flush();
+//            } catch (IOException ioException) {
+//                ioException.printStackTrace();
+//            }
+
+            send_state = Constants.SEND_SUC;
+
             Log.e(TAG, "文件接收成功，文件的MD5码是：" + Md5Util.getMd5(file));
             if (fileReceiveListener != null) {
                 fileReceiveListener.onFileReceiveFinished();
@@ -311,6 +374,7 @@ public class WifiServer extends Thread {
                     }
                 }
                 photoWL.remove(address);
+
             } else {
                 videoWL.remove(address);
                 if (videoWL.isEmpty()) {
@@ -339,14 +403,48 @@ public class WifiServer extends Thread {
                         videoWL.add(mc.clientIP);
                     }
                 }
+
             }
-//            Toast.makeText(ReceiveFileActivity.context.getApplicationContext(),"接收文件成功",Toast.LENGTH_SHORT).show();
+            //            Toast.makeText(ReceiveFileActivity.context.getApplicationContext(),"接收文件成功",Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             e.printStackTrace();
             fileReceiveListener.logMessage(e.getMessage());
             Log.e(TAG, "文件接收 Exception: " + e.getMessage());
+
+            send_state = Constants.SEND_FAIL;
+//            DataOutputStream out = new DataOutputStream(outputStream);
+//            try {
+//                out.writeInt(Constants.SEND_FAIL);
+//                out.flush();
+//            } catch (IOException ioException) {
+//                ioException.printStackTrace();
+//            }
+
+//            try {
+//                Log.i(TAG,"server started..");
+//                serverSocket = new ServerSocket();
+//                serverSocket.setReuseAddress(true);
+//                serverSocket.bind(new InetSocketAddress(Constants.PORT));//端口1995
+//                while (true) {
+//                    Socket clientSocket = serverSocket.accept();
+//                    String clientIPAddress = clientSocket.getInetAddress().getHostAddress();
+//                    WifiServer server = new WifiServer(serverSocket,clientSocket,clientIPAddress);
+//                    server.fileReceiveListener = fileReceiveListener;
+//                    server.start();
+//                }
+//            } catch (SocketException e) {
+//                e.printStackTrace();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
         }
-//        } finally {
+//         finally {
+//            try {
+//                if(objectInputStream!=null)
+//                    objectInputStream.reset();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
 //            clean();
 //            if (progressChangListener != null) {
 //                progressChangListener.onTransferFinished(file);

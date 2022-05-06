@@ -8,6 +8,8 @@ import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.DataInput;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -15,6 +17,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Random;
@@ -88,9 +93,9 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
     }
 
 
+    @SuppressLint("WrongThread")
     @Override
     protected Boolean doInBackground(Object... params) {
-
 
         Log.e(TAG, "backGround");
         Socket socket = WifiClientService.socket;
@@ -131,6 +136,7 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
             Log.e(TAG, "文件的MD5码值是：" + fileTransfer.getMd5());
 
             //inputStream负责读文件，outputStream负责向服务器传输文件流
+//            socket.setRequestProperty("Content-Type", "application/xml")
             outputStream = socket.getOutputStream();
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
             objectOutputStream.flush();
@@ -157,7 +163,33 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
 //            inputStream = null;
 //            outputStream = null;
 //            objectOutputStream = null;
-            Log.e(TAG, "文件发送成功");
+
+
+            DatagramSocket ds = new DatagramSocket();
+            String request = "checkSend";
+            DatagramPacket dp = new DatagramPacket(request.getBytes(),request.getBytes().length, InetAddress.getByName(SendFileActivity.groupOwnerIP),Constants.UDP_PORT);
+            ds.send(dp);
+
+            DatagramPacket responsePacket = new DatagramPacket(new byte[4096],4096);
+            ds.receive(responsePacket);
+            String response = new String(responsePacket.getData(),0,responsePacket.getLength());
+
+            //4.显示结果
+            String log = String.format("request:%s,response:%s", request, response);
+            Log.i(TAG,log);
+            Log.i(TAG,"finish");
+//            DataInputStream dis = new DataInputStream(WifiClientService.socket.getInputStream());
+//            int result = dis.readInt();
+////            String result = WifiClientService.serverIn.readLine();
+//            if(result == Constants.SEND_SUC){
+//                Log.e(TAG, "文件发送成功");
+//            }else {
+//                //sendFail
+//                Log.e(TAG, "重新发送");
+//                new WifiClientTask(context,true).execute(params);
+//                return false;
+//            }
+
             return true;
         } catch (Exception e) {
             e.printStackTrace();
