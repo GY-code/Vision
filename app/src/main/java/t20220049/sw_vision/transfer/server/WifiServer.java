@@ -26,6 +26,7 @@ import t20220049.sw_vision.transfer.model.FileTransfer;
 import t20220049.sw_vision.transfer.util.Md5Util;
 import t20220049.sw_vision.ui.ControlActivity;
 import t20220049.sw_vision.ui.ReceiveFileActivity;
+import t20220049.sw_vision.ui_utils.MyNotification;
 import t20220049.sw_vision.utils.JointBitmap;
 import t20220049.sw_vision.utils.Pano;
 import t20220049.sw_vision.utils.RecordUtil;
@@ -157,10 +158,16 @@ public class WifiServer extends Thread {
             int len;
             long total = 0;
             int progress;
+
+//            MyNotification notification = new MyNotification();
+//            notification.buildNotification("文件接收", "文件接收进度", "文件开始接收");
+
             while ((len = inputStream.read(buf)) != -1) {
                 fileOutputStream.write(buf, 0, len);
                 total += len;
                 progress = (int) ((total * 100) / fileTransfer.getFileLength());
+
+//                notification.setProgress2(progress);
                 Log.e(TAG, "文件接收进度: " + progress);
 
 //                if (progressChangListener != null) {
