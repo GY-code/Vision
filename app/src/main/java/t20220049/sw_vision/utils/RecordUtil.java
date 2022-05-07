@@ -90,7 +90,7 @@ public class RecordUtil {
         mkDir(remotePath);
         mkDir(remotePhotoPath);
         mkDir(remoteVideoPath);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= 29) {
             VIDEO_BASE_URI = String.valueOf(MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY));
         } else {
             VIDEO_BASE_URI = String.valueOf(MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
@@ -205,7 +205,7 @@ public class RecordUtil {
         mCurrentVideoValues.put(MediaStore.Video.Media.DATE_TAKEN, dateTaken);
         mCurrentVideoValues.put(MediaStore.MediaColumns.DATE_MODIFIED, dateTaken / 1000);
         mCurrentVideoValues.put(MediaStore.Video.Media.MIME_TYPE, mime);
-        mCurrentVideoValues.put(MediaStore.Video.Media.DATA, videoPath);
+        mCurrentVideoValues.put(MediaStore.Video.Media.DATA, file.getAbsolutePath());
         mCurrentVideoValues.put(MediaStore.Video.Media.WIDTH, nVideoWidth);
         mCurrentVideoValues.put(MediaStore.Video.Media.HEIGHT, nVideoHeight);
         mCurrentVideoValues.put(MediaStore.Video.Media.RESOLUTION, Integer.toString(nVideoWidth) + "x" + Integer.toString(nVideoHeight));
