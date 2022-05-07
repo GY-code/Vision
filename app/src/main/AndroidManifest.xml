@@ -67,9 +67,6 @@
             android:name="t20220049.sw_vision.arm_controller.connect.BLEService"
             android:enabled="true" />
 
-        <activity android:name=".arm_controller.BluetoothActivity">
-        </activity>
-
         <activity
             android:name=".ui.CollectMatch"
             android:exported="false" />

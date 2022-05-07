@@ -235,7 +235,7 @@ public class WifiServer extends Thread {
 
             Log.e(TAG, "HJKLL");
             FileTransfer fileTransfer = (FileTransfer) objectInputStream.readObject();
-            Log.e(TAG, "待接收的文件: " + fileTransfer);
+            Log.e(TAG, "待接收的文件: " + fileTransfer.getFileName());
             String name = fileTransfer.getFileName();
 //            String name = in.readLine();
 //            int fileLength = ;
@@ -260,7 +260,6 @@ public class WifiServer extends Thread {
                 total += len;
                 progress = (int) ((total * 100) / fileTransfer.getFileLength());
                 Log.e(TAG, "文件接收进度: " + progress);
-
 //                if (progressChangListener != null) {
 //                    progressChangListener.onProgressChanged(fileTransfer, progress);
 //                }

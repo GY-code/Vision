@@ -861,7 +861,6 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             }
         }
         manager.joinRoom(getApplicationContext(), rootEglBase);
-
-
     }
+
 }

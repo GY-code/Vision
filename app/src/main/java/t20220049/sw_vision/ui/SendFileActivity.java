@@ -591,7 +591,7 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
         }
     }
 
-    private void sendActionCmd(int index)//发送动作组命令
+    public static void sendActionCmd(int index)//发送动作组命令
     {
         Log.e(TAG,"cmd: "+index);
         //帧头     length  type  num         timeLo timeHi id          posLo  posHi
