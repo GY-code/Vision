@@ -135,15 +135,18 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
 
             Log.e(TAG, "文件的MD5码值是：" + fileTransfer.getMd5());
 
+//            WifiClientService.serverOut.print(fileName);
+//            Wi
             //inputStream负责读文件，outputStream负责向服务器传输文件流
-//            socket.setRequestProperty("Content-Type", "application/xml")
             outputStream = socket.getOutputStream();
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
             objectOutputStream.flush();
             Log.e(TAG,"already sended");
             objectOutputStream.writeObject(fileTransfer);
-            inputStream = new FileInputStream(outputFile);
+            objectOutputStream.flush();
 
+
+            inputStream = new FileInputStream(outputFile);
             long fileSize = fileTransfer.getFileLength();
             long total = 0;
             byte[] buf = new byte[1024];
@@ -165,18 +168,16 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
 //            objectOutputStream = null;
 
 
-            DatagramSocket ds = new DatagramSocket();
-            String request = "checkSend";
-            DatagramPacket dp = new DatagramPacket(request.getBytes(),request.getBytes().length, InetAddress.getByName(SendFileActivity.groupOwnerIP),Constants.UDP_PORT);
-            ds.send(dp);
-
-            DatagramPacket responsePacket = new DatagramPacket(new byte[4096],4096);
-            ds.receive(responsePacket);
-            String response = new String(responsePacket.getData(),0,responsePacket.getLength());
-
-            //4.显示结果
-            String log = String.format("request:%s,response:%s", request, response);
-            Log.i(TAG,log);
+//            DatagramSocket ds = new DatagramSocket();
+//            String request = "checkSend";
+//            DatagramPacket dp = new DatagramPacket(request.getBytes(),request.getBytes().length, InetAddress.getByName(SendFileActivity.groupOwnerIP),Constants.UDP_PORT);
+//            ds.send(dp);
+//            DatagramPacket responsePacket = new DatagramPacket(new byte[4096],4096);
+//            ds.receive(responsePacket);
+//            String response = new String(responsePacket.getData(),0,responsePacket.getLength());
+//
+//            String log = String.format("request:%s,response:%s", request, response);
+//            Log.i(TAG,log);
             Log.i(TAG,"finish");
 //            DataInputStream dis = new DataInputStream(WifiClientService.socket.getInputStream());
 //            int result = dis.readInt();

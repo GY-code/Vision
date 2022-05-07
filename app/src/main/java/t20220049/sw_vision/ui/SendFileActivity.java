@@ -637,7 +637,7 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
                 Log.e(TAG, "文件路径：" + fileUri);
                 if (wifiP2pInfo != null) {
                     if (WifiClientService.socket != null)
-                        new WifiClientTask(this).execute(fileUri,"photo");
+                        new WifiClientTask(this).execute(fileUri,"video");
 //                    new WifiClientTask(this).execute(wifiP2pInfo.groupOwnerAddress.getHostAddress(), fileUri);
                 }
             }
@@ -737,7 +737,7 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
     //打開系統相冊就
     private void navToChosePicture() {
         Intent intent = new Intent(Intent.ACTION_PICK, null);
-        intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+        intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "video/*");
         startActivityForResult(intent, CODE_CHOOSE_FILE);
     }
 

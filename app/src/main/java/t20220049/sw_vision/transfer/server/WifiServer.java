@@ -1,5 +1,6 @@
 package t20220049.sw_vision.transfer.server;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
@@ -50,6 +51,8 @@ import t20220049.sw_vision.utils.VideoFragmentManager;
 import t20220049.sw_vision.utils.VideoHandleManager;
 
 public class WifiServer extends Thread {
+    public static Context context;
+
     private static final String TAG = "WifiServer";
     public static final int PHOTO = 1;
     public static final int VIDEO = 2;
@@ -97,48 +100,48 @@ public class WifiServer extends Thread {
     public void run() {
         Looper.prepare();
         String inputLine;
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    DatagramSocket socket = new DatagramSocket(Constants.UDP_PORT);
-
-                    while (true){
-                        //1.读取请求，服务器一般不知道客户端啥时候发来请求
-                        //receive()参数DatagramPacket是一个输出型参数，socket中读到的数据会设置到这个参数的对象中
-                        //DatagramPacket在构造的时候需要一个缓冲区（实际上是一段内存空间, 通常使用byte[]）
-                        DatagramPacket requestPacket = new DatagramPacket(new byte[4096], 4096);
-                        socket.receive(requestPacket); //收到请求之前，receive()操作在阻塞等待！
-
-                        //把requestPacket中的内容取出来,作为一个字符串
-                        String request = new String(requestPacket.getData(), 0, requestPacket.getLength());
-
-                        Log.i(TAG,"look out: "+request);
-                        String response = "";
-
-                        //2.根据请求计算响应
-                        if(send_state==Constants.SEND_SUC){
-                            response = "SEND_SUC";
-                        } else {
-                            response = "SEND_FAIL";
-                        }
-
-                        //3.构造responsePacket响应
-                        //此处设置的参数长度 必须是 字节的长度个数！response.getBytes().length
-                        //如果直接取response.length,则是字符串的长度，也就是字符串的个数
-                        //当前的responsePacket在构造时，需要指定这个包要发给谁；发送给的目标即发来请求的一方
-                        DatagramPacket responsePacket = new DatagramPacket(response.getBytes(),response.getBytes().length,requestPacket.getSocketAddress());
-
-                        //4.发送响应到客户端
-                        socket.send(responsePacket);
-                    }
-                } catch (SocketException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    DatagramSocket socket = new DatagramSocket(Constants.UDP_PORT);
+//
+//                    while (true){
+//                        //1.读取请求，服务器一般不知道客户端啥时候发来请求
+//                        //receive()参数DatagramPacket是一个输出型参数，socket中读到的数据会设置到这个参数的对象中
+//                        //DatagramPacket在构造的时候需要一个缓冲区（实际上是一段内存空间, 通常使用byte[]）
+//                        DatagramPacket requestPacket = new DatagramPacket(new byte[4096], 4096);
+//                        socket.receive(requestPacket); //收到请求之前，receive()操作在阻塞等待！
+//
+//                        //把requestPacket中的内容取出来,作为一个字符串
+//                        String request = new String(requestPacket.getData(), 0, requestPacket.getLength());
+//
+//                        Log.i(TAG,"look out: "+request);
+//                        String response = "";
+//
+//                        //2.根据请求计算响应
+//                        if(send_state==Constants.SEND_SUC){
+//                            response = "SEND_SUC";
+//                        } else {
+//                            response = "SEND_FAIL";
+//                        }
+//
+//                        //3.构造responsePacket响应
+//                        //此处设置的参数长度 必须是 字节的长度个数！response.getBytes().length
+//                        //如果直接取response.length,则是字符串的长度，也就是字符串的个数
+//                        //当前的responsePacket在构造时，需要指定这个包要发给谁；发送给的目标即发来请求的一方
+//                        DatagramPacket responsePacket = new DatagramPacket(response.getBytes(),response.getBytes().length,requestPacket.getSocketAddress());
+//
+//                        //4.发送响应到客户端
+//                        socket.send(responsePacket);
+//                    }
+//                } catch (SocketException e) {
+//                    e.printStackTrace();
+//                } catch (IOException e) {
+//                    e.printStackTrace();
+//                }
+//            }
+//        });
         try {
             for (MyClient mc : clients) {
                 photoWL.add(mc.clientIP);
@@ -234,7 +237,8 @@ public class WifiServer extends Thread {
             FileTransfer fileTransfer = (FileTransfer) objectInputStream.readObject();
             Log.e(TAG, "待接收的文件: " + fileTransfer);
             String name = fileTransfer.getFileName();
-
+//            String name = in.readLine();
+//            int fileLength = ;
             //将文件存储至指定位置
             if (type.equals("photo")) {
                 RecordUtil.clearFile(RecordUtil.remotePhotoPath + name);
