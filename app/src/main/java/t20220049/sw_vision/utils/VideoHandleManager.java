@@ -1,9 +1,6 @@
 package t20220049.sw_vision.utils;
 
-import android.content.Context;
 import android.util.Log;
-
-import org.webrtc.EglBase;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -109,7 +106,7 @@ public class VideoHandleManager {
 
         @Override
         public void onProgress(int progress, long progressTime) {
-
+            Log.d("zsy", "onProgress: " + progress);
         }
 
         @Override
