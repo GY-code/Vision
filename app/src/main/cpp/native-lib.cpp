@@ -105,6 +105,7 @@ Java_t20220049_sw_1vision_utils_Pano_getMat(JNIEnv *env, jclass type, jlong mat)
         jclass je = env->FindClass("java/lang/Exception");
         env->ThrowNew(je, e.what());
     }
+//    return nullptr;
 }
 
 //将mat转化成bitmap
@@ -235,7 +236,7 @@ Java_t20220049_sw_1vision_ui_CVActivity_testLong(JNIEnv *env, jobject thiz) {
     return 114514;
 }
 
-bool flag = false;
+bool trakcFlag = false;
 bool trackFinish = false;
 bool started = false;
 Mat* trackFrame = nullptr;
@@ -250,10 +251,10 @@ void myTracker() {
     rectangle(*trackFrame, bbox, Scalar( 255, 0, 0 ), 2, 1 );
     tracker->init(*trackFrame, bbox);
     trackFrame = nullptr;
-    flag = false;
+    trakcFlag = false;
 
     while (!trackFinish) {
-        if (!flag || !trackFrame) continue;
+        if (!trakcFlag || !trackFrame) continue;
         double timer = (double)getTickCount();
         bool ok = tracker->update(*trackFrame, bbox);
 
@@ -267,7 +268,7 @@ void myTracker() {
         putText(*trackFrame, "MIL Tracker", Point(100,20), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(50,170,50),2);
 //    putText(*mRGB, "FPS : " + SSTR(int(fps)), Point(100,50), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(50,170,50), 2);
         trackFrame = nullptr;
-        flag = false;
+        trakcFlag = false;
     }
 }
 
@@ -279,8 +280,10 @@ Java_t20220049_sw_1vision_ui_CVActivity_tracking(JNIEnv *env, jobject thiz, jlon
     Mat* mGray = (Mat*)addr_gray;
     Mat* mRGB = (Mat*)addr_rgb;
     trackFrame = mRGB;
-    flag = true;
+    trakcFlag = true;
     if (!started) {
         myTracker();
     }
+
+
 }
