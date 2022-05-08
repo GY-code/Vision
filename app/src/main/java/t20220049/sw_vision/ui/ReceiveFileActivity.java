@@ -219,14 +219,15 @@ public class ReceiveFileActivity extends BaseActivity {
             public void onSuccess() {
                 log("createGroup onSuccess");
                 dismissLoadingDialog();
-                showToast("onSuccess");
+//                showToast("onSuccess");
             }
 
             @Override
             public void onFailure(int reason) {
                 log("createGroup onFailure: " + reason);
                 dismissLoadingDialog();
-                showToast("onFailure");
+                refresh();
+                showToast("正在重试...");
             }
         });
         broadcastReceiver = new DirectBroadcastReceiver(wifiP2pManager, channel, directActionListener);
@@ -299,6 +300,28 @@ public class ReceiveFileActivity extends BaseActivity {
             }
         }, 500, 1500);
     }
+    private void refresh(){
+        if (ActivityCompat.checkSelfPermission(ReceiveFileActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        removeGroup();
+        wifiP2pManager.createGroup(channel, new WifiP2pManager.ActionListener() {
+            @Override
+            public void onSuccess() {
+                log("createGroup onSuccess");
+                dismissLoadingDialog();
+//                    showToast("onSuccess");
+            }
+
+            @Override
+            public void onFailure(int reason) {
+                log("createGroup onFailure: " + reason);
+                dismissLoadingDialog();
+                refresh();
+                showToast("正在重试...");
+            }
+        });
+    }
 
     private void initView() {
         setTitle("接收文件");
@@ -306,25 +329,7 @@ public class ReceiveFileActivity extends BaseActivity {
         tv_log = findViewById(R.id.tv_log);
 //      刷新，先移除再创建
         findViewById(R.id.refreshButton).setOnClickListener(v -> {
-            if (ActivityCompat.checkSelfPermission(ReceiveFileActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                return;
-            }
-            removeGroup();
-            wifiP2pManager.createGroup(channel, new WifiP2pManager.ActionListener() {
-                @Override
-                public void onSuccess() {
-                    log("createGroup onSuccess");
-                    dismissLoadingDialog();
-//                    showToast("onSuccess");
-                }
-
-                @Override
-                public void onFailure(int reason) {
-                    log("createGroup onFailure: " + reason);
-                    dismissLoadingDialog();
-//                    showToast("onFailure");
-                }
-            });
+            refresh();
         });
 //        移除群组
 //        findViewById(R.id.btnRemoveGroup).setOnClickListener(v -> removeGroup());
@@ -361,7 +366,7 @@ public class ReceiveFileActivity extends BaseActivity {
             @Override
             public void onFailure(int reason) {
                 log("removeGroup onFailure");
-//                showToast("onFailure");
+//                showToast("正在重试...");
             }
         });
     }
