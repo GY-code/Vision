@@ -170,7 +170,7 @@ public class RecordUtil {
                 public void onFinish() {
                     Log.e(TAG, "onFinish: " + text);
                     if (isCollect) {
-                        saveVideo2Gallery(localmp4, context);
+//                        saveVideo2Gallery(localmp4, context);
                     } else {
                         saveVideo2Gallery(remoteVideoPath + myId + ".mp4", context);
                     }

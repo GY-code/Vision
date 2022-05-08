@@ -151,7 +151,7 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
             outputStream = socket.getOutputStream();
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream);
             objectOutputStream.flush();
-            Log.e(TAG,"already sended");
+            Log.e(TAG, "already sended");
             objectOutputStream.writeObject(fileTransfer);
             objectOutputStream.flush();
 
@@ -162,14 +162,20 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
             byte[] buf = new byte[1024];
             int len;
             MyNotification notification = new MyNotification();
-            notification.sendNotification(CollectActivityWeakRef.get().getApplicationContext(), 1,"文件发送", "文件发送进度");
+            notification.sendNotification(CollectActivityWeakRef.get().getApplicationContext(), 1, "文件发送", "文件发送进度");
+            int lastProgress = 0;
             while ((len = inputStream.read(buf)) != -1) {
                 outputStream.write(buf, 0, len);
                 total += len;
                 int progress = (int) ((total * 100) / fileSize);
                 publishProgress(progress);
                 Log.e(TAG, "文件发送进度：" + progress);
-                notification.updateNotification(1,progress);
+                if (progress != lastProgress) {
+                    new Thread(() -> {
+                        notification.updateNotification(1, progress);
+                    }).start();
+                    lastProgress = progress;
+                }
             }
 //            socket.close();
             inputStream.close();
@@ -191,7 +197,7 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
 //
 //            String log = String.format("request:%s,response:%s", request, response);
 //            Log.i(TAG,log);
-            Log.i(TAG,"finish");
+            Log.i(TAG, "finish");
 //            DataInputStream dis = new DataInputStream(WifiClientService.socket.getInputStream());
 //            int result = dis.readInt();
 ////            String result = WifiClientService.serverIn.readLine();

@@ -36,7 +36,7 @@ public class MyNotification {
         //Android 8.0开始要设置通知渠道
         if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             NotificationChannel channel = new NotificationChannel(channelID,
-                    channelID,NotificationManager.IMPORTANCE_DEFAULT);
+                    channelID,NotificationManager.IMPORTANCE_HIGH);
             mNotificationManager.createNotificationChannel(channel);
         }
 
@@ -45,12 +45,15 @@ public class MyNotification {
                 .setContentText(text)
                 .setWhen(System.currentTimeMillis())
                 .setDefaults(NotificationCompat.FLAG_ONLY_ALERT_ONCE)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setSmallIcon(R.drawable.vision)
                 .setProgress(100, 0, false)
                 .setAutoCancel(false);
 
         //发送通知( id唯一,可用于更新通知时对应旧通知; 通过mBuilder.build()拿到notification对象 )
-        mNotificationManager.notify(ID, mBuilder.build());
+        Notification notification=mBuilder.build();
+        mNotificationManager.notify(ID, notification);
     }
 
     /**

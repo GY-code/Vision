@@ -112,7 +112,7 @@ public class WifiServer extends Thread {
                 try {
                     DatagramSocket socket = new DatagramSocket(Constants.UDP_PORT);
 
-                    while (true){
+                    while (true) {
                         //1.读取请求，服务器一般不知道客户端啥时候发来请求
                         //receive()参数DatagramPacket是一个输出型参数，socket中读到的数据会设置到这个参数的对象中
                         //DatagramPacket在构造的时候需要一个缓冲区（实际上是一段内存空间, 通常使用byte[]）
@@ -122,11 +122,11 @@ public class WifiServer extends Thread {
                         //把requestPacket中的内容取出来,作为一个字符串
                         String request = new String(requestPacket.getData(), 0, requestPacket.getLength());
 
-                        Log.i(TAG,"look out: "+request);
+                        Log.i(TAG, "look out: " + request);
                         String response = "";
 
                         //2.根据请求计算响应
-                        if(send_state==Constants.SEND_SUC){
+                        if (send_state == Constants.SEND_SUC) {
                             response = "SEND_SUC";
                         } else {
                             response = "SEND_FAIL";
@@ -136,7 +136,7 @@ public class WifiServer extends Thread {
                         //此处设置的参数长度 必须是 字节的长度个数！response.getBytes().length
                         //如果直接取response.length,则是字符串的长度，也就是字符串的个数
                         //当前的responsePacket在构造时，需要指定这个包要发给谁；发送给的目标即发来请求的一方
-                        DatagramPacket responsePacket = new DatagramPacket(response.getBytes(),response.getBytes().length,requestPacket.getSocketAddress());
+                        DatagramPacket responsePacket = new DatagramPacket(response.getBytes(), response.getBytes().length, requestPacket.getSocketAddress());
 
                         //4.发送响应到客户端
                         socket.send(responsePacket);
@@ -226,6 +226,7 @@ public class WifiServer extends Thread {
         this.fileReceiveListener = fileReceiveListener;
     }
 
+
     private void receiveFile(String type) {
         File file = null;
         try {
@@ -259,16 +260,21 @@ public class WifiServer extends Thread {
             byte[] buf = new byte[1024];
             int len;
             long total = 0;
-            int progress;
+
 
             MyNotification notification = new MyNotification();
             notification.sendNotification(ControlActivityWeakRef.get().getApplicationContext(), 2, "文件接收", "文件接收进度");
+            int lastProgress = 0;
             while ((len = inputStream.read(buf)) != -1) {
                 fileOutputStream.write(buf, 0, len);
                 total += len;
-                progress = (int) ((total * 100) / fileTransfer.getFileLength());
-
-                notification.updateNotification(2, progress);
+                int progress = (int) ((total * 100) / fileTransfer.getFileLength());
+                if (progress != lastProgress) {
+                    new Thread(() -> {
+                        notification.updateNotification(2, progress);
+                    }).start();
+                    lastProgress = progress;
+                }
 
                 Log.e(TAG, "文件接收进度: " + progress);
 
@@ -335,8 +341,8 @@ public class WifiServer extends Thread {
                         }
                         jointBitmap.receiveFile(photoPath, photoName);
                         jointBitmap.jointPhoto();
-                        RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
-                            Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"已将拼接照片存储在相册",Toast.LENGTH_SHORT).show();
+                        RecordUtil.ControlActivityWeakRef.get().runOnUiThread(() -> {
+                            Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(), "已将拼接照片存储在相册", Toast.LENGTH_SHORT).show();
                         });
                     } else if (ControlActivity.mode == 1) {
                         Pano panorama = new Pano();
@@ -349,8 +355,8 @@ public class WifiServer extends Thread {
                             @Override
                             public void onSuccess(Bitmap bitmap) {
 //                                Toast.makeText(Pano.this,"图片拼接成功！",Toast.LENGTH_LONG).show();
-                                RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
-                                    Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"已将融合照片存储在相册",Toast.LENGTH_SHORT).show();
+                                RecordUtil.ControlActivityWeakRef.get().runOnUiThread(() -> {
+                                    Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(), "已将融合照片存储在相册", Toast.LENGTH_SHORT).show();
                                 });
                                 Log.e(TAG, "图片拼接成功！");
                                 RecordUtil recordUtil = new RecordUtil(ContextUtils.getApplicationContext());
@@ -360,8 +366,8 @@ public class WifiServer extends Thread {
                             @Override
                             public void onError(String errorMsg) {
 //                                Toast.makeText(Pano.this,"图片拼接失败！",Toast.LENGTH_LONG).show();
-                                RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
-                                    Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"请重新选取角度拍摄全景",Toast.LENGTH_SHORT).show();
+                                RecordUtil.ControlActivityWeakRef.get().runOnUiThread(() -> {
+                                    Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(), "请重新选取角度拍摄全景", Toast.LENGTH_SHORT).show();
                                 });
                                 Log.e(TAG, "图片拼接失败！");
                                 System.out.println(errorMsg);
@@ -381,8 +387,8 @@ public class WifiServer extends Thread {
                             photoName[i] = clients.get(i - 1).clientUserID + ".png";
                             recordUtil.savePhoto2Gallery(BitmapFactory.decodeFile(photoPath[i] + photoName[i]));
                         }
-                        RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
-                            Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"已将原图照片存储在相册",Toast.LENGTH_SHORT).show();
+                        RecordUtil.ControlActivityWeakRef.get().runOnUiThread(() -> {
+                            Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(), "已将原图照片存储在相册", Toast.LENGTH_SHORT).show();
                         });
 
 
@@ -410,8 +416,8 @@ public class WifiServer extends Thread {
 
                     RecordUtil util = new RecordUtil(ContextUtils.getApplicationContext());
                     util.saveVideo2Gallery(RecordUtil.remoteVideoPath + "output.mp4", ContextUtils.getApplicationContext());
-                    RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
-                        Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"已将融合视频存储在相册",Toast.LENGTH_SHORT).show();
+                    RecordUtil.ControlActivityWeakRef.get().runOnUiThread(() -> {
+                        Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(), "已将融合视频存储在相册", Toast.LENGTH_SHORT).show();
                     });
 
                     for (MyClient mc : clients) {
