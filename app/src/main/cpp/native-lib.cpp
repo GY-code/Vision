@@ -13,11 +13,18 @@
 #include <opencv2/core/base.hpp>
 #import "opencv2/stitching.hpp"
 #import "opencv2/imgcodecs.hpp"
+#include <opencv2/video/tracking.hpp>
+#include <opencv2/core/ocl.hpp>
+#include "opencv2/core/version.hpp"
+
 
 #define BORDER_GRAY_LEVEL 0
 
 #include <android/log.h>
 #include <android/bitmap.h>
+
+#define SSTR( x ) static_cast< std::ostringstream & >(( std::ostringstream() << std::dec << x )).str()
+
 
 #define LOG_TAG    "DDLog-jni"
 #define LOGI(...)  __android_log_print(ANDROID_LOG_INFO,LOG_TAG, __VA_ARGS__)
@@ -46,7 +53,8 @@ Java_t20220049_sw_1vision_utils_Pano_stitchImages(JNIEnv *env, jclass type,
             mats.push_back(mat);
         }
         LOGI("开始拼接......");
-        cv::Stitcher stitcher = cv::Stitcher::createDefault(false);
+//        cv::Stitcher stitcher = cv::Stitcher::createDefault(false);
+        cv::Ptr<cv::Stitcher> stitcher = cv::Stitcher::create();
         LOGI("1");
         //stitcher.setRegistrationResol(0.6);
         // stitcher.setWaveCorrection(false);
@@ -57,7 +65,7 @@ Java_t20220049_sw_1vision_utils_Pano_stitchImages(JNIEnv *env, jclass type,
 //        stitcher.setSeamFinder(new detail::NoSeamFinder);
 //        stitcher.setExposureCompensator(new detail::NoExposureCompensator());//曝光补偿
 //        stitcher.setBlender(new detail::FeatherBlender());
-        Stitcher::Status state = stitcher.stitch(mats, finalMat);
+        cv::Stitcher::Status state = stitcher->stitch(mats, finalMat);
         LOGI("2");
         //此时finalMat是bgr类型
         LOGI("拼接结果: %d", state);
@@ -81,7 +89,9 @@ Java_t20220049_sw_1vision_utils_Pano_stitchImages(JNIEnv *env, jclass type,
         jclass je = env->FindClass("java/lang/Exception");
         env->ThrowNew(je, e.what());
     }
+    return nullptr;
 }
+
 extern "C"
 JNIEXPORT void JNICALL
 Java_t20220049_sw_1vision_utils_Pano_getMat(JNIEnv *env, jclass type, jlong mat) {
@@ -186,4 +196,91 @@ Java_t20220049_sw_1vision_utils_Pano_getBitmap(JNIEnv *env, jclass type, jobject
 }
 
 
+extern "C"
+JNIEXPORT jint JNICALL
+Java_t20220049_sw_1vision_ui_CVTestActivity_intTest(JNIEnv *env, jclass clazz, jint num) {
+    return num*num;
+}
+extern "C"
+JNIEXPORT long JNICALL
+Java_t20220049_sw_1vision_ui_CVTestActivity_cameraTest(JNIEnv *env, jclass clazz) {
+    VideoCapture capture(0);
+    Mat* frame = new Mat();
+    capture >> *frame;
+//    imshow("hhh", *frame);
 
+    return long(frame);
+}
+
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_t20220049_sw_1vision_ui_CVActivity_findFeature(JNIEnv *env, jobject thiz, jlong addr_gray,
+                                                    jlong addr_rgb) {
+    Mat* mGray = (Mat*)addr_gray;
+    Mat* mRGB = (Mat*)addr_rgb;
+
+    vector<Point2f> corners;
+    goodFeaturesToTrack(*mGray, corners, 20, 0.01, 10, Mat(), 3, false, 0.04);
+
+
+
+    for (auto & corner : corners) {
+        circle(*mRGB, corner, 10, Scalar(0, 255, 0), 2);
+    }
+}
+extern "C"
+JNIEXPORT jlong JNICALL
+Java_t20220049_sw_1vision_ui_CVActivity_testLong(JNIEnv *env, jobject thiz) {
+    return 114514;
+}
+
+bool flag = false;
+bool trackFinish = false;
+bool started = false;
+Mat* trackFrame = nullptr;
+
+void myTracker() {
+
+    Ptr<Tracker> tracker;
+
+    tracker = TrackerMIL::create();
+    Rect2i bbox(287, 23, 86, 320);
+
+    rectangle(*trackFrame, bbox, Scalar( 255, 0, 0 ), 2, 1 );
+    tracker->init(*trackFrame, bbox);
+    trackFrame = nullptr;
+    flag = false;
+
+    while (!trackFinish) {
+        if (!flag || !trackFrame) continue;
+        double timer = (double)getTickCount();
+        bool ok = tracker->update(*trackFrame, bbox);
+
+        float fps = getTickFrequency() / ((double)getTickCount() - timer);
+
+        if (ok) {
+            rectangle(*trackFrame, bbox, Scalar( 255, 0, 0 ), 2, 1 );
+        } else {
+            putText(*trackFrame, "Tracking failure detected", Point(100,80), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(0,0,255),2);
+        }
+        putText(*trackFrame, "MIL Tracker", Point(100,20), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(50,170,50),2);
+//    putText(*mRGB, "FPS : " + SSTR(int(fps)), Point(100,50), FONT_HERSHEY_SIMPLEX, 0.75, Scalar(50,170,50), 2);
+        trackFrame = nullptr;
+        flag = false;
+    }
+}
+
+extern "C"
+JNIEXPORT void JNICALL
+Java_t20220049_sw_1vision_ui_CVActivity_tracking(JNIEnv *env, jobject thiz, jlong addr_gray,
+                                                 jlong addr_rgb) {
+
+    Mat* mGray = (Mat*)addr_gray;
+    Mat* mRGB = (Mat*)addr_rgb;
+    trackFrame = mRGB;
+    flag = true;
+    if (!started) {
+        myTracker();
+    }
+}

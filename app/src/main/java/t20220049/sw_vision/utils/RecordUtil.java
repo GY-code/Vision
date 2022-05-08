@@ -8,9 +8,12 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
+
+import androidx.annotation.RequiresApi;
 
 import org.webrtc.EglBase;
 import org.webrtc.EglRenderer;
@@ -48,7 +51,7 @@ public class RecordUtil {
     public static String localPhoto;
     public static String remotePhotoPath;
     public static String remoteVideoPath;
-    private static final String VIDEO_BASE_URI = "content://media/external/video/media";
+    private static String VIDEO_BASE_URI;
     private static final String TAG = "RecordUtil";
     private long stime;
     private long ltime;
@@ -65,7 +68,8 @@ public class RecordUtil {
         localPhoto = localPath + myId + ".png";
         localmp4 = localPath + myId + ".mp4";
     }
-        public static String getMyId() {
+
+    public static String getMyId() {
         return myId;
     }
 
@@ -74,7 +78,7 @@ public class RecordUtil {
 
     public RecordUtil(Context c) {
         context = c;
-        backupContext=c;
+        backupContext = c;
         filePath = context.getFilesDir().getAbsolutePath() + "/";
         localPath = filePath + "local/";
         remotePath = filePath + "remote/";
@@ -86,6 +90,11 @@ public class RecordUtil {
         mkDir(remotePath);
         mkDir(remotePhotoPath);
         mkDir(remoteVideoPath);
+        if (Build.VERSION.SDK_INT >= 29) {
+            VIDEO_BASE_URI = String.valueOf(MediaStore.Video.Media.getContentUri(MediaStore.VOLUME_EXTERNAL_PRIMARY));
+        } else {
+            VIDEO_BASE_URI = String.valueOf(MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
+        }
     }
 
     public static void setFullDefinition(boolean b) {
@@ -103,7 +112,7 @@ public class RecordUtil {
         File file = new File(path);
         if (file.isFile() && file.exists()) {
             file.delete();
-            Log.e(TAG, "terminateVideo: release0" );
+            Log.e(TAG, "terminateVideo: release0");
         }
     }
 
@@ -123,7 +132,7 @@ public class RecordUtil {
         if (vfr != null) {
             localTrack.removeSink(vfr);
             vfr.release();
-            Log.e(TAG, "terminateVideo: release1" );
+            Log.e(TAG, "terminateVideo: release1");
         }
         activity.runOnUiThread(() -> {
             Toast.makeText(context, "结束录制", Toast.LENGTH_SHORT).show();
@@ -153,7 +162,7 @@ public class RecordUtil {
                     });
                     clearFile(localy4m);
                     if (isCollect && isSend) {
-                        TransferUtil.C2S_Video( localmp4, context);
+                        TransferUtil.C2S_Video(localmp4, context);
                     }
                 }
 
@@ -175,6 +184,7 @@ public class RecordUtil {
 
     }
 
+    // reference：https://developer.android.com/training/data-storage/shared/media#java
     public void saveVideo2Gallery(String videoPath, Context context) {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
 //        Uri newUri = FileProvider.getUriForFile(getApplicationContext(), getApplicationContext().getPackageName() + ".fileprovider", new File(videoPath));
@@ -195,7 +205,7 @@ public class RecordUtil {
         mCurrentVideoValues.put(MediaStore.Video.Media.DATE_TAKEN, dateTaken);
         mCurrentVideoValues.put(MediaStore.MediaColumns.DATE_MODIFIED, dateTaken / 1000);
         mCurrentVideoValues.put(MediaStore.Video.Media.MIME_TYPE, mime);
-        mCurrentVideoValues.put(MediaStore.Video.Media.DATA, videoPath);
+        mCurrentVideoValues.put(MediaStore.Video.Media.DATA, file.getAbsolutePath());
         mCurrentVideoValues.put(MediaStore.Video.Media.WIDTH, nVideoWidth);
         mCurrentVideoValues.put(MediaStore.Video.Media.HEIGHT, nVideoHeight);
         mCurrentVideoValues.put(MediaStore.Video.Media.RESOLUTION, Integer.toString(nVideoWidth) + "x" + Integer.toString(nVideoHeight));
