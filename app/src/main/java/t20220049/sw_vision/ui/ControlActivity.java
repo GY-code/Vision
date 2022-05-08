@@ -45,7 +45,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import io.microshow.rxffmpeg.RxFFmpegInvoke;
+import t20220049.sw_vision.transfer.client.WifiClientTask;
 import t20220049.sw_vision.transfer.server.WifiServer;
+import t20220049.sw_vision.ui_utils.MyNotification;
 import t20220049.sw_vision.utils.TimerManager;
 import t20220049.sw_vision.utils.TransferUtil;
 import t20220049.sw_vision.utils.VideoFragment;
@@ -263,6 +265,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         super.onCreate(savedInstanceState);
         RecordUtil.setControlActivityWeakRef(ControlActivity.this);
+        WifiServer.setControlActivityWeakRef(ControlActivity.this);
 //        setContentView(R.layout.wr_activity_chat_room);
         setContentView(R.layout.acticity_control);
 
@@ -279,6 +282,10 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         ru = new RecordUtil(getApplicationContext());
 
         RxFFmpegInvoke.getInstance().setDebug(true);
+    }
+
+    public Context getContext(){
+        return ControlActivity.this;
     }
 
     private void changeRecordCapture(String s) {
@@ -454,7 +461,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 //                    Toast.makeText(getApplicationContext(), "finish capturing", Toast.LENGTH_SHORT).show();
 //                });
 
-                ru.terminateVideo(_vfrs.get(myId), _localVideoTrack, rootEglBase, ControlActivity.this, false, false);
+                ru.terminateVideo(_vfrs.get(myId), _localVideoTrack, rootEglBase, ControlActivity.this, false, false, 1);
                 activateVideo = false;
                 TransferUtil.S2C("stop");
             }

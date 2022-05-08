@@ -35,7 +35,9 @@ import io.microshow.rxffmpeg.RxFFmpegInvoke;
 import okio.BufferedSource;
 import okio.Okio;
 import okio.Sink;
+import t20220049.sw_vision.ui.CollectActivity;
 import t20220049.sw_vision.ui.ControlActivity;
+import t20220049.sw_vision.ui_utils.MyNotification;
 import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
 
 
@@ -61,6 +63,12 @@ public class RecordUtil {
 
     public static void setControlActivityWeakRef(ControlActivity activity) {
         ControlActivityWeakRef = new WeakReference<>(activity);
+    }
+
+    public static WeakReference<CollectActivity> CollectActivityWeakRef;
+
+    public static void setCollectActivityWeakRef(CollectActivity activity) {
+        CollectActivityWeakRef = new WeakReference<>(activity);
     }
 
     public static void setMyId(String myId) {
@@ -127,7 +135,7 @@ public class RecordUtil {
         localTrack.addSink(vfr);
     }
 
-    public void terminateVideo(VideoFileRenderer vfr, VideoTrack localTrack, EglBase rootEglBase, Activity activity, boolean isCollect, boolean isSend) {
+    public void terminateVideo(VideoFileRenderer vfr, VideoTrack localTrack, EglBase rootEglBase, Activity activity, boolean isCollect, boolean isSend, int flag) {
         ltime = (new Date().getTime() - stime) / 1000;
         if (vfr != null) {
             localTrack.removeSink(vfr);
@@ -137,6 +145,15 @@ public class RecordUtil {
         activity.runOnUiThread(() -> {
             Toast.makeText(context, "结束录制", Toast.LENGTH_SHORT).show();
         });
+
+        // 通知
+        MyNotification notification = new MyNotification();
+        if(flag == 0){
+//            notification.sendNotification(CollectActivityWeakRef.get().getApplicationContext(), 4, "本地视频处理", "本地视频处理进度");
+        }else{
+            notification.sendNotification(ControlActivityWeakRef.get().getApplicationContext(), 3, "本地视频处理", "本地视频处理进度");
+        }
+
         clearFile(localmp4);
         clearFile(remoteVideoPath + myId + ".mp4");
         new Thread(() -> {
@@ -169,6 +186,11 @@ public class RecordUtil {
                 @Override
                 public void onProgress(int progress, long progressTime) {
                     Log.d(TAG, "onProgress: " + progress);
+                    if(flag==1){
+                        notification.updateNotification(3, progress);
+                    }else{
+                        notification.updateNotification(4, progress);
+                    }
                 }
 
                 @Override

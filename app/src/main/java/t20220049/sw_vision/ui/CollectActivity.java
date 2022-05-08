@@ -23,6 +23,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import t20220049.sw_vision.transfer.client.WifiClientService;
+import t20220049.sw_vision.transfer.client.WifiClientTask;
 import t20220049.sw_vision.utils.CameraService;
 import t20220049.sw_vision.utils.RecordUtil;
 import t20220049.sw_vision.utils.TransferUtil;
@@ -94,6 +95,7 @@ public class CollectActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.wr_activity_chat_single);
         setContentView(R.layout.activity_collect);
+        WifiClientTask.setCollectActivityWeakRef(CollectActivity.this);
         initVar();
         initListener();
         initService();
@@ -203,7 +205,7 @@ public class CollectActivity extends AppCompatActivity {
     }
 
     public void CallSetVideoEnd(boolean isCollect, boolean isSend) {
-        ru.terminateVideo(vfr, localTrack, rootEglBase, CollectActivity.this, isCollect, isSend);
+        ru.terminateVideo(vfr, localTrack, rootEglBase, CollectActivity.this, isCollect, isSend, 0);
         runOnUiThread(() -> {
             mChronometer.stop();
             mChronometer.setVisibility(View.INVISIBLE);

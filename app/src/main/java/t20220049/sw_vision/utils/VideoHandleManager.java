@@ -3,14 +3,24 @@ package t20220049.sw_vision.utils;
 import android.util.Log;
 
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import io.microshow.rxffmpeg.RxFFmpegInvoke;
 import io.microshow.rxffmpeg.RxFFmpegSubscriber;
+import t20220049.sw_vision.ui.ControlActivity;
+import t20220049.sw_vision.ui_utils.MyNotification;
 //import t20220049.sw_vision.view.VideoTestView;
 
 public class VideoHandleManager {
     private static VideoHandleManager instance;
+//    static MyNotification notification = new MyNotification();
+
+    public static WeakReference<ControlActivity> ControlActivityWeakRef;
+
+    public static void setControlActivityWeakRef(ControlActivity activity) {
+        ControlActivityWeakRef = new WeakReference<>(activity);
+    }
 
     private VideoHandleManager() {
     }
@@ -48,6 +58,7 @@ public class VideoHandleManager {
 
         String outputPath = srcDir + outputFile;
 
+       // notification.sendNotification(ControlActivityWeakRef.get().getApplicationContext(), 5, "融合视频", "融合视频进度");
         Log.e("zsy", "FFMPEG start working!");
 
         ArrayList<String> midMp4Paths = new ArrayList<>();
@@ -107,6 +118,11 @@ public class VideoHandleManager {
         @Override
         public void onProgress(int progress, long progressTime) {
             Log.d("zsy", "onProgress: " + progress);
+//            if(progress <= 100){
+//                notification.updateNotification(5, progress);
+//            }else{
+//                notification.updateNotification(5, 100);
+//            }
         }
 
         @Override
