@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -14,6 +15,7 @@ import androidx.core.app.ActivityCompat;
 
 import t20220049.sw_vision.R;
 import t20220049.sw_vision.entrance.WebrtcUtil;
+import t20220049.sw_vision.ui_utils.MyNotification;
 
 public class HomePage extends AppCompatActivity {
     ImageView controlButton;
