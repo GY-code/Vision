@@ -53,6 +53,7 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.webrtc.Camera2Capturer;
+import org.webrtc.CameraEnumerationAndroid;
 import org.webrtc.CapturerObserver;
 import org.webrtc.FileVideoCapturer;
 import org.webrtc.JavaI420Buffer;

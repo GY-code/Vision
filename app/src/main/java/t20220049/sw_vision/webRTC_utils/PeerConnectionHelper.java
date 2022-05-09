@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import t20220049.sw_vision.bean.MediaType;
 import t20220049.sw_vision.bean.MyIceServer;
+import t20220049.sw_vision.ui.DetectCapturer;
 import t20220049.sw_vision.ui.TestCapturer;
 import t20220049.sw_vision.ws.IWebSocket;
 
@@ -247,29 +248,34 @@ public class PeerConnectionHelper {
     private void createLocalStream() {
         _localStream = _factory.createLocalMediaStream("ARDAMS");
         // 音频
-        audioSource = _factory.createAudioSource(createAudioConstraints());
-        _localAudioTrack = _factory.createAudioTrack(AUDIO_TRACK_ID, audioSource);
-        _localStream.addTrack(_localAudioTrack);
+//        audioSource = _factory.createAudioSource(createAudioConstraints());
+//        _localAudioTrack = _factory.createAudioTrack(AUDIO_TRACK_ID, audioSource);
+//        _localStream.addTrack(_localAudioTrack);
 
         if (videoEnable) {
             //创建需要传入设备的名称
 //            captureAndroid = createVideoCapture();
-            captureAndroid = createTestVideoCapture();
+//            captureAndroid = createTestVideoCapture();
+            Log.e(TAG, "Create local steam");
+
+            captureAndroid = createDetectVideoCapture();
             // 视频
             surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", _rootEglBase.getEglBaseContext());
             videoSource = _factory.createVideoSource(captureAndroid.isScreencast());
             if (_mediaType == MediaType.TYPE_MEETING) {
                 // videoSource.adaptOutputFormat(200, 200, 15);
             }
+
             captureAndroid.initialize(surfaceTextureHelper, _context, videoSource.getCapturerObserver());
-            captureAndroid.startCapture(VIDEO_RESOLUTION_WIDTH, VIDEO_RESOLUTION_HEIGHT, FPS);
+//            captureAndroid.startCapture(VIDEO_RESOLUTION_WIDTH, VIDEO_RESOLUTION_HEIGHT, FPS);
             _localVideoTrack = _factory.createVideoTrack(VIDEO_TRACK_ID, videoSource);
             _localStream.addTrack(_localVideoTrack);
         }
 
-
         if (viewCallback != null) {
+            Log.e("zsy", "start set local stream");
             viewCallback.onSetLocalStream(_localStream, _myId);
+            Log.e("zsy", "finish set local stream");
         }
 
     }
@@ -288,6 +294,8 @@ public class PeerConnectionHelper {
 //        }
 //
 //    }
+
+
     // 创建所有连接
     private void createPeerConnections() {
         for (Object str : _connectionIdArray) {
@@ -438,6 +446,10 @@ public class PeerConnectionHelper {
 
     private VideoCapturer createTestVideoCapture() {
         return new TestCapturer(_context);
+    }
+
+    private VideoCapturer createDetectVideoCapture() {
+        return new DetectCapturer(_context);
     }
 
 
