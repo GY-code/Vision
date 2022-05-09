@@ -247,14 +247,15 @@ public class PeerConnectionHelper {
     private void createLocalStream() {
         _localStream = _factory.createLocalMediaStream("ARDAMS");
         // 音频
-        audioSource = _factory.createAudioSource(createAudioConstraints());
-        _localAudioTrack = _factory.createAudioTrack(AUDIO_TRACK_ID, audioSource);
-        _localStream.addTrack(_localAudioTrack);
+//        audioSource = _factory.createAudioSource(createAudioConstraints());
+//        _localAudioTrack = _factory.createAudioTrack(AUDIO_TRACK_ID, audioSource);
+//        _localStream.addTrack(_localAudioTrack);
 
         if (videoEnable) {
             //创建需要传入设备的名称
-            captureAndroid = createVideoCapture();
+//            captureAndroid = createVideoCapture();
 //            captureAndroid = createTestVideoCapture();
+            captureAndroid = createDetectVideoCapture();
             // 视频
             surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", _rootEglBase.getEglBaseContext());
             videoSource = _factory.createVideoSource(captureAndroid.isScreencast());
@@ -438,6 +439,10 @@ public class PeerConnectionHelper {
 
     private VideoCapturer createTestVideoCapture() {
         return new TestCapturer(_context);
+    }
+
+    private VideoCapturer createDetectVideoCapture() {
+        return new DetectCapturer(_context);
     }
 
 
