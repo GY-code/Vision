@@ -178,7 +178,6 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             String collectReadyUrl = "@drawable/caijizhong";
             String collectingUrl = "@drawable/caijizhunbei";
 
-
             Drawable collect = getResources().getDrawable(R.drawable.ic_caiji);
             Drawable collectReady = getResources().getDrawable(R.drawable.ic_caijizhunbei);
             Drawable collecting = getResources().getDrawable(R.drawable.ic_caijizhong);
@@ -205,33 +204,32 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             holder.upButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Log.e("move up", "moveup");
-//                    move(UP, device.ip);
+                    Log.e(TAG,"moveUp");
+                    WifiServer.sendInstruction("UP",device.ip);
                 }
             });
 
             holder.downButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    WifiServer.sendInstruction("DOWN",device.ip);
                 }
             });
 
             holder.leftButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    WifiServer.sendInstruction("LEFT",device.ip);
                 }
             });
 
             holder.rightButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    WifiServer.sendInstruction("RIGHT",device.ip);
                 }
             });
         }
-
 
         @Override
         public int getItemCount() {

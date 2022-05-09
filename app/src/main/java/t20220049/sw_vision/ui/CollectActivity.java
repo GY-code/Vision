@@ -42,6 +42,8 @@ import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoFileRenderer;
 import org.webrtc.VideoTrack;
 
+import java.util.Stack;
+
 /**
  * 单聊界面
  * 1. 一对一视频通话
@@ -449,66 +451,6 @@ public class CollectActivity extends AppCompatActivity {
         }
         manager.joinRoom(getApplicationContext(), rootEglBase);
 
-    }
-
-    private int btmKp = 5;
-    private int topKp = 5;
-    private float offsetX;
-    private float offsetY;
-    private int offsetDeadBlock; //偏移量死区大小
-    private int lastBtmDegree; //上一次底部舵机的角度
-    private int lastTopDegree; //上一次底部舵机的角度
-
-    private void updateBtmKp(int value){
-        btmKp = value;
-    }
-    private void updateTopKp(int value){
-        topKp = value;
-    }
-
-    private int calBtmServoDegree(){
-        //设置阈值
-        if (offsetX < offsetDeadBlock) {
-            offsetX = 0;
-        }
-        //delta 范围-50~50
-        float deltaDegree = offsetX * btmKp;
-        //计算更新的底部舵机角度
-        float nextBtmDegree = lastBtmDegree + deltaDegree;
-        //边界检测
-        if(nextBtmDegree < 0){
-            nextBtmDegree = 0;
-        }else if(nextBtmDegree >180){
-            nextBtmDegree = 180;
-        }
-        return (int) nextBtmDegree;
-    }
-
-    private int calTopServoDegree(){
-        //设置阈值
-        if (offsetY < offsetDeadBlock) {
-        offsetY = 0;
-    }
-    //delta 范围-50~50
-    float deltaDegree = offsetY * topKp;
-    //计算更新的顶部舵机角度
-    float nextTopDegree = lastTopDegree + deltaDegree;
-    //边界检测
-        if(nextTopDegree < 0){
-        nextTopDegree = 0;
-    }else if(nextTopDegree >180){
-        nextTopDegree = 180;
-    }
-        return (int) nextTopDegree;
-}
-
-    private void updateOffset(int videoWidth, int videoHeight, int x,int y,int w,int h){
-        //box中心坐标
-        float targetX = (float) (x + w/2);
-        float targetY = (float) (y + h/2);
-        //目标在画面中心X轴上的偏移量
-        offsetX = (float) (targetX/videoWidth - 0.5) * 2;
-        offsetY = (float) (targetY/videoHeight - 0.5) * 2;
     }
 
 }

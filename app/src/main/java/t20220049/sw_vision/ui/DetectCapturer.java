@@ -58,6 +58,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import t20220049.sw_vision.R;
+import t20220049.sw_vision.arm_controller.ControlCenter;
 
 public class DetectCapturer implements VideoCapturer {
     final String TAG = "DetectCapturer";
@@ -122,7 +123,7 @@ public class DetectCapturer implements VideoCapturer {
 
             mProcessing = true;
 
-            Log.e(TAG, "enter image available");
+//            Log.e(TAG, "enter image available");
 
             // image to byte array
             ByteBuffer bb = image.getPlanes()[0].getBuffer();
@@ -287,8 +288,9 @@ public class DetectCapturer implements VideoCapturer {
         }
         MatOfRect faces = new MatOfRect();
         if (classifier != null)
-            classifier.detectMultiScale(gray, faces, 1.1, 2, 2,
-                    new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
+            classifier.detectMultiScale(gray, faces, 1.1, 3, 0,
+//                    new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
+                    new Size(), new Size());
 
         Rect[] facesArray = faces.toArray();
         Scalar faceRectColor = new Scalar(0, 255, 0, 255);
@@ -296,22 +298,20 @@ public class DetectCapturer implements VideoCapturer {
         boolean flag = true;
 
         for (Rect faceRect : facesArray) {
-            int x = faceRect.x;
-            int y = faceRect.y;
-
-            Log.e(TAG, "Detect face width: " + (double) x/width + ", height: " + (double) y/height);
+            int x = faceRect.x + faceRect.width/2;
+            int y = faceRect.y + faceRect.height/2;
+            Log.e(TAG,"width: "+faceRect.width+",height: "+faceRect.height);
+            Log.e(TAG, "x1: "+faceRect.x+", y1: "+faceRect.y);
+            Log.e(TAG,"x2: " + (faceRect.x+faceRect.width) + ", y2: " + (faceRect.y+faceRect.height));
+//            Log.e(TAG, "Detect face width: " + (double) x/width + ", height: " + (double) y/height);
             if (flag) {
                 flag = false;
-                moveArm((double)x/width, (double)y/height);
+                ControlCenter.getInstance().moveArm((double)x/width, (double)y/height);
             }
             Imgproc.rectangle(mat, faceRect.tl(), faceRect.br(), faceRectColor, 1);
         }
     }
 
-
-    private void moveArm(double x, double y) {
-
-    }
 
 
     private void saveImg(Mat srcImg,String fileName) {

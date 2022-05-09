@@ -253,8 +253,8 @@ public class PeerConnectionHelper {
 
         if (videoEnable) {
             //创建需要传入设备的名称
-//            captureAndroid = createVideoCapture();
-            captureAndroid = createTestVideoCapture();
+            captureAndroid = createVideoCapture();
+//            captureAndroid = createTestVideoCapture();
             // 视频
             surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", _rootEglBase.getEglBaseContext());
             videoSource = _factory.createVideoSource(captureAndroid.isScreencast());
