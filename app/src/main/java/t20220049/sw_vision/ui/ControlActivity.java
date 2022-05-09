@@ -179,6 +179,12 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             String collectReadyUrl = "@drawable/caijizhong";
             String collectingUrl = "@drawable/caijizhunbei";
 
+            if(device.ip.equals("localhost")){
+                holder.upButton.setVisibility(View.GONE);
+                holder.downButton.setVisibility(View.GONE);
+                holder.leftButton.setVisibility(View.GONE);
+                holder.rightButton.setVisibility(View.GONE);
+            }
 
             Drawable collect = getResources().getDrawable(R.drawable.ic_caiji);
             Drawable collectReady = getResources().getDrawable(R.drawable.ic_caijizhunbei);
