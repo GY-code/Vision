@@ -43,12 +43,15 @@ import android.view.Surface;
 import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Toast;
+
+import com.bumptech.glide.RequestBuilder;
 
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
@@ -65,7 +68,10 @@ import org.opencv.video.Tracker;
 import org.opencv.video.TrackerDaSiamRPN;
 import org.opencv.video.TrackerGOTURN;
 import org.opencv.video.TrackerMIL;
+import org.webrtc.Camera1Capturer;
 import org.webrtc.ContextUtils;
+import org.webrtc.EglBase;
+import org.webrtc.SurfaceTextureHelper;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
@@ -159,6 +165,7 @@ public class TrackerCameraFragment extends Fragment  {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+
     }
 
     @Override
@@ -280,6 +287,7 @@ public class TrackerCameraFragment extends Fragment  {
 
             if(mTargetLocked) {
                 // image to byte array
+                Log.e(TAG, "hhhh");
                 ByteBuffer bb = image.getPlanes()[0].getBuffer();
                 byte[] data = new byte[bb.remaining()];
                 bb.get(data);
@@ -371,20 +379,32 @@ public class TrackerCameraFragment extends Fragment  {
         mProcessing = false;
     }
 
+    private SurfaceTextureHelper surfaceTextureHelperCreator() {
+        EglBase rootEglBase = EglBase.create();
+
+        return SurfaceTextureHelper.create("CaptureThread", rootEglBase.getEglBaseContext());
+    }
+
     protected void createCameraPreview() {
         try {
-            SurfaceTexture texture = mTextureView.getSurfaceTexture();
-            assert texture != null;
-            texture.setDefaultBufferSize((int) imageDimension.width, (int) imageDimension.height);
-            Surface surface = new Surface(texture);
             previewRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
-            previewRequestBuilder.addTarget(surface);
+
+//            SurfaceTexture texture = mTextureView.getSurfaceTexture();
+//            assert texture != null;
+//            texture.setDefaultBufferSize((int) imageDimension.width, (int) imageDimension.height);
+//            Surface surface = new Surface(texture);
+//            previewRequestBuilder.addTarget(surface);
+
+
+//            SurfaceTextureHelper surfaceTextureHelper = surfaceTextureHelperCreator();
+//            Surface surface = new Surface(surfaceTextureHelper.getSurfaceTexture());
+
 
             imageReader = ImageReader.newInstance((int) CamResolution.width, (int) CamResolution.height, ImageFormat.JPEG, 2);
             imageReader.setOnImageAvailableListener(onImageAvailableListener, mBackgroundHandler);
             previewRequestBuilder.addTarget(imageReader.getSurface());
 
-            cameraDevice.createCaptureSession(Arrays.asList(surface, imageReader.getSurface()), new CameraCaptureSession.StateCallback(){
+            cameraDevice.createCaptureSession(Arrays.asList(/*surface, */imageReader.getSurface()), new CameraCaptureSession.StateCallback(){
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
                     //The camera is already closed
@@ -525,7 +545,7 @@ public class TrackerCameraFragment extends Fragment  {
                     return true;
                 }
             });
-        } catch (CameraAccessException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

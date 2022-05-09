@@ -87,7 +87,6 @@ public class WebRTCManager implements ISignalingEvents {
         if (_webSocket != null) {
             _webSocket.joinRoom(_roomId);
         }
-
     }
 
     public void stopCapture() {

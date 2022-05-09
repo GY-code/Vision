@@ -157,18 +157,27 @@ public class TrackingCapturer implements VideoCapturer {
             org.opencv.core.Core.flip(mImageGrab, mImageGrab, 1);
             org.opencv.imgproc.Imgproc.resize(mImageGrab, mImageGrab, new org.opencv.core.Size(240,320));
 
-            Bitmap bmp;
-            Mat tmp = new Mat (mImageGrab.rows(), mImageGrab.cols(), CvType.CV_8U, new Scalar(4));
-            Imgproc.cvtColor(mImageGrab, tmp, Imgproc.COLOR_RGB2BGRA);
-            bmp = Bitmap.createBitmap(tmp.cols(), tmp.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(tmp, bmp);
-
-
+            tick(mImageGrab);
 
             image.close();
             processing();
         }
     };
+
+    private void tick(Mat img) {
+
+        Mat temp = new Mat(img.rows(), img.cols(), CvType.CV_8U, new Scalar(4));
+
+        Imgproc.cvtColor(img, temp, Imgproc.COLOR_RGB2YUV_I420);
+
+//        VideoFrame.I420Buffer i420Buf = yuvConverter.convert(buffer);
+//
+//        VideoFrame videoFrame = new VideoFrame(i420Buf, 0, lastFrameReceived.getTimestampNs());
+//
+//        ogCapturerObserver.onFrameCaptured(videoFrame);
+
+
+    }
 
     public TrackingCapturer(AppCompatActivity activity, SurfaceViewRenderer viewRenderer, Mat mInitImage, Rect mInitRectangle) {
         this.activity = activity;
@@ -242,7 +251,6 @@ public class TrackingCapturer implements VideoCapturer {
         }
         Log.e(TAG, "openCamera 0");
     }
-
 
 
     @Override

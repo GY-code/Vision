@@ -25,6 +25,13 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
+    <org.webrtc.SurfaceViewRenderer
+        android:id="@+id/test_local_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@+id/bottom"
+        android:layout_below="@+id/top" />
+
     <Button
         android:id="@+id/button5"
         android:layout_width="wrap_content"

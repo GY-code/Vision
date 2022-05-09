@@ -6,9 +6,11 @@ import android.media.AudioManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import t20220049.sw_vision.bean.MediaType;
 import t20220049.sw_vision.bean.MyIceServer;
+import t20220049.sw_vision.ui.TestCapturer;
 import t20220049.sw_vision.ws.IWebSocket;
 
 import org.webrtc.AudioSource;
@@ -31,6 +33,7 @@ import org.webrtc.RtpTransceiver;
 import org.webrtc.SdpObserver;
 import org.webrtc.SessionDescription;
 import org.webrtc.SurfaceTextureHelper;
+import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoCapturer;
 import org.webrtc.VideoDecoderFactory;
 import org.webrtc.VideoEncoderFactory;
@@ -250,7 +253,8 @@ public class PeerConnectionHelper {
 
         if (videoEnable) {
             //创建需要传入设备的名称
-            captureAndroid = createVideoCapture();
+//            captureAndroid = createVideoCapture();
+            captureAndroid = createTestVideoCapture();
             // 视频
             surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", _rootEglBase.getEglBaseContext());
             videoSource = _factory.createVideoSource(captureAndroid.isScreencast());
@@ -432,6 +436,10 @@ public class PeerConnectionHelper {
 
     }
 
+    private VideoCapturer createTestVideoCapture() {
+        return new TestCapturer(_context);
+    }
+
 
     private VideoCapturer createVideoCapture() {
         VideoCapturer videoCapturer;
@@ -442,6 +450,8 @@ public class PeerConnectionHelper {
         }
         return videoCapturer;
     }
+
+
 
     private VideoCapturer createCameraCapture(CameraEnumerator enumerator) {
         final String[] deviceNames = enumerator.getDeviceNames();

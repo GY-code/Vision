@@ -86,6 +86,7 @@ import java.util.Map;
  */
 public class ControlActivity extends AppCompatActivity implements IViewCallback {
 
+
     private FrameLayout wr_video_view;
 
     private WebRTCManager manager;
