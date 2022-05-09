@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import t20220049.sw_vision.bean.MediaType;
 import t20220049.sw_vision.bean.MyIceServer;
+import t20220049.sw_vision.ui.DetectCapturer;
 import t20220049.sw_vision.ui.TestCapturer;
 import t20220049.sw_vision.ws.IWebSocket;
 
