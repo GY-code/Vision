@@ -54,6 +54,7 @@ import t20220049.sw_vision.utils.VideoFragment;
 import t20220049.sw_vision.utils.CameraService;
 import t20220049.sw_vision.utils.RecordUtil;
 import t20220049.sw_vision.utils.VideoFragmentManager;
+import t20220049.sw_vision.utils.VideoHandleManager;
 import t20220049.sw_vision.webRTC_utils.IViewCallback;
 import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
 import t20220049.sw_vision.webRTC_utils.ProxyVideoSink;
@@ -205,7 +206,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             holder.upButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Log.e("move up", "moveup");
+                    Log.e("move up", device.ip);
 //                    move(UP, device.ip);
                 }
             });
@@ -310,6 +311,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         super.onCreate(savedInstanceState);
         RecordUtil.setControlActivityWeakRef(ControlActivity.this);
         WifiServer.setControlActivityWeakRef(ControlActivity.this);
+        VideoHandleManager.setControlActivityWeakRef(ControlActivity.this);
 //        setContentView(R.layout.wr_activity_chat_room);
         setContentView(R.layout.acticity_control);
 
