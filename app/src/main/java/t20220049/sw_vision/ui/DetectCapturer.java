@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.ImageFormat;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
+import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CaptureFailure;
@@ -19,6 +20,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.SystemClock;
 import android.util.Log;
+import android.util.Range;
 import android.view.Surface;
 import android.widget.Toast;
 
@@ -37,6 +39,8 @@ import org.opencv.core.Size;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
+import org.webrtc.Camera2Enumerator;
+import org.webrtc.CameraEnumerationAndroid;
 import org.webrtc.CapturerObserver;
 import org.webrtc.Logging;
 import org.webrtc.NV21Buffer;
@@ -54,6 +58,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -80,6 +85,39 @@ public class DetectCapturer implements VideoCapturer {
     private Mat mImageGrab = new Mat();
     private CascadeClassifier classifier;
     private int mAbsoluteFaceSize = 0;
+
+    private CameraCaptureSession.StateCallback sessionStateCallback = new CameraCaptureSession.StateCallback() {
+        @Override
+        public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
+            //The camera is already closed
+            Log.e(TAG, "enter on configured");
+            if (null == cameraDevice) {
+                return;
+            }
+            mCaptureSession = cameraCaptureSession;
+            // Auto focus should be continuous for camera preview.
+            previewRequestBuilder.set(
+                    CaptureRequest.CONTROL_AF_MODE,
+                    CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
+            // Flash is automatically enabled when necessary.
+            previewRequestBuilder.set(
+                    CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+
+            // Finally, we start displaying the camera preview.
+            previewRequest = previewRequestBuilder.build();
+
+            try {
+                cameraCaptureSession.setRepeatingRequest(previewRequest, captureCallback, mBackgroundHandler);
+            } catch (CameraAccessException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
+            Toast.makeText(_context, "Configuration change", Toast.LENGTH_SHORT).show();
+        }
+    };
 
     private final CameraDevice.StateCallback stateCallback = new CameraDevice.StateCallback() {
         @Override
@@ -155,6 +193,7 @@ public class DetectCapturer implements VideoCapturer {
                         final CameraCaptureSession session,
                         final CaptureRequest request,
                         final TotalCaptureResult result) {
+
                 }
 
                 @Override
@@ -212,39 +251,9 @@ public class DetectCapturer implements VideoCapturer {
 
             Log.e(TAG, "Set preview finish");
 
-            cameraDevice.createCaptureSession(Arrays.asList(surface, imageReader.getSurface()), new CameraCaptureSession.StateCallback(){
-                @Override
-                public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
-                    //The camera is already closed
-                    Log.e(TAG, "enter on configured");
-                    if (null == cameraDevice) {
-                        return;
-                    }
-                    mCaptureSession = cameraCaptureSession;
-                    // Auto focus should be continuous for camera preview.
-                    previewRequestBuilder.set(
-                            CaptureRequest.CONTROL_AF_MODE,
-                            CaptureRequest.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
-                    // Flash is automatically enabled when necessary.
-                    previewRequestBuilder.set(
-                            CaptureRequest.CONTROL_AE_MODE, CaptureRequest.CONTROL_AE_MODE_ON_AUTO_FLASH);
+            cameraDevice.createCaptureSession(Arrays.asList(surface, imageReader.getSurface()), sessionStateCallback, mBackgroundHandler);
 
-                    // Finally, we start displaying the camera preview.
-                    previewRequest = previewRequestBuilder.build();
-
-                    try {
-                        cameraCaptureSession.setRepeatingRequest(previewRequest, captureCallback, mBackgroundHandler);
-                    } catch (CameraAccessException e) {
-                        e.printStackTrace();
-                    }
-                }
-                @Override
-                public void onConfigureFailed(@NonNull CameraCaptureSession cameraCaptureSession) {
-                    Toast.makeText(_context, "Configuration change", Toast.LENGTH_SHORT).show();
-                }
-            }, null);
-
-        } catch (CameraAccessException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -296,14 +305,15 @@ public class DetectCapturer implements VideoCapturer {
         boolean flag = true;
 
         for (Rect faceRect : facesArray) {
-            int x = faceRect.x;
-            int y = faceRect.y;
+            int x = faceRect.x + faceRect.width/2;
+            int y = faceRect.y + faceRect.height/2;
 
             Log.e(TAG, "Detect face width: " + (double) x/width + ", height: " + (double) y/height);
             if (flag) {
                 flag = false;
                 moveArm((double)x/width, (double)y/height);
             }
+//            System.out.println("fff" + 1 + 5);
             Imgproc.rectangle(mat, faceRect.tl(), faceRect.br(), faceRectColor, 1);
         }
     }

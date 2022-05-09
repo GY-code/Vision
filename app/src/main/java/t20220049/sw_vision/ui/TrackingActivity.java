@@ -70,6 +70,8 @@ public class TrackingActivity extends AppCompatActivity implements FragmentManag
                 _localVideoTrack.addSink(localRender);
 
                 localRender.setTarget(local_view);
+//                cameraTest();
+//                Log.i("zsy", "Test complete");
             }
         });
     }
@@ -80,6 +82,43 @@ public class TrackingActivity extends AppCompatActivity implements FragmentManag
         local_view.setZOrderMediaOverlay(true);
 //        local_view.setMirror(true);
         localRender = new ProxyVideoSink();
+    }
+
+    private void cameraTest() {
+        VideoCapturer videoCapturer = new DetectCapturer(getApplicationContext());
+
+
+        EglBase rootEglBase = EglBase.create();
+
+
+        PeerConnectionFactory.initialize(
+                PeerConnectionFactory.InitializationOptions.builder(getApplicationContext())
+                        .createInitializationOptions());
+        final VideoEncoderFactory encoderFactory;
+        final VideoDecoderFactory decoderFactory;
+        encoderFactory = new DefaultVideoEncoderFactory(
+                rootEglBase.getEglBaseContext(),
+                true,
+                true);
+        decoderFactory = new DefaultVideoDecoderFactory(rootEglBase.getEglBaseContext());
+        PeerConnectionFactory.Options options = new PeerConnectionFactory.Options();
+        PeerConnectionFactory factory = PeerConnectionFactory.builder()
+                                    .setOptions(options)
+                                    .setAudioDeviceModule(JavaAudioDeviceModule.builder(getApplicationContext()).createAudioDeviceModule())
+                                    .setVideoEncoderFactory(encoderFactory)
+                                    .setVideoDecoderFactory(decoderFactory)
+                                    .createPeerConnectionFactory();
+        ProxyVideoSink localRender = new ProxyVideoSink();
+
+
+        VideoTrack localVideoTrack;
+
+        SurfaceTextureHelper surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", rootEglBase.getEglBaseContext());
+        VideoSource videoSource = factory.createVideoSource(videoCapturer.isScreencast());
+        videoCapturer.initialize(surfaceTextureHelper, getApplicationContext(), videoSource.getCapturerObserver());
+        localVideoTrack = factory.createVideoTrack("ARDAMSv0", videoSource);
+        localVideoTrack.addSink(localRender);
+
     }
 
     private PeerConnectionFactory createConnectionFactory() {

@@ -63,6 +63,7 @@ import t20220049.sw_vision.webRTC_utils.WebRTCManager;
 import t20220049.sw_vision.bean.MemberBean;
 import t20220049.sw_vision.utils.PermissionUtil;
 
+import org.opencv.android.OpenCVLoader;
 import org.w3c.dom.Text;
 import org.webrtc.EglBase;
 import org.webrtc.EglRenderer;
@@ -637,7 +638,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         runOnUiThread(() -> {
             addView(userId, stream);
         });
-        switchCamera();
+//        switchCamera();
         toggleMic(false);
 
     }
@@ -922,5 +923,16 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         manager.joinRoom(getApplicationContext(), rootEglBase);
 
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!OpenCVLoader.initDebug()) {
+            Log.d("OpenCV", "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, null);
+        } else {
+            Log.d("OpenCV", "OpenCV library found inside package. Using it!");
+        }
     }
 }
