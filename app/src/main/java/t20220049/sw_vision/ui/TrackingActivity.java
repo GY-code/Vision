@@ -61,14 +61,13 @@ public class TrackingActivity extends AppCompatActivity implements FragmentManag
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                VideoCapturer videoCapturer = new TestCapturer(getApplicationContext());
+                VideoCapturer videoCapturer = new DetectCapturer(getApplicationContext());
                 initLocalView();
                 SurfaceTextureHelper surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", _rootEglBase.getEglBaseContext());
                 VideoSource videoSource = _factory.createVideoSource(videoCapturer.isScreencast());
                 videoCapturer.initialize(surfaceTextureHelper, getApplicationContext(), videoSource.getCapturerObserver());
                 _localVideoTrack = _factory.createVideoTrack("ARDAMSv0", videoSource);
                 _localVideoTrack.addSink(localRender);
-
 
                 localRender.setTarget(local_view);
             }
@@ -79,7 +78,7 @@ public class TrackingActivity extends AppCompatActivity implements FragmentManag
         local_view.init(_rootEglBase.getEglBaseContext(), null);
         local_view.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
         local_view.setZOrderMediaOverlay(true);
-        local_view.setMirror(true);
+//        local_view.setMirror(true);
         localRender = new ProxyVideoSink();
     }
 

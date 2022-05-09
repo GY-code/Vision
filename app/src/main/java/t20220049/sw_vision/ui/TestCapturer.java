@@ -65,6 +65,7 @@ import org.webrtc.VideoCapturer;
 import org.webrtc.VideoFrame;
 import org.webrtc.YuvConverter;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -87,7 +88,6 @@ public class TestCapturer implements VideoCapturer {
     private CaptureRequest previewRequest;
     private Size imageDimension;
     private ImageReader imageReader;
-    private static final int REQUEST_CAMERA_PERMISSION = 200;
     private Handler mBackgroundHandler;
     private HandlerThread mBackgroundThread;
     private final Size CamResolution = new Size(1280,720);
@@ -197,19 +197,16 @@ public class TestCapturer implements VideoCapturer {
             byte[] data = new byte[bb.remaining()];
             bb.get(data);
 
-            Bitmap bitmapImage = BitmapFactory.decodeByteArray(data, 0, data.length, null);
-            if (saveFlag) {
-                saveFlag = false;
-                Log.i(TAG, "Bitmap width: " + bitmapImage.getWidth()
-                        + ", height: " + bitmapImage.getHeight()
-                        + ", has alpha: " + bitmapImage.hasAlpha());
-                saveImg(bitmapImage, "raw_bitmap.jpg");
-            }
-
-
+//            Bitmap bitmapImage = BitmapFactory.decodeByteArray(data, 0, data.length, null);
+//            if (saveFlag) {
+//                saveFlag = false;
+//                Log.i(TAG, "Bitmap width: " + bitmapImage.getWidth()
+//                        + ", height: " + bitmapImage.getHeight()
+//                        + ", has alpha: " + bitmapImage.hasAlpha());
+//                saveImg(bitmapImage, "raw_bitmap.jpg");
+//            }
 
             mImageGrab = Imgcodecs.imdecode(new MatOfByte(data), Imgcodecs.IMREAD_UNCHANGED);
-
             org.opencv.core.Core.transpose(mImageGrab, mImageGrab);
 //            org.opencv.core.Core.flip(mImageGrab, mImageGrab, 1);
 //            org.opencv.imgproc.Imgproc.resize(mImageGrab, mImageGrab, new org.opencv.core.Size(240,320));
@@ -278,8 +275,6 @@ public class TestCapturer implements VideoCapturer {
 //            TextureBufferImpl buffer = new TextureBufferImpl(width, height,
 //                    VideoFrame.TextureBuffer.Type.RGB, textures[0],  matrix,
 //                    textureHelper.getHandler(), yuvConverter, null);
-
-
 
             Log.e(TAG, "byte array to Video Frame");
 
@@ -368,9 +363,9 @@ public class TestCapturer implements VideoCapturer {
         try {
             previewRequestBuilder = cameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
 
-//            mSurfaceTextureHelper.setTextureSize((int) CamResolution.width, (int) CamResolution.height);
-//            surface = new Surface(mSurfaceTextureHelper.getSurfaceTexture());
-//            previewRequestBuilder.addTarget(surface);
+            mSurfaceTextureHelper.setTextureSize((int) CamResolution.width, (int) CamResolution.height);
+            surface = new Surface(mSurfaceTextureHelper.getSurfaceTexture());
+            previewRequestBuilder.addTarget(surface);
 
             imageReader = ImageReader.newInstance((int) CamResolution.width, (int) CamResolution.height, ImageFormat.JPEG, 2);
             imageReader.setOnImageAvailableListener(onImageAvailableListener, mBackgroundHandler);
@@ -378,7 +373,7 @@ public class TestCapturer implements VideoCapturer {
 
             Log.e(TAG, "Set preview finish");
 
-            cameraDevice.createCaptureSession(Arrays.asList(/*surface,*/ imageReader.getSurface()), new CameraCaptureSession.StateCallback(){
+            cameraDevice.createCaptureSession(Arrays.asList(surface, imageReader.getSurface()), new CameraCaptureSession.StateCallback(){
                 @Override
                 public void onConfigured(@NonNull CameraCaptureSession cameraCaptureSession) {
                     //The camera is already closed
