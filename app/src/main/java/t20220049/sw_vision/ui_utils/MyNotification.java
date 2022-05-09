@@ -42,6 +42,7 @@ public class MyNotification {
 
         //创建通知
         mBuilder = new NotificationCompat.Builder(context,channelID)
+                .setContentTitle(title)
                 .setContentText(text)
                 .setWhen(System.currentTimeMillis())
                 .setDefaults(NotificationCompat.FLAG_ONLY_ALERT_ONCE)

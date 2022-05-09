@@ -78,6 +78,7 @@
         <activity
             android:name=".ui.ControlMatch"
             android:exported="true" />
+
         <activity
             android:name=".ui.HomePage"
             android:exported="true">
@@ -112,12 +113,20 @@
 <!--                 <category android:name="android.intent.category.LAUNCHER" />-->
 <!--             </intent-filter>-->
         </activity>
+
         <activity
             android:name=".ui.ControlActivity"
             android:configChanges="orientation|smallestScreenSize|screenSize|screenLayout"
             android:launchMode="singleInstance"
             android:screenOrientation="fullUser"
-            android:theme="@style/Theme.Design.NoActionBar" />
+            android:theme="@style/Theme.Design.NoActionBar"
+            android:exported="true">
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.MAIN" />-->
+<!--                <category android:name="android.intent.category.LAUNCHER" />-->
+<!--            </intent-filter>-->
+        </activity>
+
         <activity
             android:name=".ui.CollectActivity"
             android:configChanges="orientation|smallestScreenSize|screenSize|screenLayout"

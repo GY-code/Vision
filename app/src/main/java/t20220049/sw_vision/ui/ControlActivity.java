@@ -88,6 +88,11 @@ import java.util.Map;
  */
 public class ControlActivity extends AppCompatActivity implements IViewCallback {
 
+    static final int UP = 1;
+    static final int DOWN = 2;
+    static final int LEFT = 3;
+    static final int RIGHT = 4;
+
     private FrameLayout wr_video_view;
 
     private WebRTCManager manager;
@@ -177,8 +182,8 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             Drawable collectReady = getResources().getDrawable(R.drawable.ic_caijizhunbei);
             Drawable collecting = getResources().getDrawable(R.drawable.ic_caijizhong);
 
-            if (device.stat == 1) holder.selectButton.setImageDrawable(collect);
-            else if (device.stat == 2) holder.selectButton.setImageDrawable(collectReady);
+            if (device.stat == 2) holder.selectButton.setImageDrawable(collect);
+            else if (device.stat == 1) holder.selectButton.setImageDrawable(collectReady);
             else holder.selectButton.setImageDrawable(collecting);
 
             holder.selectButton.setOnClickListener(new View.OnClickListener() {
@@ -194,6 +199,36 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                     changeRecordCapture(deviceList.get(position).userId);
                 }
             });
+
+            // move
+            holder.upButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.e("move up", "moveup");
+//                    move(UP, device.ip);
+                }
+            });
+
+            holder.downButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                }
+            });
+
+            holder.leftButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                }
+            });
+
+            holder.rightButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                }
+            });
         }
 
 
@@ -207,12 +242,20 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         TextView mType;
         TextView mName;
         ImageView selectButton;
+        ImageView upButton;
+        ImageView downButton;
+        ImageView leftButton;
+        ImageView rightButton;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             mType = itemView.findViewById(R.id.txt_mType);
             mName = itemView.findViewById(R.id.txt_mName);
             selectButton = itemView.findViewById(R.id.select_button);
+            upButton = itemView.findViewById(R.id.turn_up);
+            downButton = itemView.findViewById(R.id.turn_down);
+            leftButton = itemView.findViewById(R.id.turn_left);
+            rightButton = itemView.findViewById(R.id.turn_right);
         }
 
     }
