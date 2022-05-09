@@ -35,6 +35,7 @@ import t20220049.sw_vision.R;
 import t20220049.sw_vision.webRTC_utils.WebRTCManager;
 import t20220049.sw_vision.utils.PermissionUtil;
 
+import org.opencv.android.OpenCVLoader;
 import org.webrtc.EglBase;
 import org.webrtc.MediaStream;
 import org.webrtc.RendererCommon;
@@ -311,7 +312,6 @@ public class CollectActivity extends AppCompatActivity {
                 if (stream.videoTracks.size() > 0) {
                     stream.videoTracks.get(0).addSink(localRender);
                     localTrack = stream.videoTracks.get(0);
-
                 }
                 RecordUtil.setMyId(socketId);
                 try {
@@ -323,7 +323,7 @@ public class CollectActivity extends AppCompatActivity {
                 if (videoEnable) {
                     stream.videoTracks.get(0).setEnabled(true);
                 }
-                switchCamera();
+//                switchCamera();
                 toggleMic(false);
             }
 
@@ -353,8 +353,6 @@ public class CollectActivity extends AppCompatActivity {
         } else if (isNeedOverLay) {
             finish();
         }
-
-
     }
 
 //    private void replaceFragment(Fragment fragment, boolean videoEnable) {
@@ -453,4 +451,14 @@ public class CollectActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!OpenCVLoader.initDebug()) {
+            Log.d("OpenCV", "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, null);
+        } else {
+            Log.d("OpenCV", "OpenCV library found inside package. Using it!");
+        }
+    }
 }

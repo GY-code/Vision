@@ -27,8 +27,9 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> <!-- 操作文件系统的权限 -->
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEM" />
+    <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW"/>
     <uses-permission android:name="android.permission.SYSTEM_OVERLAY_WINDOW" />
 
@@ -82,8 +83,6 @@
             android:enabled="true" />
 
 <!--        <activity android:name=".arm_controller.BluetoothActivity"></activity>-->
-
-
         <activity
             android:name=".ui.CollectMatch"
             android:exported="false" />
@@ -94,10 +93,11 @@
         <activity
             android:name=".ui.HomePage"
             android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+
+             <intent-filter>
+             <action android:name="android.intent.action.MAIN" />
+             <category android:name="android.intent.category.LAUNCHER" />
+             </intent-filter>
         </activity>
         <activity
             android:name=".transfer.SearchActivity"
@@ -126,7 +126,15 @@
 <!--                <category android:name="android.intent.category.LAUNCHER" />-->
 <!--            </intent-filter>-->
         </activity>
+<!--        <activity-->
+<!--            android:name=".utils.Panorama"-->
+<!--            android:exported="true">-->
 
+<!--            &lt;!&ndash; <intent-filter> &ndash;&gt;-->
+<!--            &lt;!&ndash; <action android:name="android.intent.action.MAIN" /> &ndash;&gt;-->
+<!--            &lt;!&ndash; <category android:name="android.intent.category.LAUNCHER" /> &ndash;&gt;-->
+<!--            &lt;!&ndash; </intent-filter> &ndash;&gt;-->
+<!--        </activity>-->
         <activity
             android:name=".ui.ControlActivity"
             android:configChanges="orientation|smallestScreenSize|screenSize|screenLayout"
@@ -138,7 +146,13 @@
             android:configChanges="orientation|smallestScreenSize|screenSize|screenLayout"
             android:launchMode="singleInstance"
             android:screenOrientation="fullUser"
-            android:theme="@style/Theme.Design.NoActionBar" />
+            android:theme="@style/Theme.Design.NoActionBar" >
+<!--                <intent-filter>-->
+<!--                    <action android:name="android.intent.action.MAIN" />-->
+
+<!--                    <category android:name="android.intent.category.LAUNCHER" />-->
+<!--                </intent-filter>-->
+        </activity>
 
         <service
             android:name=".transfer.server.WifiServerService"

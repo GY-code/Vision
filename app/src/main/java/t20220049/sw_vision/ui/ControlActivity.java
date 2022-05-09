@@ -54,6 +54,7 @@ import t20220049.sw_vision.utils.VideoFragment;
 import t20220049.sw_vision.utils.CameraService;
 import t20220049.sw_vision.utils.RecordUtil;
 import t20220049.sw_vision.utils.VideoFragmentManager;
+import t20220049.sw_vision.utils.VideoHandleManager;
 import t20220049.sw_vision.webRTC_utils.IViewCallback;
 import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
 import t20220049.sw_vision.webRTC_utils.ProxyVideoSink;
@@ -62,6 +63,7 @@ import t20220049.sw_vision.webRTC_utils.WebRTCManager;
 import t20220049.sw_vision.bean.MemberBean;
 import t20220049.sw_vision.utils.PermissionUtil;
 
+import org.opencv.android.OpenCVLoader;
 import org.w3c.dom.Text;
 import org.webrtc.EglBase;
 import org.webrtc.EglRenderer;
@@ -178,6 +180,13 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             String collectReadyUrl = "@drawable/caijizhong";
             String collectingUrl = "@drawable/caijizhunbei";
 
+            if(device.ip.equals("localhost")){
+                holder.upButton.setVisibility(View.GONE);
+                holder.downButton.setVisibility(View.GONE);
+                holder.leftButton.setVisibility(View.GONE);
+                holder.rightButton.setVisibility(View.GONE);
+            }
+
             Drawable collect = getResources().getDrawable(R.drawable.ic_caiji);
             Drawable collectReady = getResources().getDrawable(R.drawable.ic_caijizhunbei);
             Drawable collecting = getResources().getDrawable(R.drawable.ic_caijizhong);
@@ -230,6 +239,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                 }
             });
         }
+
 
         @Override
         public int getItemCount() {
@@ -912,4 +922,16 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         manager.joinRoom(getApplicationContext(), rootEglBase);
     }
 
+
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (!OpenCVLoader.initDebug()) {
+            Log.d("OpenCV", "Internal OpenCV library not found. Using OpenCV Manager for initialization");
+            OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, null);
+        } else {
+            Log.d("OpenCV", "OpenCV library found inside package. Using it!");
+        }
+    }
 }

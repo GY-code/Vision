@@ -149,7 +149,7 @@ public class RecordUtil {
         // 通知
         MyNotification notification = new MyNotification();
         if(flag == 0){
-//            notification.sendNotification(CollectActivityWeakRef.get().getApplicationContext(), 4, "本地视频处理", "本地视频处理进度");
+            notification.sendNotification(CollectActivityWeakRef.get().getApplicationContext(), 4, "本地视频处理", "本地视频处理进度");
         }else{
             notification.sendNotification(ControlActivityWeakRef.get().getApplicationContext(), 3, "本地视频处理", "本地视频处理进度");
         }
@@ -170,7 +170,7 @@ public class RecordUtil {
                 public void onFinish() {
                     Log.e(TAG, "onFinish: " + text);
                     if (isCollect) {
-//                        saveVideo2Gallery(localmp4, context);
+                        saveVideo2Gallery(localmp4, context);
                     } else {
                         saveVideo2Gallery(remoteVideoPath + myId + ".mp4", context);
                     }
@@ -187,9 +187,13 @@ public class RecordUtil {
                 public void onProgress(int progress, long progressTime) {
                     Log.d(TAG, "onProgress: " + progress);
                     if(flag==1){
-                        notification.updateNotification(3, progress);
+                        new Thread(() -> {
+                            notification.updateNotification(3, progress);
+                        }).start();
                     }else{
-                        notification.updateNotification(4, progress);
+                        new Thread(() -> {
+                            notification.updateNotification(4, progress);
+                        }).start();
                     }
                 }
 
