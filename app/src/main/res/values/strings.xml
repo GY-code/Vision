@@ -25,5 +25,7 @@
     <string name="bluetooth_state_connecting">正在连接蓝牙</string>
     <string name="bluetooth_state_connect_failure">蓝牙连接失败</string>
     <string name="bluetooth_state_disconnected">蓝牙已断开</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 
 </resources>

@@ -450,4 +450,5 @@ public class CollectActivity extends AppCompatActivity {
         manager.joinRoom(getApplicationContext(), rootEglBase);
 
     }
+
 }

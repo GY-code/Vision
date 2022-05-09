@@ -11,4 +11,5 @@ public class MyApplication extends Application {
         super.onCreate();
         AppMaster.getInstance().setApp(MyApplication.this);
     }
+
 }

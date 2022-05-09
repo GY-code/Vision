@@ -93,6 +93,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     static final int LEFT = 3;
     static final int RIGHT = 4;
 
+
     private FrameLayout wr_video_view;
 
     private WebRTCManager manager;
