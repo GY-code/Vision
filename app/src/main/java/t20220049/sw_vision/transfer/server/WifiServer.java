@@ -1,6 +1,6 @@
 package t20220049.sw_vision.transfer.server;
 
-import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Handler;
@@ -22,6 +22,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.lang.ref.WeakReference;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
@@ -52,8 +53,6 @@ import t20220049.sw_vision.utils.VideoFragmentManager;
 import t20220049.sw_vision.utils.VideoHandleManager;
 
 public class WifiServer extends Thread {
-    public static Context context;
-
     private static final String TAG = "WifiServer";
     public static final int PHOTO = 1;
     public static final int VIDEO = 2;
@@ -76,6 +75,12 @@ public class WifiServer extends Thread {
     OutputStream outputStream;
 
     int send_state = Constants.SEND_FAIL;
+
+    public static WeakReference<ControlActivity> ControlActivityWeakRef;
+
+    public static void setControlActivityWeakRef(ControlActivity activity) {
+        ControlActivityWeakRef = new WeakReference<>(activity);
+    }
 
     public class MyClient {
         public Socket client = null;
@@ -101,48 +106,48 @@ public class WifiServer extends Thread {
     public void run() {
         Looper.prepare();
         String inputLine;
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                try {
-//                    DatagramSocket socket = new DatagramSocket(Constants.UDP_PORT);
-//
-//                    while (true){
-//                        //1.读取请求，服务器一般不知道客户端啥时候发来请求
-//                        //receive()参数DatagramPacket是一个输出型参数，socket中读到的数据会设置到这个参数的对象中
-//                        //DatagramPacket在构造的时候需要一个缓冲区（实际上是一段内存空间, 通常使用byte[]）
-//                        DatagramPacket requestPacket = new DatagramPacket(new byte[4096], 4096);
-//                        socket.receive(requestPacket); //收到请求之前，receive()操作在阻塞等待！
-//
-//                        //把requestPacket中的内容取出来,作为一个字符串
-//                        String request = new String(requestPacket.getData(), 0, requestPacket.getLength());
-//
-//                        Log.i(TAG,"look out: "+request);
-//                        String response = "";
-//
-//                        //2.根据请求计算响应
-//                        if(send_state==Constants.SEND_SUC){
-//                            response = "SEND_SUC";
-//                        } else {
-//                            response = "SEND_FAIL";
-//                        }
-//
-//                        //3.构造responsePacket响应
-//                        //此处设置的参数长度 必须是 字节的长度个数！response.getBytes().length
-//                        //如果直接取response.length,则是字符串的长度，也就是字符串的个数
-//                        //当前的responsePacket在构造时，需要指定这个包要发给谁；发送给的目标即发来请求的一方
-//                        DatagramPacket responsePacket = new DatagramPacket(response.getBytes(),response.getBytes().length,requestPacket.getSocketAddress());
-//
-//                        //4.发送响应到客户端
-//                        socket.send(responsePacket);
-//                    }
-//                } catch (SocketException e) {
-//                    e.printStackTrace();
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    DatagramSocket socket = new DatagramSocket(Constants.UDP_PORT);
+
+                    while (true) {
+                        //1.读取请求，服务器一般不知道客户端啥时候发来请求
+                        //receive()参数DatagramPacket是一个输出型参数，socket中读到的数据会设置到这个参数的对象中
+                        //DatagramPacket在构造的时候需要一个缓冲区（实际上是一段内存空间, 通常使用byte[]）
+                        DatagramPacket requestPacket = new DatagramPacket(new byte[4096], 4096);
+                        socket.receive(requestPacket); //收到请求之前，receive()操作在阻塞等待！
+
+                        //把requestPacket中的内容取出来,作为一个字符串
+                        String request = new String(requestPacket.getData(), 0, requestPacket.getLength());
+
+                        Log.i(TAG, "look out: " + request);
+                        String response = "";
+
+                        //2.根据请求计算响应
+                        if (send_state == Constants.SEND_SUC) {
+                            response = "SEND_SUC";
+                        } else {
+                            response = "SEND_FAIL";
+                        }
+
+                        //3.构造responsePacket响应
+                        //此处设置的参数长度 必须是 字节的长度个数！response.getBytes().length
+                        //如果直接取response.length,则是字符串的长度，也就是字符串的个数
+                        //当前的responsePacket在构造时，需要指定这个包要发给谁；发送给的目标即发来请求的一方
+                        DatagramPacket responsePacket = new DatagramPacket(response.getBytes(), response.getBytes().length, requestPacket.getSocketAddress());
+
+                        //4.发送响应到客户端
+                        socket.send(responsePacket);
+                    }
+                } catch (SocketException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
         try {
             for (MyClient mc : clients) {
                 photoWL.add(mc.clientIP);
@@ -221,6 +226,7 @@ public class WifiServer extends Thread {
         this.fileReceiveListener = fileReceiveListener;
     }
 
+
     private void receiveFile(String type) {
         File file = null;
         try {
@@ -238,8 +244,7 @@ public class WifiServer extends Thread {
             FileTransfer fileTransfer = (FileTransfer) objectInputStream.readObject();
             Log.e(TAG, "待接收的文件: " + fileTransfer.getFileName());
             String name = fileTransfer.getFileName();
-//            String name = in.readLine();
-//            int fileLength = ;
+
             //将文件存储至指定位置
             if (type.equals("photo")) {
                 RecordUtil.clearFile(RecordUtil.remotePhotoPath + name);
@@ -255,17 +260,22 @@ public class WifiServer extends Thread {
             byte[] buf = new byte[1024];
             int len;
             long total = 0;
-            int progress;
 
-//            MyNotification notification = new MyNotification();
-//            notification.buildNotification("文件接收", "文件接收进度", "文件开始接收");
 
+            MyNotification notification = new MyNotification();
+            notification.sendNotification(ControlActivityWeakRef.get().getApplicationContext(), 2, "文件接收", "文件接收进度");
+            int lastProgress = 0;
             while ((len = inputStream.read(buf)) != -1) {
                 fileOutputStream.write(buf, 0, len);
                 total += len;
-                progress = (int) ((total * 100) / fileTransfer.getFileLength());
+                int progress = (int) ((total * 100) / fileTransfer.getFileLength());
+                if (progress != lastProgress) {
+                    new Thread(() -> {
+                        notification.updateNotification(2, progress);
+                    }).start();
+                    lastProgress = progress;
+                }
 
-//                notification.setProgress2(progress);
                 Log.e(TAG, "文件接收进度: " + progress);
 //                if (progressChangListener != null) {
 //                    progressChangListener.onProgressChanged(fileTransfer, progress);
@@ -330,8 +340,8 @@ public class WifiServer extends Thread {
                         }
                         jointBitmap.receiveFile(photoPath, photoName);
                         jointBitmap.jointPhoto();
-                        RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
-                            Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"已将拼接照片存储在相册",Toast.LENGTH_SHORT).show();
+                        RecordUtil.ControlActivityWeakRef.get().runOnUiThread(() -> {
+                            Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(), "已将拼接照片存储在相册", Toast.LENGTH_SHORT).show();
                         });
                     } else if (ControlActivity.mode == 1) {
                         Pano panorama = new Pano();
@@ -344,8 +354,8 @@ public class WifiServer extends Thread {
                             @Override
                             public void onSuccess(Bitmap bitmap) {
 //                                Toast.makeText(Pano.this,"图片拼接成功！",Toast.LENGTH_LONG).show();
-                                RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
-                                    Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"已将融合照片存储在相册",Toast.LENGTH_SHORT).show();
+                                RecordUtil.ControlActivityWeakRef.get().runOnUiThread(() -> {
+                                    Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(), "已将融合照片存储在相册", Toast.LENGTH_SHORT).show();
                                 });
                                 Log.e(TAG, "图片拼接成功！");
                                 RecordUtil recordUtil = new RecordUtil(ContextUtils.getApplicationContext());
@@ -355,8 +365,8 @@ public class WifiServer extends Thread {
                             @Override
                             public void onError(String errorMsg) {
 //                                Toast.makeText(Pano.this,"图片拼接失败！",Toast.LENGTH_LONG).show();
-                                RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
-                                    Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"请重新选取角度拍摄全景",Toast.LENGTH_SHORT).show();
+                                RecordUtil.ControlActivityWeakRef.get().runOnUiThread(() -> {
+                                    Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(), "请重新选取角度拍摄全景", Toast.LENGTH_SHORT).show();
                                 });
                                 Log.e(TAG, "图片拼接失败！");
                                 System.out.println(errorMsg);
@@ -376,8 +386,8 @@ public class WifiServer extends Thread {
                             photoName[i] = clients.get(i - 1).clientUserID + ".png";
                             recordUtil.savePhoto2Gallery(BitmapFactory.decodeFile(photoPath[i] + photoName[i]));
                         }
-                        RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
-                            Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"已将原图照片存储在相册",Toast.LENGTH_SHORT).show();
+                        RecordUtil.ControlActivityWeakRef.get().runOnUiThread(() -> {
+                            Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(), "已将原图照片存储在相册", Toast.LENGTH_SHORT).show();
                         });
 
 
@@ -405,8 +415,8 @@ public class WifiServer extends Thread {
 
                     RecordUtil util = new RecordUtil(ContextUtils.getApplicationContext());
                     util.saveVideo2Gallery(RecordUtil.remoteVideoPath + "output.mp4", ContextUtils.getApplicationContext());
-                    RecordUtil.ControlActivityWeakRef.get().runOnUiThread(()->{
-                        Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(),"已将融合视频存储在相册",Toast.LENGTH_SHORT).show();
+                    RecordUtil.ControlActivityWeakRef.get().runOnUiThread(() -> {
+                        Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(), "已将融合视频存储在相册", Toast.LENGTH_SHORT).show();
                     });
 
                     for (MyClient mc : clients) {

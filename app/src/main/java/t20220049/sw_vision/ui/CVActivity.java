@@ -160,13 +160,16 @@ public class CVActivity extends AppCompatActivity implements CameraBridgeViewBas
         Mat rgbFrame = inputFrame.rgba();
         Mat grayFrame = inputFrame.gray();
 
+
         Log.e(TAG, Long.toString(testLong()));
 
         findFeature(grayFrame.getNativeObjAddr(), rgbFrame.getNativeObjAddr());
-
+//        tracking(grayFrame.getNativeObjAddr(), rgbFrame.getNativeObjAddr());
 
         return rgbFrame;
     }
+
+
 
 
     private native void findFeature(long addrGray, long addrRGB);

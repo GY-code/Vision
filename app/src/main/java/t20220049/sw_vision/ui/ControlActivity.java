@@ -45,7 +45,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import io.microshow.rxffmpeg.RxFFmpegInvoke;
+import t20220049.sw_vision.transfer.client.WifiClientTask;
 import t20220049.sw_vision.transfer.server.WifiServer;
+import t20220049.sw_vision.ui_utils.MyNotification;
 import t20220049.sw_vision.utils.TimerManager;
 import t20220049.sw_vision.utils.TransferUtil;
 import t20220049.sw_vision.utils.VideoFragment;
@@ -85,6 +87,12 @@ import java.util.Map;
  * 支持 9 路同時通信
  */
 public class ControlActivity extends AppCompatActivity implements IViewCallback {
+
+    static final int UP = 1;
+    static final int DOWN = 2;
+    static final int LEFT = 3;
+    static final int RIGHT = 4;
+
 
     private FrameLayout wr_video_view;
 
@@ -175,8 +183,8 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             Drawable collectReady = getResources().getDrawable(R.drawable.ic_caijizhunbei);
             Drawable collecting = getResources().getDrawable(R.drawable.ic_caijizhong);
 
-            if (device.stat == 1) holder.selectButton.setImageDrawable(collect);
-            else if (device.stat == 2) holder.selectButton.setImageDrawable(collectReady);
+            if (device.stat == 2) holder.selectButton.setImageDrawable(collect);
+            else if (device.stat == 1) holder.selectButton.setImageDrawable(collectReady);
             else holder.selectButton.setImageDrawable(collecting);
 
             holder.selectButton.setOnClickListener(new View.OnClickListener() {
@@ -192,6 +200,36 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                     changeRecordCapture(deviceList.get(position).userId);
                 }
             });
+
+            // move
+            holder.upButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.e("move up", "moveup");
+//                    move(UP, device.ip);
+                }
+            });
+
+            holder.downButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                }
+            });
+
+            holder.leftButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                }
+            });
+
+            holder.rightButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                }
+            });
         }
 
 
@@ -205,12 +243,20 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         TextView mType;
         TextView mName;
         ImageView selectButton;
+        ImageView upButton;
+        ImageView downButton;
+        ImageView leftButton;
+        ImageView rightButton;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
             mType = itemView.findViewById(R.id.txt_mType);
             mName = itemView.findViewById(R.id.txt_mName);
             selectButton = itemView.findViewById(R.id.select_button);
+            upButton = itemView.findViewById(R.id.turn_up);
+            downButton = itemView.findViewById(R.id.turn_down);
+            leftButton = itemView.findViewById(R.id.turn_left);
+            rightButton = itemView.findViewById(R.id.turn_right);
         }
 
     }
@@ -263,6 +309,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                 | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         super.onCreate(savedInstanceState);
         RecordUtil.setControlActivityWeakRef(ControlActivity.this);
+        WifiServer.setControlActivityWeakRef(ControlActivity.this);
 //        setContentView(R.layout.wr_activity_chat_room);
         setContentView(R.layout.acticity_control);
 
@@ -279,6 +326,10 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         ru = new RecordUtil(getApplicationContext());
 
         RxFFmpegInvoke.getInstance().setDebug(true);
+    }
+
+    public Context getContext(){
+        return ControlActivity.this;
     }
 
     private void changeRecordCapture(String s) {
@@ -454,7 +505,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 //                    Toast.makeText(getApplicationContext(), "finish capturing", Toast.LENGTH_SHORT).show();
 //                });
 
-                ru.terminateVideo(_vfrs.get(myId), _localVideoTrack, rootEglBase, ControlActivity.this, false, false);
+                ru.terminateVideo(_vfrs.get(myId), _localVideoTrack, rootEglBase, ControlActivity.this, false, false, 1);
                 activateVideo = false;
                 TransferUtil.S2C("stop");
             }
