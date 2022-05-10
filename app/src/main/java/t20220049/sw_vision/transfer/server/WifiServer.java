@@ -242,7 +242,7 @@ public class WifiServer extends Thread {
 
             Log.e(TAG, "HJKLL");
             FileTransfer fileTransfer = (FileTransfer) objectInputStream.readObject();
-            Log.e(TAG, "待接收的文件: " + fileTransfer);
+            Log.e(TAG, "待接收的文件: " + fileTransfer.getFileName());
             String name = fileTransfer.getFileName();
 
             //将文件存储至指定位置
@@ -277,7 +277,6 @@ public class WifiServer extends Thread {
                 }
 
                 Log.e(TAG, "文件接收进度: " + progress);
-
 //                if (progressChangListener != null) {
 //                    progressChangListener.onProgressChanged(fileTransfer, progress);
 //                }
@@ -477,20 +476,26 @@ public class WifiServer extends Thread {
 
     public static void sendInstruction(String instruction, String clientIP) {
 
-        PrintWriter out;
-        System.out.println("this:" + clientIP);
-        for (MyClient c : clients) {
-            System.out.println(c.clientIP);
-            if (c.clientIP.equals(clientIP)) {
-                try {
-                    out = new PrintWriter(c.client.getOutputStream(), true);
-                    out.println(instruction);
-                    Log.i(TAG, "a instruction has sent.");
-                } catch (IOException e) {
-                    e.printStackTrace();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                PrintWriter out;
+                System.out.println("this:" + clientIP);
+                for (MyClient c : clients) {
+                    System.out.println(c.clientIP);
+                    if (c.clientIP.equals(clientIP)) {
+                        try {
+                            out = new PrintWriter(c.client.getOutputStream(), true);
+                            out.println(instruction);
+                            out.flush();
+                            Log.e(TAG, "a instruction has sent.");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
-        }
+        }).start();
 
     }
 }

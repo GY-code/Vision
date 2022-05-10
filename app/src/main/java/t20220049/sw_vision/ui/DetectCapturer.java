@@ -64,6 +64,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
 import t20220049.sw_vision.R;
+import t20220049.sw_vision.arm_controller.ControlCenter;
 
 public class DetectCapturer implements VideoCapturer {
     final String TAG = "DetectCapturer";
@@ -141,7 +142,8 @@ public class DetectCapturer implements VideoCapturer {
         @Override
         public void onError(CameraDevice camera, int error) {
             cameraOpenCloseLock.release();
-            cameraDevice.close();
+            if(cameraDevice!=null)
+                cameraDevice.close();
             cameraDevice = null;
         }
     };
@@ -316,16 +318,11 @@ public class DetectCapturer implements VideoCapturer {
             Log.e(TAG, "Detect face width: " + (double) x/width + ", height: " + (double) y/height);
             if (flag) {
                 flag = false;
-                moveArm((double)x/width, (double)y/height);
+                ControlCenter.getInstance().moveArm((double)x/width, (double)y/height);
             }
 //            System.out.println("fff" + 1 + 5);
             Imgproc.rectangle(mat, faceRect.tl(), faceRect.br(), faceRectColor, 1);
         }
-    }
-
-
-    private void moveArm(double x, double y) {
-
     }
 
 

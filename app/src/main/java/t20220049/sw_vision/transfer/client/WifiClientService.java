@@ -16,6 +16,7 @@ import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
+import t20220049.sw_vision.arm_controller.ControlCenter;
 import t20220049.sw_vision.transfer.common.Constants;
 import t20220049.sw_vision.ui.CollectActivity;
 import t20220049.sw_vision.ui.SendFileActivity;
@@ -72,6 +73,7 @@ public class WifiClientService extends IntentService {
                     if (instruction == null) {
                         continue;
                     }
+                    Log.e(TAG,"look: "+instruction);
                     switch (instruction) {
                         case "photo":
                             new Thread(() -> {
@@ -83,6 +85,18 @@ public class WifiClientService extends IntentService {
                             break;
                         case "stop":
                             CollectActivityWeakRef.get().CallSetVideoEnd(true, true);
+                            break;
+                        case "UP":
+                            ControlCenter.getInstance().moveUp();
+                            break;
+                        case "DOWN":
+                            ControlCenter.getInstance().moveDown();
+                            break;
+                        case "LEFT":
+                            ControlCenter.getInstance().moveLeft();
+                            break;
+                        case "RIGHT":
+                            ControlCenter.getInstance().moveRight();
                             break;
                     }
 

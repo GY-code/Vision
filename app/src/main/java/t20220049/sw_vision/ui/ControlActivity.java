@@ -213,29 +213,29 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             holder.upButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Log.e("move up", device.ip);
-//                    move(UP, device.ip);
+                    Log.e(TAG,"moveUp");
+                    WifiServer.sendInstruction("UP",device.ip);
                 }
             });
 
             holder.downButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    WifiServer.sendInstruction("DOWN",device.ip);
                 }
             });
 
             holder.leftButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    WifiServer.sendInstruction("LEFT",device.ip);
                 }
             });
 
             holder.rightButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    WifiServer.sendInstruction("RIGHT",device.ip);
                 }
             });
         }
@@ -468,12 +468,12 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 
     private void initListner() {
         // 转换摄像头
-        switch_camera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                switchCamera();
-            }
-        });
+//        switch_camera.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+////                switchCamera();
+//            }
+//        });
 
         // 挂断
         switch_hang_up.setOnClickListener(new View.OnClickListener() {
@@ -922,9 +922,9 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             }
         }
         manager.joinRoom(getApplicationContext(), rootEglBase);
-
-
     }
+
+
 
     @Override
     protected void onResume() {

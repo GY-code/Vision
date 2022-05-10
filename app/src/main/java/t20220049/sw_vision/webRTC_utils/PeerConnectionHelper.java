@@ -257,6 +257,7 @@ public class PeerConnectionHelper {
 //            captureAndroid = createVideoCapture();
 //            captureAndroid = createTestVideoCapture();
             captureAndroid = createDetectVideoCapture();
+
             // 视频
             surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", _rootEglBase.getEglBaseContext());
             videoSource = _factory.createVideoSource(captureAndroid.isScreencast());
