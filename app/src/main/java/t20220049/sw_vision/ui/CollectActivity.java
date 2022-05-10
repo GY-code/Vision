@@ -157,7 +157,7 @@ public class CollectActivity extends AppCompatActivity {
             local_view.init(rootEglBase.getEglBaseContext(), null);
             local_view.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
             local_view.setZOrderMediaOverlay(true);
-            local_view.setMirror(true);
+//            local_view.setMirror(true);
             localRender = new ProxyVideoSink();
             //远端图像初始化
             remote_view.init(rootEglBase.getEglBaseContext(), null);
@@ -261,7 +261,7 @@ public class CollectActivity extends AppCompatActivity {
         switch_camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                switchCamera();
+//                switchCamera();
 
             }
         });

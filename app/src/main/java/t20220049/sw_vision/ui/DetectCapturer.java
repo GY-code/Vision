@@ -162,7 +162,7 @@ public class DetectCapturer implements VideoCapturer {
 
             mProcessing = true;
 
-            Log.e(TAG, "enter image available");
+//            Log.e(TAG, "enter image available");
 
             // image to byte array
             ByteBuffer bb = image.getPlanes()[0].getBuffer();

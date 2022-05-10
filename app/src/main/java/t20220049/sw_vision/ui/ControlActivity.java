@@ -191,8 +191,8 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             Drawable collectReady = getResources().getDrawable(R.drawable.ic_caijizhunbei);
             Drawable collecting = getResources().getDrawable(R.drawable.ic_caijizhong);
 
-            if (device.stat == 2) holder.selectButton.setImageDrawable(collect);
-            else if (device.stat == 1) holder.selectButton.setImageDrawable(collectReady);
+            if (device.stat == 1) holder.selectButton.setImageDrawable(collect);
+            else if (device.stat == 2) holder.selectButton.setImageDrawable(collectReady);
             else holder.selectButton.setImageDrawable(collecting);
 
             holder.selectButton.setOnClickListener(new View.OnClickListener() {
@@ -471,7 +471,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         switch_camera.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                switchCamera();
+//                switchCamera();
             }
         });
 

@@ -306,7 +306,7 @@ public class RecordUtil {
 
     //存photo到文件系统
     public void savePhotoInLocal(Bitmap bitmap) {
-        Log.e(TAG, "save");
+        Log.e(TAG, "save in local");
         clearFile(localPhoto);
         File file = new File(localPhoto);
         try {
@@ -321,7 +321,7 @@ public class RecordUtil {
 
     //存photo到文件系统
     public void savePhotoInRemote(Bitmap bitmap) {
-        Log.e(TAG, "save");
+        Log.e(TAG, "save in remote");
         clearFile(localPhoto);
         File file = new File(remotePhotoPath + myId + ".png");
         try {
@@ -335,6 +335,7 @@ public class RecordUtil {
     }
 
     public void savePhoto2Gallery(Activity activity, Bitmap bitmap, String fileName) {
+        Log.e(TAG, "save in gallery");
         activity.runOnUiThread(() -> {
             Toast.makeText(context, "已保存图片到相册", Toast.LENGTH_SHORT).show();
         });
@@ -342,6 +343,7 @@ public class RecordUtil {
     }
 
     public void savePhoto2Gallery(Bitmap bitmap) {
+        Log.e(TAG, "save in gallery");
         MediaStore.Images.Media.insertImage(context.getContentResolver(), bitmap, getCurTimeStr(), getCurTimeStr());
     }
 
