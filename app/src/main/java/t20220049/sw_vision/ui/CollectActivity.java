@@ -109,6 +109,7 @@ public class CollectActivity extends AppCompatActivity {
             ReceiveWatchUtils.activeWatch();
             watchButton.setVisibility(View.VISIBLE);
         }
+        RecordUtil.setCollectActivityWeakRef(CollectActivity.this);
     }
 
 

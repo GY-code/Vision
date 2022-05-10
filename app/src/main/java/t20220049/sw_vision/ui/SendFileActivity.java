@@ -83,7 +83,7 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
 
     private static final int RETRY_TIMES = 3;
 
-//    private static final String TAG = BluetoothActivity.class.getSimpleName();
+    //    private static final String TAG = BluetoothActivity.class.getSimpleName();
     private boolean confirm;
 
     private ImageButton btStateBtn;
@@ -112,6 +112,7 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
             BLEService bleService = ((BLEService.BLEBinder) service).getService();
             BLEManager.getInstance().init(bleService);
         }
+
         @Override
         public void onServiceDisconnected(ComponentName name) {
             LogUtil.w(TAG, "BLE Service disconnected");
@@ -313,13 +314,13 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
                     setState(false);
                     break;
                 case t20220049.sw_vision.arm_controller.commen.Constants.MessageID.MSG_SEND_COMMAND:
-                    bleManager.send((ByteCommand)msg.obj);
+                    bleManager.send((ByteCommand) msg.obj);
                     Message sendMsg = mHandler.obtainMessage(t20220049.sw_vision.arm_controller.commen.Constants.MessageID.MSG_SEND_COMMAND, msg.arg1, -1, msg.obj);
                     mHandler.sendMessageDelayed(sendMsg, msg.arg1);
                     break;
 
                 case Constants.MessageID.MSG_SEND_NOT_CONNECT:
-                    Toast.makeText(getBaseContext(), R.string.send_tips_no_connected, Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(getBaseContext(), R.string.send_tips_no_connected, Toast.LENGTH_SHORT).show();
                     break;
             }
             return true;
@@ -433,7 +434,7 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
             showToast(mWifiP2pDevice.deviceName);
             connect();
         });
-        runOnUiThread(()->{
+        runOnUiThread(() -> {
             showToast("点击上方按钮搜索设备");
         });
         rv_deviceList.setAdapter(deviceAdapter);
@@ -472,12 +473,12 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
                 }
             });
         });
-        findViewById(R.id.playLayout).setOnClickListener(v->{
-            WebrtcUtil.callSingle(SendFileActivity.this, "ws://106.13.236.207:3000","123456", true,false);
+        findViewById(R.id.playLayout).setOnClickListener(v -> {
+            WebrtcUtil.callSingle(SendFileActivity.this, "ws://106.13.236.207:3000", "123456", true, false);
         });
 
-        final RippleBackground rippleBackground=(RippleBackground)findViewById(R.id.content);
-        ImageView imageView=(ImageView)findViewById(R.id.clientIcon);
+        final RippleBackground rippleBackground = (RippleBackground) findViewById(R.id.content);
+        ImageView imageView = (ImageView) findViewById(R.id.clientIcon);
         rippleBackground.startRippleAnimation();
 
         startLayout = findViewById(R.id.playLayout);
@@ -606,7 +607,8 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
     {
         ByteCommand.Builder builder = new ByteCommand.Builder();
         builder.addCommand(byteArray, 100);
-        bleManager.send(builder.createCommands());
+        if (bleManager != null)
+            bleManager.send(builder.createCommands());
     }
 
 //    public static void sendActionCmd(int index)//发送动作组命令
@@ -655,7 +657,7 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
                 Log.e(TAG, "文件路径：" + fileUri);
                 if (wifiP2pInfo != null) {
                     if (WifiClientService.socket != null)
-                        new WifiClientTask(this).execute(fileUri,"video");
+                        new WifiClientTask(this).execute(fileUri, "video");
 //                    new WifiClientTask(this).execute(wifiP2pInfo.groupOwnerAddress.getHostAddress(), fileUri);
                 }
             }
