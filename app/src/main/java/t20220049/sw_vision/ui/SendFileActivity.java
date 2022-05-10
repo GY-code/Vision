@@ -345,12 +345,12 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         connectTimes = 0;
 
-        findViewById(R.id.faceBtn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(SendFileActivity.this,TrackingActivity.class));
-            }
-        });
+//        findViewById(R.id.faceBtn).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                startActivity(new Intent(SendFileActivity.this,TrackingActivity.class));
+//            }
+//        });
         initView();
         initEvent();
     }
@@ -388,12 +388,12 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
 //                navToChosePicture(); //打开文件选择
 //            }
 //        };
-        findViewById(R.id.sendDebug).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                navToChosePicture();
-            }
-        });
+//        findViewById(R.id.sendDebug).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                navToChosePicture();
+//            }
+//        });
 
 //        findViewById(R.id.action1_btn).setOnClickListener(new View.OnClickListener() {
 //            @Override

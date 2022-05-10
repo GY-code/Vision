@@ -467,12 +467,12 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 
     private void initListner() {
         // 转换摄像头
-        switch_camera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                switchCamera();
-            }
-        });
+//        switch_camera.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+////                switchCamera();
+//            }
+//        });
 
         // 挂断
         switch_hang_up.setOnClickListener(new View.OnClickListener() {
@@ -637,7 +637,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         runOnUiThread(() -> {
             addView(userId, stream);
         });
-        switchCamera();
+//        switchCamera();
         toggleMic(false);
 
     }

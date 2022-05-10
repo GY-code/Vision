@@ -129,6 +129,7 @@ public class ControlCenter {
         updatePositionValue(cal(nextTopDegree),cal(lastBtmDegree));
         lastTopDegree = nextTopDegree;
         makeArmsMove();
+
     }
 
     public void moveDown(){
@@ -139,6 +140,7 @@ public class ControlCenter {
         updatePositionValue(cal(nextTopDegree),cal(lastBtmDegree));
         lastTopDegree = nextTopDegree;
         makeArmsMove();
+
     }
 
     public void moveLeft(){
@@ -149,6 +151,7 @@ public class ControlCenter {
         updatePositionValue(cal(lastTopDegree),cal(nextBtmDegree));
         lastBtmDegree = nextBtmDegree;
         makeArmsMove();
+
     }
 
     public void moveRight(){
@@ -159,5 +162,6 @@ public class ControlCenter {
         updatePositionValue(cal(lastTopDegree),cal(nextBtmDegree));
         lastBtmDegree = nextBtmDegree;
         makeArmsMove();
+
     }
 }

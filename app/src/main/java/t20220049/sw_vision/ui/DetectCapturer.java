@@ -140,7 +140,8 @@ public class DetectCapturer implements VideoCapturer {
         @Override
         public void onError(CameraDevice camera, int error) {
             cameraOpenCloseLock.release();
-            cameraDevice.close();
+            if(cameraDevice!=null)
+                cameraDevice.close();
             cameraDevice = null;
         }
     };
