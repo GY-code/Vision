@@ -441,10 +441,10 @@ public class PeerConnectionHelper {
     private VideoCapturer createTestVideoCapture() {
         return new TestCapturer(_context);
     }
-
     private VideoCapturer createDetectVideoCapture() {
         return new DetectCapturer(_context);
     }
+
 
 
     private VideoCapturer createVideoCapture() {
