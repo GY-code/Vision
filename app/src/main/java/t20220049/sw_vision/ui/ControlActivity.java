@@ -620,7 +620,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         userIdList.add(userId);
         streamList.add(stream);
 
-        currentIndex = 1;
+        currentIndex = 0;
 
         Device device = new Device();
 
@@ -670,6 +670,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     @Override
     public void onCloseWithId(String userId) {
         int pos = userIdList.indexOf(userId);
+        if (pos == -1) return;
         userIdList.remove(userId);
         streamList.remove(pos - 1);
         for (int i = 0; i < mDevicesList.size(); i++) {

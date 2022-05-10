@@ -41,6 +41,7 @@ import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
 import org.webrtc.Camera2Enumerator;
 import org.webrtc.CameraEnumerationAndroid;
+
 import org.webrtc.CapturerObserver;
 import org.webrtc.Logging;
 import org.webrtc.NV21Buffer;
@@ -85,6 +86,7 @@ public class DetectCapturer implements VideoCapturer {
     private Mat mImageGrab = new Mat();
     private CascadeClassifier classifier;
     private int mAbsoluteFaceSize = 0;
+    private boolean setSurfaceTextureHelper = false;
 
     private CameraCaptureSession.StateCallback sessionStateCallback = new CameraCaptureSession.StateCallback() {
         @Override
@@ -265,15 +267,18 @@ public class DetectCapturer implements VideoCapturer {
     }
 
     private void listenForTextureFrames() {
-        mSurfaceTextureHelper.startListening((VideoFrame frame) -> {
+        if (!setSurfaceTextureHelper) {
+            setSurfaceTextureHelper = true;
+            mSurfaceTextureHelper.startListening((VideoFrame frame) -> {
 
-            // Undo the mirror that the OS "helps" us with.
-            // http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
+                // Undo the mirror that the OS "helps" us with.
+                // http://developer.android.com/reference/android/hardware/Camera.html#setDisplayOrientation(int)
 
-            mCapturerObserver.onFrameCaptured(frame);
+                mCapturerObserver.onFrameCaptured(frame);
 
-            frame.release();
-        });
+                frame.release();
+            });
+        }
     }
 
     int count = 0;
@@ -371,19 +376,30 @@ public class DetectCapturer implements VideoCapturer {
     public void initialize(SurfaceTextureHelper surfaceTextureHelper, Context applicationContext, CapturerObserver capturerObserver) {
         this.mCapturerObserver = capturerObserver;
         this.mSurfaceTextureHelper = surfaceTextureHelper;
-        startBackgroundThread();
-        openCamera();
         listenForTextureFrames();
+//        startBackgroundThread();
+//        openCamera();
+//        listenForTextureFrames();
     }
 
     @Override
     public void startCapture(int width, int height, int framerate) {
-
+        startBackgroundThread();
+        openCamera();
     }
 
     @Override
     public void stopCapture() throws InterruptedException {
+        if (mCaptureSession != null) {
+            Logging.d(TAG, "Stop capture: Nulling session");
+            mCaptureSession.close();
+            cameraDevice.close();
+            mCaptureSession = null;
+            mCapturerObserver.onCapturerStopped();
 
+        } else {
+            Logging.d(TAG, "Stop capture: No session open");
+        }
     }
 
     @Override
