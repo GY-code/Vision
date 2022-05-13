@@ -378,30 +378,30 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
 //                navToChosePicture(); //打开文件选择
 //            }
 //        };
-        findViewById(R.id.sendDebug).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                navToChosePicture();
-            }
-        });
-        findViewById(R.id.action1_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sendActionCmd(1);
-            }
-        });
-        findViewById(R.id.action2_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sendActionCmd(2);
-            }
-        });
-        findViewById(R.id.action3_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                sendActionCmd(3);
-            }
-        });
+//        findViewById(R.id.sendDebug).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                navToChosePicture();
+//            }
+//        });
+//        findViewById(R.id.action1_btn).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                sendActionCmd(1);
+//            }
+//        });
+//        findViewById(R.id.action2_btn).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                sendActionCmd(2);
+//            }
+//        });
+//        findViewById(R.id.action3_btn).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                sendActionCmd(3);
+//            }
+//        });
 
         setTitle("发送文件");
         tv_myDeviceName = findViewById(R.id.tv_myDeviceName);
@@ -591,31 +591,38 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
         }
     }
 
-    private void sendActionCmd(int index)//发送动作组命令
+    public static void sendActionCmd(byte[] byteArray)//发送动作组命令
     {
-        Log.e(TAG,"cmd: "+index);
-        //帧头     length  type  num         timeLo timeHi id          posLo  posHi
-        byte[] byteArray1 = {0x55, 0x55, 0x08, 0x03, 0x01, (byte) 0xe8, 0x03, 0x01, (byte) 0xf4, 0x01};       //500
-        byte[] byteArray2 = {0x55, 0x55, 0x08, 0x03, 0x01, (byte) 0xd0, 0x07, 0x01, (byte) 0xdc, 0x05};       //1500
-        byte[] byteArray3 = {0x55, 0x55, 0x08, 0x03, 0x01, (byte) 0xb8, 0x0b, 0x01, (byte) 0xc4, 0x09};       //2500
-
-        //        byte[] byteArray = {0x55, 0x55, 0x05, 0x06, 0x00, 0x01, 0x00};
-//        byteArray[4] = (byte) (index & 0xff);
         ByteCommand.Builder builder = new ByteCommand.Builder();
-        switch (index) {
-            case 1:
-                builder.addCommand(byteArray1, 100);
-                break;
-            case 2:
-                builder.addCommand(byteArray2, 100);
-                break;
-            case 3:
-                builder.addCommand(byteArray3, 100);
-                break;
-        }
-//        builder.addCommand(byteArray, 100);
+        builder.addCommand(byteArray, 100);
         bleManager.send(builder.createCommands());
     }
+
+//    private void sendActionCmd(int index)//发送动作组命令
+//    {
+//        Log.e(TAG,"cmd: "+index);
+//        //帧头     length  type  num         timeLo timeHi id          posLo  posHi
+//        byte[] byteArray1 = {0x55, 0x55, 0x08, 0x03, 0x01, (byte) 0xe8, 0x03, 0x01, (byte) 0xf4, 0x01};       //500
+//        byte[] byteArray2 = {0x55, 0x55, 0x08, 0x03, 0x01, (byte) 0xd0, 0x07, 0x01, (byte) 0xdc, 0x05};       //1500
+//        byte[] byteArray3 = {0x55, 0x55, 0x08, 0x03, 0x01, (byte) 0xb8, 0x0b, 0x01, (byte) 0xc4, 0x09};       //2500
+//
+//        //        byte[] byteArray = {0x55, 0x55, 0x05, 0x06, 0x00, 0x01, 0x00};
+////        byteArray[4] = (byte) (index & 0xff);
+//        ByteCommand.Builder builder = new ByteCommand.Builder();
+//        switch (index) {
+//            case 1:
+//                builder.addCommand(byteArray1, 100);
+//                break;
+//            case 2:
+//                builder.addCommand(byteArray2, 100);
+//                break;
+//            case 3:
+//                builder.addCommand(byteArray3, 100);
+//                break;
+//        }
+////        builder.addCommand(byteArray, 100);
+//        bleManager.send(builder.createCommands());
+//    }
 
     private void setState(boolean isConnected) {//设置蓝牙状态图片
         LogUtil.i(TAG, "isConnected = " + isConnected);

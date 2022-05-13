@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import t20220049.sw_vision.transfer.client.WifiClientService;
 import t20220049.sw_vision.transfer.client.WifiClientTask;
 import t20220049.sw_vision.transfer.server.WifiServer;
+import t20220049.sw_vision.transfer.server.WifiServerService;
 
 public class TransferUtil {
     static ArrayList<WifiServer.MyClient> clients = WifiServer.clients;
@@ -14,10 +15,12 @@ public class TransferUtil {
     //采集端给控制端发送信息，先指令，后内容
     public static void C2S_UserID(String id) {
         new Thread(() -> {
-            WifiClientService.serverOut.println("userID");
-            WifiClientService.serverOut.flush();
-            WifiClientService.serverOut.println(id);
-            WifiClientService.serverOut.flush();
+            if (WifiClientService.serverOut != null) {
+                WifiClientService.serverOut.println("userID");
+                WifiClientService.serverOut.flush();
+                WifiClientService.serverOut.println(id);
+                WifiClientService.serverOut.flush();
+            }
         }).start();
     }
 
@@ -30,15 +33,15 @@ public class TransferUtil {
         }
     }
 
-    public static void C2S_Photo(String path, Context context){
-        if(WifiClientService.socket!=null){
-            new WifiClientTask(context,true).execute(path,"photo");
+    public static void C2S_Photo(String path, Context context) {
+        if (WifiClientService.socket != null) {
+            new WifiClientTask(context, true).execute(path, "photo");
         }
     }
 
-    public static void C2S_Video(String path, Context context){
-        if(WifiClientService.socket!=null){
-            new WifiClientTask(context,true).execute(path,"video");
+    public static void C2S_Video(String path, Context context) {
+        if (WifiClientService.socket != null) {
+            new WifiClientTask(context, true).execute(path, "video");
         }
     }
 }

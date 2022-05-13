@@ -140,9 +140,11 @@ public class DetectCapturer implements VideoCapturer {
 
         @Override
         public void onError(CameraDevice camera, int error) {
-            cameraOpenCloseLock.release();
-            cameraDevice.close();
-            cameraDevice = null;
+            if (cameraDevice != null) {
+                cameraOpenCloseLock.release();
+                cameraDevice.close();
+                cameraDevice = null;
+            }
         }
     };
 
@@ -219,22 +221,17 @@ public class DetectCapturer implements VideoCapturer {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
             }
             if (ActivityCompat.checkSelfPermission(_context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
+                Log.e(TAG, "Permission not get");
                 return;
             }
             manager.openCamera(cameraId, stateCallback, mBackgroundHandler);
+            Log.e(TAG, "openCamera 0");
         } catch (CameraAccessException e) {
             e.printStackTrace();
         } catch (final InterruptedException e) {
             throw new RuntimeException("Interrupted while trying to lock camera opening.", e);
         }
-        Log.e(TAG, "openCamera 0");
+
     }
 
     private void createCameraPreview() {
@@ -276,12 +273,16 @@ public class DetectCapturer implements VideoCapturer {
 
                 mCapturerObserver.onFrameCaptured(frame);
 
+
+
                 frame.release();
             });
         }
     }
 
     int count = 0;
+
+
 
     private void detectFace(Mat mat) {
         float mRelativeFaceSize = 0.2f;
@@ -301,8 +302,8 @@ public class DetectCapturer implements VideoCapturer {
         }
         MatOfRect faces = new MatOfRect();
         if (classifier != null)
-            classifier.detectMultiScale(gray, faces, 1.1, 2, 2,
-                    new Size(mAbsoluteFaceSize, mAbsoluteFaceSize), new Size());
+            classifier.detectMultiScale(gray, faces, 1.1, 3, 0,
+                    new Size(), new Size());
 
         Rect[] facesArray = faces.toArray();
         Scalar faceRectColor = new Scalar(0, 255, 0, 255);
@@ -384,6 +385,7 @@ public class DetectCapturer implements VideoCapturer {
 
     @Override
     public void startCapture(int width, int height, int framerate) {
+        Log.i(TAG, "start capture");
         startBackgroundThread();
         openCamera();
     }

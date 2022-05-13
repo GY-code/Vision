@@ -69,6 +69,7 @@ import org.webrtc.EglBase;
 import org.webrtc.EglRenderer;
 import org.webrtc.MediaStream;
 import org.webrtc.RendererCommon;
+import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoFileRenderer;
 import org.webrtc.VideoTrack;
@@ -213,29 +214,28 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             holder.upButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Log.e("move up", device.ip);
-//                    move(UP, device.ip);
+                    WifiServer.sendInstruction("UP",device.ip);
                 }
             });
 
             holder.downButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    WifiServer.sendInstruction("DOWN",device.ip);
                 }
             });
 
             holder.leftButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    WifiServer.sendInstruction("LEFT",device.ip);
                 }
             });
 
             holder.rightButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    WifiServer.sendInstruction("RIGHT",device.ip);
                 }
             });
         }
@@ -610,7 +610,8 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     }
 
     @Override
-    public void onSetLocalStream(MediaStream stream, String userId) {
+    public void onSetLocalStream(MediaStream stream, String userId, SurfaceTextureHelper surfaceTextureHelper) {
+
         List<VideoTrack> videoTracks = stream.videoTracks;
         if (videoTracks.size() > 0) {
             _localVideoTrack = videoTracks.get(0);
@@ -638,7 +639,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         runOnUiThread(() -> {
             addView(userId, stream);
         });
-//        switchCamera();
+        switchCamera();
         toggleMic(false);
 
     }

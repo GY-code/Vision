@@ -1,13 +1,16 @@
 package t20220049.sw_vision.ui;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.Log;
@@ -21,6 +24,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import t20220049.sw_vision.transfer.client.WifiClientService;
 import t20220049.sw_vision.transfer.client.WifiClientTask;
@@ -39,6 +43,7 @@ import org.opencv.android.OpenCVLoader;
 import org.webrtc.EglBase;
 import org.webrtc.MediaStream;
 import org.webrtc.RendererCommon;
+import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoFileRenderer;
 import org.webrtc.VideoTrack;
@@ -76,6 +81,10 @@ public class CollectActivity extends AppCompatActivity {
     private static RecordUtil ru;
     public static boolean activateVideo = false;
     private static final String TAG = "ChatSingleActivity";
+
+    private static final int REQUEST_CAMERA_PERMISSION = 200;
+
+    private Handler handler = new Handler();
 
     public static void openActivity(Activity activity, boolean videoEnable, boolean watchMode) {
         Intent intent = new Intent(activity, CollectActivity.class);
@@ -159,11 +168,13 @@ public class CollectActivity extends AppCompatActivity {
             local_view.setZOrderMediaOverlay(true);
             local_view.setMirror(true);
             localRender = new ProxyVideoSink();
+            localRender.setDetect(true);
             //远端图像初始化
             remote_view.init(rootEglBase.getEglBaseContext(), null);
             remote_view.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_BALANCED);
             remote_view.setMirror(true);
             remoteRender = new ProxyVideoSink();
+
 //            setSwappedFeeds(true);
             //后加
             setSwappedFeeds(false);
@@ -305,11 +316,14 @@ public class CollectActivity extends AppCompatActivity {
         manager = WebRTCManager.getInstance();
         manager.setCallback(new IViewCallback() {
             @Override
-            public void onSetLocalStream(MediaStream stream, String socketId) {
+            public void onSetLocalStream(MediaStream stream, String socketId, SurfaceTextureHelper surfaceTextureHelper) {
+
+                localRender.setSurfaceHandler(surfaceTextureHelper.getHandler());
 
                 if (stream.videoTracks.size() > 0) {
                     stream.videoTracks.get(0).addSink(localRender);
                     localTrack = stream.videoTracks.get(0);
+
                 }
                 RecordUtil.setMyId(socketId);
                 try {
@@ -321,7 +335,7 @@ public class CollectActivity extends AppCompatActivity {
                 if (videoEnable) {
                     stream.videoTracks.get(0).setEnabled(true);
                 }
-//                switchCamera();
+                switchCamera();
                 toggleMic(false);
             }
 
@@ -457,6 +471,15 @@ public class CollectActivity extends AppCompatActivity {
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, null);
         } else {
             Log.d("OpenCV", "OpenCV library found inside package. Using it!");
+        }
+        if (ActivityCompat.checkSelfPermission(CollectActivity.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(CollectActivity.this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+            AlertDialog.Builder builder = new AlertDialog.Builder(CollectActivity.this);
+            builder.setTitle("Camera permission required");
+            builder.setMessage("This app uses camera only for object tracking and sent the object location to your BLE connected device, the information from your camera is not sent or collected anywhere else");
+            builder.setPositiveButton(android.R.string.ok,
+                    (dialog, which) -> requestPermissions(new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION));
+            builder.show();
         }
     }
 }

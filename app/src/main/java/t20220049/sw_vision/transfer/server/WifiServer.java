@@ -476,21 +476,24 @@ public class WifiServer extends Thread {
     }
 
     public static void sendInstruction(String instruction, String clientIP) {
-
-        PrintWriter out;
-        System.out.println("this:" + clientIP);
-        for (MyClient c : clients) {
-            System.out.println(c.clientIP);
-            if (c.clientIP.equals(clientIP)) {
-                try {
-                    out = new PrintWriter(c.client.getOutputStream(), true);
-                    out.println(instruction);
-                    Log.i(TAG, "a instruction has sent.");
-                } catch (IOException e) {
-                    e.printStackTrace();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                PrintWriter out;
+                System.out.println("this:" + clientIP);
+                for (MyClient c : clients) {
+                    System.out.println(c.clientIP);
+                    if (c.clientIP.equals(clientIP)) {
+                        try {
+                            out = new PrintWriter(c.client.getOutputStream(), true);
+                            out.println(instruction);
+                            Log.i(TAG, "a instruction has sent.");
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
             }
-        }
-
+        }).start();
     }
 }
