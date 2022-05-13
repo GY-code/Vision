@@ -142,7 +142,7 @@ public class CameraService extends Service implements SurfaceHolder.Callback {
 
 
     Camera mCamera; //可以用来对打开的摄像头进行关闭，释放
-    private int mCameraId = 1;
+    private int mCameraId = 0;
     MediaRecorder mMediaRecorder = new MediaRecorder();
     boolean isRecord = false;
 

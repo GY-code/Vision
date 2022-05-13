@@ -212,6 +212,7 @@ public class ReceiveFileActivity extends BaseActivity {
         if (ActivityCompat.checkSelfPermission(ReceiveFileActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+
         removeGroup();
         //建立群组
         wifiP2pManager.createGroup(channel, new WifiP2pManager.ActionListener() {
@@ -226,7 +227,7 @@ public class ReceiveFileActivity extends BaseActivity {
             public void onFailure(int reason) {
                 log("createGroup onFailure: " + reason);
                 dismissLoadingDialog();
-                refresh();
+//                refresh();
                 showToast("正在重试...");
             }
         });
@@ -317,7 +318,7 @@ public class ReceiveFileActivity extends BaseActivity {
             public void onFailure(int reason) {
                 log("createGroup onFailure: " + reason);
                 dismissLoadingDialog();
-                refresh();
+//                refresh();
                 showToast("正在重试...");
             }
         });

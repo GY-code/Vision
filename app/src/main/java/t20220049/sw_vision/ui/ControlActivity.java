@@ -192,8 +192,8 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             Drawable collectReady = getResources().getDrawable(R.drawable.ic_caijizhunbei);
             Drawable collecting = getResources().getDrawable(R.drawable.ic_caijizhong);
 
-            if (device.stat == 2) holder.selectButton.setImageDrawable(collect);
-            else if (device.stat == 1) holder.selectButton.setImageDrawable(collectReady);
+            if (device.stat == 1) holder.selectButton.setImageDrawable(collect);
+            else if (device.stat == 2) holder.selectButton.setImageDrawable(collectReady);
             else holder.selectButton.setImageDrawable(collecting);
 
             holder.selectButton.setOnClickListener(new View.OnClickListener() {
@@ -214,6 +214,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             holder.upButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    Log.e(TAG,"moveUp");
                     WifiServer.sendInstruction("UP",device.ip);
                 }
             });
@@ -468,12 +469,12 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 
     private void initListner() {
         // 转换摄像头
-        switch_camera.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                switchCamera();
-            }
-        });
+//        switch_camera.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+////                switchCamera();
+//            }
+//        });
 
         // 挂断
         switch_hang_up.setOnClickListener(new View.OnClickListener() {
@@ -923,9 +924,9 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             }
         }
         manager.joinRoom(getApplicationContext(), rootEglBase);
-
-
     }
+
+
 
     @Override
     protected void onResume() {

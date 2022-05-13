@@ -7,15 +7,18 @@ import t20220049.sw_vision.ui.SendFileActivity;
 public class ControlCenter {
 
     private int count = 0;
+
     private final static ControlCenter INSTANCE = new ControlCenter();
     private ControlCenter(){}
     public static ControlCenter getInstance(){
         return INSTANCE;
     }
 
+
     //arm control
     private int btmKp = 4;
     private int topKp = 4;
+
     private double offsetX;
     private double offsetY;
     private double offsetDeadBlock = 0.1; //偏移量死区大小
@@ -24,6 +27,7 @@ public class ControlCenter {
     public static final String TAG = "ControlCenter";
 
     //十六进制
+
     //500~2500: 0x01f4~0x09c4
     //常量
     final byte FRAME_HEAD = 0x55;
@@ -36,6 +40,7 @@ public class ControlCenter {
     byte positionLow1 = (byte)0xdc;
     byte positionHigh1 = (byte)0x05;
 
+
     byte servoId2 = 0x02;
     byte positionLow2 = (byte)0xdc;
     byte positionHigh2 = (byte)0x05;
@@ -45,6 +50,7 @@ public class ControlCenter {
     /*
      * 根据offsetX返回更新后的下舵机角度（十进制映射到500-2500）
      * */
+
     private int calBtmServoDegree(){
         //设置阈值
         if (Math.abs(offsetX) < offsetDeadBlock) {
@@ -71,6 +77,7 @@ public class ControlCenter {
     * 根据offsetY返回更新后的上舵机角度（十进制映射到500-2500）
     * */
      private int calTopServoDegree(){
+
         //设置阈值
         if (Math.abs(offsetY) < offsetDeadBlock) {
             offsetY = 0;
@@ -80,6 +87,7 @@ public class ControlCenter {
         Log.e(TAG,"deltaTop: "+deltaDegree);
         //计算更新的顶部舵机角度
         double nextTopDegree = lastTopDegree - deltaDegree;
+
         Log.e(TAG,"nTop: "+nextTopDegree);
         //边界检测
         if(nextTopDegree < 0){
@@ -103,6 +111,7 @@ public class ControlCenter {
         if (count % 3 != 0){
              return;
         }
+
         x = 1 - x;
         offsetX = (x - 0.5) * 2;
         offsetY = (y - 0.5) * 2;
@@ -117,6 +126,7 @@ public class ControlCenter {
     /*
     * 更新舵机角度（十六进制）
     * */
+
     private void updatePositionValue(int nextTopDegree,int nextBtmDegree){
         //1500
         positionHigh1 = (byte) (nextTopDegree >> 8);
@@ -142,6 +152,7 @@ public class ControlCenter {
              TIME_LOW = (byte) 0x20;
              TIME_HIGH = (byte) 0x03;
         }
+
         byte[] bytes = {
                 FRAME_HEAD,FRAME_HEAD,FRAME_LENGTH,FRAME_TYPE,SERVO_NUM,TIME_LOW,TIME_HIGH,
                 servoId1,positionLow1,positionHigh1,
@@ -156,6 +167,7 @@ public class ControlCenter {
 
     public void moveUp(){
         int nextTopDegree = lastTopDegree - 15;
+
         if(nextTopDegree < 0){
             nextTopDegree = 0;
         }
@@ -166,6 +178,7 @@ public class ControlCenter {
 
     public void moveDown(){
         int nextTopDegree = lastTopDegree + 15;
+
         if(nextTopDegree > 180){
             nextTopDegree = 180;
         }
@@ -176,6 +189,7 @@ public class ControlCenter {
 
     public void moveLeft(){
         int nextBtmDegree = lastBtmDegree + 15;
+
         if(nextBtmDegree > 180){
             nextBtmDegree = 180;
         }
@@ -186,11 +200,13 @@ public class ControlCenter {
 
     public void moveRight(){
         int nextBtmDegree = lastBtmDegree - 15;
+
         if(nextBtmDegree < 0){
             nextBtmDegree = 0;
         }
         updatePositionValue(cal(lastTopDegree),cal(nextBtmDegree));
         lastBtmDegree = nextBtmDegree;
         makeArmsMove(MOVE_STATE);
+
     }
 }

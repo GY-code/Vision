@@ -56,6 +56,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 //import t20220049.sw_vision.arm_controller.BluetoothActivity;
+import t20220049.sw_vision.arm_controller.ControlCenter;
 import t20220049.sw_vision.arm_controller.commen.Constants;
 import t20220049.sw_vision.arm_controller.connect.BLEManager;
 import t20220049.sw_vision.arm_controller.connect.BLEService;
@@ -287,6 +288,8 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
                     LogUtil.i(TAG, "connected ");
 //                    setState(R.string.bluetooth_state_connected);
                     Toast.makeText(getBaseContext(), R.string.bluetooth_state_connected, Toast.LENGTH_SHORT).show();
+//                    ControlCenter.getInstance().updatePosition((byte) 0x00,(byte) 0x00,(byte) 0xdc,(byte) 0x05);
+//                    ControlCenter.getInstance().makeArmsMove();
                     setState(true);
                     break;
                 case t20220049.sw_vision.arm_controller.commen.Constants.MessageID.MSG_CONNECT_FAILURE:
@@ -341,6 +344,13 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
         // Get local Bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         connectTimes = 0;
+
+//        findViewById(R.id.faceBtn).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                startActivity(new Intent(SendFileActivity.this,TrackingActivity.class));
+//            }
+//        });
         initView();
         initEvent();
     }

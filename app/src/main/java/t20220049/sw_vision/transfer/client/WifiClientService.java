@@ -73,6 +73,7 @@ public class WifiClientService extends IntentService {
                     if (instruction == null) {
                         continue;
                     }
+                    Log.e(TAG,"look: "+instruction);
                     switch (instruction) {
                         case "photo":
                             new Thread(() -> {

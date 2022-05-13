@@ -133,10 +133,11 @@ public class WifiClientTask extends AsyncTask<Object, Integer, Boolean> {
                 outputFilePath = params[0].toString();
             }
             File outputFile = new File(outputFilePath);
-
+            Log.e(TAG,"path: "+outputFilePath);
             //将文件转化为对象
             FileTransfer fileTransfer = new FileTransfer();
             String fileName = outputFile.getName();
+            Log.e(TAG,"fileName: "+fileName);
             String fileMa5 = Md5Util.getMd5(outputFile);
             long fileLength = outputFile.length();
             fileTransfer.setFileName(fileName);

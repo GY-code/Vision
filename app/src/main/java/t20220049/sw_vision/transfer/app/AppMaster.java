@@ -6,7 +6,6 @@ import t20220049.sw_vision.transfer.MyApplication;
 
 public class AppMaster implements IApp {
 
-
     @Override
     public Context getAppContext() {
         if (app == null) {
@@ -14,7 +13,6 @@ public class AppMaster implements IApp {
         }
         return app.getApplicationContext();
     }
-
 
     public void setApp(MyApplication app) {
         this.app = app;

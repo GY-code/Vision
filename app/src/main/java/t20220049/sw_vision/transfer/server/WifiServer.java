@@ -242,7 +242,7 @@ public class WifiServer extends Thread {
 
             Log.e(TAG, "HJKLL");
             FileTransfer fileTransfer = (FileTransfer) objectInputStream.readObject();
-            Log.e(TAG, "待接收的文件: " + fileTransfer);
+            Log.e(TAG, "待接收的文件: " + fileTransfer.getFileName());
             String name = fileTransfer.getFileName();
 
             //将文件存储至指定位置
@@ -277,7 +277,6 @@ public class WifiServer extends Thread {
                 }
 
                 Log.e(TAG, "文件接收进度: " + progress);
-
 //                if (progressChangListener != null) {
 //                    progressChangListener.onProgressChanged(fileTransfer, progress);
 //                }
@@ -476,6 +475,7 @@ public class WifiServer extends Thread {
     }
 
     public static void sendInstruction(String instruction, String clientIP) {
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -487,7 +487,8 @@ public class WifiServer extends Thread {
                         try {
                             out = new PrintWriter(c.client.getOutputStream(), true);
                             out.println(instruction);
-                            Log.i(TAG, "a instruction has sent.");
+                            out.flush();
+                            Log.e(TAG, "a instruction has sent.");
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
