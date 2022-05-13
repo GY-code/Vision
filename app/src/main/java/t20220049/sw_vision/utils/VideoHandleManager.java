@@ -104,6 +104,13 @@ public class VideoHandleManager {
             if (file.exists() && file.isFile()) file.delete();
         }
 
+        for (int i = 0; i < fragments.size(); i++) {
+            VideoFragment fragment = fragments.get(i);
+            String sourcePath = srcDir + fragment.filename;
+            file = new File(sourcePath);
+            if (file.exists() && file.isFile()) file.delete();
+        }
+
         Log.e("zsy", "FFMPEG finish working!");
 
     }

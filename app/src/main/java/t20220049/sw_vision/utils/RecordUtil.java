@@ -231,7 +231,7 @@ public class RecordUtil {
         mCurrentVideoValues.put(MediaStore.Video.Media.DATE_TAKEN, dateTaken);
         mCurrentVideoValues.put(MediaStore.MediaColumns.DATE_MODIFIED, dateTaken / 1000);
         mCurrentVideoValues.put(MediaStore.Video.Media.MIME_TYPE, mime);
-        mCurrentVideoValues.put(MediaStore.Video.Media.DATA, file.getAbsolutePath());
+//        mCurrentVideoValues.put(MediaStore.Video.Media.DATA, file.getAbsolutePath());
         mCurrentVideoValues.put(MediaStore.Video.Media.WIDTH, nVideoWidth);
         mCurrentVideoValues.put(MediaStore.Video.Media.HEIGHT, nVideoHeight);
         mCurrentVideoValues.put(MediaStore.Video.Media.RESOLUTION, Integer.toString(nVideoWidth) + "x" + Integer.toString(nVideoHeight));

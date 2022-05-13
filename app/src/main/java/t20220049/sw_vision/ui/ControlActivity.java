@@ -69,6 +69,7 @@ import org.webrtc.EglBase;
 import org.webrtc.EglRenderer;
 import org.webrtc.MediaStream;
 import org.webrtc.RendererCommon;
+import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoFileRenderer;
 import org.webrtc.VideoTrack;
@@ -610,7 +611,8 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     }
 
     @Override
-    public void onSetLocalStream(MediaStream stream, String userId) {
+    public void onSetLocalStream(MediaStream stream, String userId, SurfaceTextureHelper surfaceTextureHelper) {
+
         List<VideoTrack> videoTracks = stream.videoTracks;
         if (videoTracks.size() > 0) {
             _localVideoTrack = videoTracks.get(0);
@@ -638,7 +640,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         runOnUiThread(() -> {
             addView(userId, stream);
         });
-//        switchCamera();
+        switchCamera();
         toggleMic(false);
 
     }
