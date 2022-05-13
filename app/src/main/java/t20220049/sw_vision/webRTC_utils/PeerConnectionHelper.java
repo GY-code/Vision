@@ -188,7 +188,6 @@ public class PeerConnectionHelper {
 
     public void onRemoteOutRoom(String socketId) {
         executor.execute(() -> closePeerConnection(socketId));
-
     }
 
     public void onReceiveOffer(String socketId, String description) {
@@ -254,12 +253,12 @@ public class PeerConnectionHelper {
 
         if (videoEnable) {
             //创建需要传入设备的名称
-//            captureAndroid = createVideoCapture();
+            captureAndroid = createVideoCapture();
 //            captureAndroid = createTestVideoCapture();
-            captureAndroid = createDetectVideoCapture();
-
+//            captureAndroid = createDetectVideoCapture();
             // 视频
             surfaceTextureHelper = SurfaceTextureHelper.create("CaptureThread", _rootEglBase.getEglBaseContext());
+
             videoSource = _factory.createVideoSource(captureAndroid.isScreencast());
             if (_mediaType == MediaType.TYPE_MEETING) {
                 // videoSource.adaptOutputFormat(200, 200, 15);
@@ -272,7 +271,7 @@ public class PeerConnectionHelper {
 
 
         if (viewCallback != null) {
-            viewCallback.onSetLocalStream(_localStream, _myId);
+            viewCallback.onSetLocalStream(_localStream, _myId, surfaceTextureHelper);
         }
 
     }

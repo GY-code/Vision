@@ -496,6 +496,5 @@ public class WifiServer extends Thread {
                 }
             }
         }).start();
-
     }
 }

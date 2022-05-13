@@ -19,6 +19,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior;
 
 import org.webrtc.EglBase;
 import org.webrtc.MediaStream;
+import org.webrtc.SurfaceTextureHelper;
 import org.webrtc.SurfaceViewRenderer;
 import org.webrtc.VideoTrack;
 
@@ -48,7 +49,7 @@ public class ControlVideo extends AppCompatActivity implements IViewCallback {
     private EglBase rootEglBase;
 
     @Override
-    public void onSetLocalStream(MediaStream stream, String socketId) {
+    public void onSetLocalStream(MediaStream stream, String socketId, SurfaceTextureHelper surfaceTextureHelper) {
 
     }
 

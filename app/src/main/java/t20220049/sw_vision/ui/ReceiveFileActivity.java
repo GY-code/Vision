@@ -220,7 +220,7 @@ public class ReceiveFileActivity extends BaseActivity {
             public void onSuccess() {
                 log("createGroup onSuccess");
                 dismissLoadingDialog();
-//                showToast("onSuccess");
+                showToast("onSuccess");
             }
 
             @Override
@@ -311,7 +311,7 @@ public class ReceiveFileActivity extends BaseActivity {
             public void onSuccess() {
                 log("createGroup onSuccess");
                 dismissLoadingDialog();
-//                    showToast("onSuccess");
+                    showToast("onSuccess");
             }
 
             @Override

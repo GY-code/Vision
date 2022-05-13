@@ -394,7 +394,6 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
 //                navToChosePicture();
 //            }
 //        });
-
 //        findViewById(R.id.action1_btn).setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {
@@ -609,10 +608,10 @@ public class SendFileActivity extends BaseActivity implements SearchDialog.OnDev
         bleManager.send(builder.createCommands());
     }
 
-//    public static void sendActionCmd(int index)//发送动作组命令
+//    private void sendActionCmd(int index)//发送动作组命令
 //    {
 //        Log.e(TAG,"cmd: "+index);
-//        //帧头       length  type  num         timeLo timeHi id          posLo  posHi
+//        //帧头     length  type  num         timeLo timeHi id          posLo  posHi
 //        byte[] byteArray1 = {0x55, 0x55, 0x08, 0x03, 0x01, (byte) 0xe8, 0x03, 0x01, (byte) 0xf4, 0x01};       //500
 //        byte[] byteArray2 = {0x55, 0x55, 0x08, 0x03, 0x01, (byte) 0xd0, 0x07, 0x01, (byte) 0xdc, 0x05};       //1500
 //        byte[] byteArray3 = {0x55, 0x55, 0x08, 0x03, 0x01, (byte) 0xb8, 0x0b, 0x01, (byte) 0xc4, 0x09};       //2500
