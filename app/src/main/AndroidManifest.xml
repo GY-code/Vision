@@ -140,18 +140,16 @@
             android:configChanges="orientation|smallestScreenSize|screenSize|screenLayout"
             android:launchMode="singleInstance"
             android:screenOrientation="fullUser"
-            android:theme="@style/Theme.Design.NoActionBar" />
+            android:theme="@style/Theme.Design.NoActionBar" >
+        </activity>
+
         <activity
             android:name=".ui.CollectActivity"
             android:configChanges="orientation|smallestScreenSize|screenSize|screenLayout"
             android:launchMode="singleInstance"
             android:screenOrientation="fullUser"
             android:theme="@style/Theme.Design.NoActionBar" >
-<!--                <intent-filter>-->
-<!--                    <action android:name="android.intent.action.MAIN" />-->
 
-<!--                    <category android:name="android.intent.category.LAUNCHER" />-->
-<!--                </intent-filter>-->
         </activity>
 
         <service

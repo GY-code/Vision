@@ -38,6 +38,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import t20220049.sw_vision.transfer.app.AppMaster;
 import t20220049.sw_vision.transfer.client.WifiClientService;
 import t20220049.sw_vision.transfer.common.Constants;
 import t20220049.sw_vision.transfer.model.FileTransfer;
@@ -413,8 +414,10 @@ public class WifiServer extends Thread {
                                     "output.mp4",
                                     RecordUtil.remoteVideoPath);
 
-                    RecordUtil util = new RecordUtil(ContextUtils.getApplicationContext());
-                    util.saveVideo2Gallery(RecordUtil.remoteVideoPath + "output.mp4", ContextUtils.getApplicationContext());
+//                    RecordUtil util = new RecordUtil(ContextUtils.getApplicationContext());
+                    RecordUtil util = new RecordUtil(AppMaster.getInstance().getAppContext());
+//                    util.saveVideo2Gallery(RecordUtil.remoteVideoPath + "output.mp4", ContextUtils.getApplicationContext());
+                    util.saveVideo2Gallery(RecordUtil.remoteVideoPath + "output.mp4", AppMaster.getInstance().getAppContext());
                     RecordUtil.ControlActivityWeakRef.get().runOnUiThread(() -> {
                         Toast.makeText(RecordUtil.ControlActivityWeakRef.get().getApplicationContext(), "已将融合视频存储在相册", Toast.LENGTH_SHORT).show();
                     });

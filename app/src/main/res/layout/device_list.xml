@@ -100,6 +100,15 @@
             android:layout_marginLeft="10dp"
             android:src="@drawable/right">
         </ImageView>
+
+        <ImageView
+            android:id="@+id/switch_face_detect"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_weight="1"
+            android:layout_marginLeft="10dp"
+            android:src="@drawable/switch_on">
+        </ImageView>
     </LinearLayout>
 
 </LinearLayout>

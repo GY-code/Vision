@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.DrawableWrapper;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.SystemClock;
@@ -147,6 +148,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         String userId;
         String ip;
         int stat; // 1 collect, 2 collectReady, 3 collecting
+        int face_detect;    //  1 switch on, 0 switch off
     }
 
 
@@ -186,15 +188,21 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                 holder.downButton.setVisibility(View.GONE);
                 holder.leftButton.setVisibility(View.GONE);
                 holder.rightButton.setVisibility(View.GONE);
+                holder.switchButton.setVisibility(View.GONE);
             }
 
             Drawable collect = getResources().getDrawable(R.drawable.ic_caiji);
             Drawable collectReady = getResources().getDrawable(R.drawable.ic_caijizhunbei);
             Drawable collecting = getResources().getDrawable(R.drawable.ic_caijizhong);
+            Drawable switchOn = getResources().getDrawable(R.drawable.switch_on);
+            Drawable switchOff = getResources().getDrawable(R.drawable.switch_off);
 
             if (device.stat == 1) holder.selectButton.setImageDrawable(collect);
             else if (device.stat == 2) holder.selectButton.setImageDrawable(collectReady);
             else holder.selectButton.setImageDrawable(collecting);
+
+//            if (device.face_detect == 1) holder.switchButton.setImageDrawable(switchOn);
+//            else if (device.face_detect == 0) holder.switchButton.setImageDrawable(switchOff);
 
             holder.selectButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -239,6 +247,21 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                     WifiServer.sendInstruction("RIGHT",device.ip);
                 }
             });
+
+            holder.switchButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if(device.face_detect == 0) {
+                        holder.switchButton.setImageDrawable(switchOn);
+                        device.face_detect = 1;
+                    }
+                    else if(device.face_detect == 1){
+                        holder.switchButton.setImageDrawable(switchOff);
+                        device.face_detect = 0;
+                    }
+
+                }
+            });
         }
 
 
@@ -256,6 +279,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         ImageView downButton;
         ImageView leftButton;
         ImageView rightButton;
+        ImageView switchButton;
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -266,6 +290,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             downButton = itemView.findViewById(R.id.turn_down);
             leftButton = itemView.findViewById(R.id.turn_left);
             rightButton = itemView.findViewById(R.id.turn_right);
+            switchButton = itemView.findViewById(R.id.switch_face_detect);
         }
 
     }
@@ -434,6 +459,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         device.userId = "_all";
         device.ip = "";
         device.stat = 1;
+        device.face_detect = 1;
 
 //        mDevicesList.add(device);
 

@@ -108,6 +108,7 @@ public class CollectActivity extends AppCompatActivity {
 //        setContentView(R.layout.wr_activity_chat_single);
         setContentView(R.layout.activity_collect);
         WifiClientTask.setCollectActivityWeakRef(CollectActivity.this);
+        RecordUtil.setCollectActivityWeakRef(CollectActivity.this);
         initVar();
         initListener();
         initService();
