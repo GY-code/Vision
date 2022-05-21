@@ -4,10 +4,12 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.os.Build;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
@@ -19,8 +21,10 @@ import org.webrtc.VideoFileRenderer;
 import org.webrtc.VideoTrack;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
@@ -195,7 +199,7 @@ public class RecordUtil {
         mCurrentVideoValues.put(MediaStore.Video.Media.DATE_TAKEN, dateTaken);
         mCurrentVideoValues.put(MediaStore.MediaColumns.DATE_MODIFIED, dateTaken / 1000);
         mCurrentVideoValues.put(MediaStore.Video.Media.MIME_TYPE, mime);
-        mCurrentVideoValues.put(MediaStore.Video.Media.DATA, videoPath);
+//        mCurrentVideoValues.put(MediaStore.Video.Media.DATA, videoPath);
         mCurrentVideoValues.put(MediaStore.Video.Media.WIDTH, nVideoWidth);
         mCurrentVideoValues.put(MediaStore.Video.Media.HEIGHT, nVideoHeight);
         mCurrentVideoValues.put(MediaStore.Video.Media.RESOLUTION, Integer.toString(nVideoWidth) + "x" + Integer.toString(nVideoHeight));
@@ -228,6 +232,26 @@ public class RecordUtil {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 获取视频 contentValue
+     * @param paramFile
+     * @param paramLong
+     * @return
+     */
+    public static ContentValues getVideoContentValues(File paramFile, long paramLong) {
+        ContentValues localContentValues = new ContentValues();
+        localContentValues.put("title", paramFile.getName());
+        localContentValues.put("_display_name", paramFile.getName());
+        localContentValues.put("mime_type", "video/mp4");
+        localContentValues.put("datetaken", Long.valueOf(paramLong));
+        localContentValues.put("date_modified", Long.valueOf(paramLong));
+        localContentValues.put("date_added", Long.valueOf(paramLong));
+        localContentValues.put("_data", paramFile.getAbsolutePath());
+        localContentValues.put("_size", Long.valueOf(paramFile.length()));
+        return localContentValues;
+    }
+
 
     //照一张本地缩略图片
     public void catchPhoto(Activity activity, SurfaceViewRenderer mySurfaceViewRenderer) {
