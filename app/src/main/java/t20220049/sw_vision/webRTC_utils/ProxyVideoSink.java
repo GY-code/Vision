@@ -52,7 +52,7 @@ import t20220049.sw_vision.transfer.app.AppMaster;
  * Created by GuYi on 2022/4/4.
  * android_shuai@163.com
  */
-public class ProxyVideoSink implements VideoSink {
+public class ProxyVideoSink implements mVideoSink {
     private static final String TAG = "dds_ProxyVideoSink";
     private VideoSink target;
     private YuvConverter yuvConverter = new YuvConverter();
@@ -88,15 +88,11 @@ public class ProxyVideoSink implements VideoSink {
             return;
         }
 
+        frame = convertFrame(frame);
 
-
-        if (isDetect) {
-            frame = convertFrame(frame);
-
-            if (!isClassifierInit) {
-                isClassifierInit = true;
-                initFaceClassifier();
-            }
+        if (!isClassifierInit) {
+            isClassifierInit = true;
+            initFaceClassifier();
         }
 
 
@@ -226,7 +222,7 @@ public class ProxyVideoSink implements VideoSink {
         try {
             Log.e(TAG, "initFaceClassifier");
             InputStream is = _context.getResources()
-                    .openRawResource(R.raw.lbpcascade_frontalface_improved);
+                    .openRawResource(R.raw.haarcascade_frontalface_alt2);
             File cascadeDir = _context.getDir("cascade", Context.MODE_PRIVATE);
             File cascadeFile = new File(cascadeDir, "lbpcascade_frontalface.xml");
             FileOutputStream os = new FileOutputStream(cascadeFile);

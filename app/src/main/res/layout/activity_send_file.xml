@@ -187,36 +187,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/sendDebug"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="debug" />
-
-            <Button
-                android:id="@+id/action1_btn"
-                android:layout_width="67dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:text="1" />
-
-            <Button
-                android:id="@+id/action2_btn"
-                android:layout_width="64dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:text="2" />
-
-            <Button
-                android:id="@+id/action3_btn"
-                android:layout_width="71dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="10dp"
-                android:text="3" />
-
-        </LinearLayout>
+            android:orientation="horizontal"/>
 
         <TextView
             android:layout_width="match_parent"

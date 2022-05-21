@@ -36,8 +36,10 @@ import t20220049.sw_vision.webRTC_utils.IViewCallback;
 import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
 import t20220049.sw_vision.webRTC_utils.ProxyVideoSink;
 import t20220049.sw_vision.R;
+import t20220049.sw_vision.webRTC_utils.RawVideoSink;
 import t20220049.sw_vision.webRTC_utils.WebRTCManager;
 import t20220049.sw_vision.utils.PermissionUtil;
+import t20220049.sw_vision.webRTC_utils.mVideoSink;
 
 import org.opencv.android.OpenCVLoader;
 import org.webrtc.EglBase;
@@ -56,8 +58,8 @@ import org.webrtc.VideoTrack;
 public class CollectActivity extends AppCompatActivity {
     private SurfaceViewRenderer local_view;
     private SurfaceViewRenderer remote_view;
-    private ProxyVideoSink localRender;
-    private ProxyVideoSink remoteRender;
+    private mVideoSink localRender;
+    private mVideoSink remoteRender;
 
     private WebRTCManager manager;
 
@@ -167,13 +169,17 @@ public class CollectActivity extends AppCompatActivity {
             local_view.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
             local_view.setZOrderMediaOverlay(true);
             local_view.setMirror(true);
-            localRender = new ProxyVideoSink();
-            localRender.setDetect(true);
+            if (watchMode) {
+                localRender = new RawVideoSink();
+            } else {
+                localRender = new ProxyVideoSink();
+            }
+//            localRender.setDetect(true);
             //远端图像初始化
             remote_view.init(rootEglBase.getEglBaseContext(), null);
             remote_view.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_BALANCED);
             remote_view.setMirror(true);
-            remoteRender = new ProxyVideoSink();
+            remoteRender = new RawVideoSink();
 
 //            setSwappedFeeds(true);
             //后加
