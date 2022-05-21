@@ -57,11 +57,12 @@ import t20220049.sw_vision.utils.VideoFragmentManager;
 import t20220049.sw_vision.utils.VideoHandleManager;
 import t20220049.sw_vision.webRTC_utils.IViewCallback;
 import t20220049.sw_vision.webRTC_utils.PeerConnectionHelper;
-import t20220049.sw_vision.webRTC_utils.ProxyVideoSink;
 import t20220049.sw_vision.R;
+import t20220049.sw_vision.webRTC_utils.RawVideoSink;
 import t20220049.sw_vision.webRTC_utils.WebRTCManager;
 import t20220049.sw_vision.bean.MemberBean;
 import t20220049.sw_vision.utils.PermissionUtil;
+import t20220049.sw_vision.webRTC_utils.mVideoSink;
 
 import org.opencv.android.OpenCVLoader;
 import org.w3c.dom.Text;
@@ -102,7 +103,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     private WebRTCManager manager;
     private Map<String, SurfaceViewRenderer> _videoViews = new HashMap<>();
     private Map<String, LinearLayout> _outerViews = new HashMap<>();
-    private Map<String, ProxyVideoSink> _sinks = new HashMap<>();
+    private Map<String, mVideoSink> _sinks = new HashMap<>();
     private Map<String, TextView> _textViews = new HashMap<>();
     private Map<String, VideoFileRenderer> _vfrs = new HashMap<>();
     private List<MemberBean> _infos = new ArrayList<>();
@@ -186,15 +187,19 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                 holder.downButton.setVisibility(View.GONE);
                 holder.leftButton.setVisibility(View.GONE);
                 holder.rightButton.setVisibility(View.GONE);
+
             }
 
             Drawable collect = getResources().getDrawable(R.drawable.ic_caiji);
             Drawable collectReady = getResources().getDrawable(R.drawable.ic_caijizhunbei);
             Drawable collecting = getResources().getDrawable(R.drawable.ic_caijizhong);
 
-            if (device.stat == 1) holder.selectButton.setImageDrawable(collect);
-            else if (device.stat == 2) holder.selectButton.setImageDrawable(collectReady);
+
+            if (device.stat == 2) holder.selectButton.setImageDrawable(collect);
+            else if (device.stat == 1) holder.selectButton.setImageDrawable(collectReady);
             else holder.selectButton.setImageDrawable(collecting);
+
+
 
             holder.selectButton.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -214,7 +219,6 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             holder.upButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Log.e(TAG,"moveUp");
                     WifiServer.sendInstruction("UP",device.ip);
                 }
             });
@@ -239,6 +243,8 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
                     WifiServer.sendInstruction("RIGHT",device.ip);
                 }
             });
+
+
         }
 
 
@@ -256,6 +262,8 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         ImageView downButton;
         ImageView leftButton;
         ImageView rightButton;
+
+
 
         public MyViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -435,6 +443,8 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         device.ip = "";
         device.stat = 1;
 
+
+
 //        mDevicesList.add(device);
 
         deviceAdapter = new deviceAdapter(mDevicesList);
@@ -469,12 +479,12 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
 
     private void initListner() {
         // 转换摄像头
-//        switch_camera.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-////                switchCamera();
-//            }
-//        });
+        switch_camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                switchCamera();
+            }
+        });
 
         // 挂断
         switch_hang_up.setOnClickListener(new View.OnClickListener() {
@@ -697,7 +707,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         renderer.setScalingType(RendererCommon.ScalingType.SCALE_ASPECT_FIT);
 //        renderer.setMirror(true);
         // set render
-        ProxyVideoSink sink = new ProxyVideoSink();
+        RawVideoSink sink = new RawVideoSink();
         sink.setTarget(renderer);
         if (stream.videoTracks.size() > 0) {
             stream.videoTracks.get(0).addSink(sink);
@@ -729,7 +739,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
     }
 
     private void removeView(String userId) {
-        ProxyVideoSink sink = _sinks.get(userId);
+        mVideoSink sink = _sinks.get(userId);
         SurfaceViewRenderer renderer = _videoViews.get(userId);
         LinearLayout outView = _outerViews.get(userId);
         VideoFileRenderer vfr = _vfrs.get(userId);
@@ -903,7 +913,7 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
         for (SurfaceViewRenderer renderer : _videoViews.values()) {
             renderer.release();
         }
-        for (ProxyVideoSink sink : _sinks.values()) {
+        for (mVideoSink sink : _sinks.values()) {
             sink.setTarget(null);
         }
         _videoViews.clear();
@@ -924,9 +934,9 @@ public class ControlActivity extends AppCompatActivity implements IViewCallback 
             }
         }
         manager.joinRoom(getApplicationContext(), rootEglBase);
+
+
     }
-
-
 
     @Override
     protected void onResume() {
