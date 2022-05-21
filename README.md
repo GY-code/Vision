@@ -39,6 +39,7 @@
 
 Android源码架构
 
+```markdown
 ├─arm_controller 云台控制模块
 │  ├─commen
 │  ├─connect
@@ -66,6 +67,7 @@ Android源码架构
 ├─view 辅助View
 ├─webRTC_utils webRTC改进实现预览
 └─ws WebSocket使用集成
+```
 
 
 #### 安装教程
