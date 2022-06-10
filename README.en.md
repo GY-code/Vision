@@ -34,6 +34,17 @@ Vision is a smart image control, acquisition, and fusion solution that integrate
 
 (4) intelligent cell phone end face recognition control PTZ follow
 
+### Screenshots
+<div align=center>
+<img src="Screenshots1.png" height="600"  />
+<img src="Screenshots2.png" height="600" />
+<img src="Screenshots4.png" height="600"  />
+</div>
+
+<div align=center>
+<img src="Screenshots3.png" width="200"  />
+<img src="Screenshots5.png" width="200"/>
+</div>
 
 ## Software architecture
 ### Branch introduction
