@@ -34,6 +34,17 @@ Vision是一款集成多设备优势的跨手机、手表、云台的智能图�
 
 （4）智能化手机端人脸识别控制云台跟随
 
+### 屏幕快照
+<div align=center>
+<img src="Screenshots1.png" height="600"  />
+<img src="Screenshots2.png" height="600" />
+<img src="Screenshots4.png" height="600"  />
+</div>
+
+<div align=center>
+<img src="Screenshots3.png" width="200"  />
+<img src="Screenshots5.png" width="200"/>
+</div>
 
 ## 软件架构
 ### 分支介绍
