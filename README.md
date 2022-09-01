@@ -1,5 +1,7 @@
 # Vision
 
+[中文简介](README.cn.md)
+
 ## Introduction
 Vision is a smart image control, acquisition, and fusion solution that integrates the advantages of multiple devices across cell phones, watches, and gimbals.
 
