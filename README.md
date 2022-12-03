@@ -5,6 +5,7 @@
 ## Introduction
 Vision is a smart image control, acquisition, and fusion solution that integrates the advantages of multiple devices across cell phones, watches, and gimbals.
 
+### If the project is helpful to you, welcome star, fork and pr. If you have any questions, you can add an issue or contact the author by email.
 
 ### Achieved functions
 
